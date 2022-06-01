@@ -1,0 +1,37 @@
+﻿<Project>
+
+  <PropertyGroup>
+    <GameFolder>C:\Users\vcc\Desktop\GTFO_Assemblies</GameFolder>
+    <!-- <GameFolder>C:\Users\DELL\AppData\Roaming\Thunderstore Mod Manager\DataFolder\GTFO\profiles\Default</GameFolder> -->
+    <BIELibsFolder>$(GameFolder)\BepInEx\core</BIELibsFolder>
+    <MonoLibsFolder>$(GameFolder)\mono\Managed</MonoLibsFolder>
+    <UnhollowedLibsFolder>$(GameFolder)\BepInEx\unhollowed</UnhollowedLibsFolder>
+    <PluginsFolder>$(GameFolder)\BepInEx\plugins</PluginsFolder>
+  </PropertyGroup>
+
+  <!-- BepInEx libs --> 
+  <ItemGroup>
+    <Reference Include="$(BIELibsFolder)\BepInEx.*.dll" Private="false" />
+    <Reference Include="$(BIELibsFolder)\0Harmony.dll" Private="false" />
+    <Reference Include="$(BIELibsFolder)\UnhollowerBaseLib.dll" Private="false" />
+    <Reference Include="$(BIELibsFolder)\UnhollowerRuntimeLib.dll" Private="false" />
+
+  </ItemGroup>
+
+  <!-- Mono libs -->
+  <ItemGroup>
+    <Reference Include="$(MonoLibsFolder)\Microsoft.Bcl.AsyncInterfaces.dll" Private="false" />
+    <Reference Include="$(MonoLibsFolder)\System.Text.Json.dll" Private="false" />
+    <Reference Include="$(MonoLibsFolder)\System.Runtime.CompilerServices.Unsafe.dll" Private="false" />
+    
+  </ItemGroup>
+
+  <!-- Unhollowed assemblies -->
+  <ItemGroup>
+    <Reference Include="$(UnhollowedLibsFolder)/*.dll" Private="false" />
+    <Reference Remove="$(UnhollowedLibsFolder)/netstandard.dll" />
+    <Reference Remove="$(UnhollowedLibsFolder)/Newtonsoft.Json.dll" />
+  </ItemGroup>
+
+
+</Project>

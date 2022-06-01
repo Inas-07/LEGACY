@@ -1,0 +1,48 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="Dependencies.props" />
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <RootNamespace>LEGACY</RootNamespace>
+    <AssemblyName>LEGACY</AssemblyName>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>preview</LangVersion>
+    <!--
+      Due to the nature of coding with IL2CPP, unsafe blocks will be allowed by default.
+    -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Platforms>x64</Platforms>
+    <OutputPath>C:\Users\vcc\Desktop\GTFO_Assemblies\</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="LEGACY.cs" />
+    <Compile Include="LEGACY.Utilities.cs" />
+    <Compile Include="Patch_CentralGenCluster.cs" />
+    <Compile Include="Patch_CentralGenCluster_Rebrand.cs" />
+    <Compile Include="Patch_Enemies_ES_ScoutScream.cs" />
+    <Compile Include="Patch_EventsOnBossDeath.cs" />
+    <Compile Include="Patch_OverwriteSurvivalWaveSpawnPosition_Hardcoded.cs" />
+    <Compile Include="Patch_L3E2_HardcodedBehaviour.cs" />
+    <Compile Include="Patch_ReactorShutdown.cs" />
+    <Compile Include="Patch_ReactorStartup_ExtraEventsExecution.cs" />
+    <Compile Include="Patch_ReactorStartup_OverwriteGUIBehaviour.cs" />
+    <Compile Include="Patch_RepeatableCommandEventFix.cs" />
+    <Compile Include="Patch_Uplink.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Dependencies.props" />
+  </ItemGroup>
+</Project>
