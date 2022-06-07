@@ -421,33 +421,37 @@ namespace LEGACY.Hardcoded_Behaviour
 
             if (__instance.m_spawnType != SurvivalWaveSpawnType.OnSpawnPoints) return true;
 
-            // L3E2 Hardcoded
-            if (currentMainLayerUID != (uint)MainLayerUID.L3E2) return true;
-
-            SurvivalWave.ScoredSpawnPoint scoredSpawnPoint = __instance.GetScoredSpawnPoint(__instance.m_spawnDirection);
-
-            if (scoredSpawnPoint == null || scoredSpawnPoint.courseNode == null)
+            switch (currentMainLayerUID)
             {
-                __instance.StopEvent();
-            }
-            else
-            {
-                UnityEngine.Quaternion rot = UnityEngine.Quaternion.identity;
-                Enemies.eEnemyGroupSpawnType spawnType;
-                UnityEngine.Vector3 pos;
+                case (uint)MainLayerUID.L3E2:
+                    SurvivalWave.ScoredSpawnPoint scoredSpawnPoint = __instance.GetScoredSpawnPoint(__instance.m_spawnDirection);
+
+                    if (scoredSpawnPoint == null || scoredSpawnPoint.courseNode == null)
+                    {
+                        __instance.StopEvent();
+                    }
+                    else
+                    {
+                        UnityEngine.Quaternion rot = UnityEngine.Quaternion.identity;
+                        Enemies.eEnemyGroupSpawnType spawnType;
+                        UnityEngine.Vector3 pos;
 
 
-                if (scoredSpawnPoint.courseNode == null || scoredSpawnPoint.courseNode.m_area == null )
-                {
-                    __instance.StopEvent();
+                        if (scoredSpawnPoint.courseNode == null || scoredSpawnPoint.courseNode.m_area == null)
+                        {
+                            __instance.StopEvent();
+                            return false;
+                        }
+
+                        pos = scoredSpawnPoint.courseNode.GetRandomPositionInside();
+                        spawnType = Enemies.eEnemyGroupSpawnType.RandomInArea;
+                        Enemies.EnemyGroup.Spawn(pos, rot, scoredSpawnPoint.courseNode, Enemies.EnemyGroupType.Survival, spawnType, 0U, 0.0f, __instance.Replicator, __instance);
+                    }
+
                     return false;
-                }
 
-                pos = scoredSpawnPoint.courseNode.GetRandomPositionInside();
-                spawnType = Enemies.eEnemyGroupSpawnType.RandomInArea;
-                Enemies.EnemyGroup.Spawn(pos, rot, scoredSpawnPoint.courseNode, Enemies.EnemyGroupType.Survival, spawnType, 0U, 0.0f, __instance.Replicator, __instance);
+                default: return true;
             }
-            return false;
         }
     }
 }
