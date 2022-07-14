@@ -33,6 +33,8 @@
     <Compile Include="Patch_Enemies_ES_ScoutScream.cs" />
     <Compile Include="Patch_EventsOnBossDeath.cs" />
     <Compile Include="Patch_ExtraEventsConfig.cs" />
+    <Compile Include="Patch_ForceEmptyElevatorCargo_Hardcoded.cs" />
+    <Compile Include="Patch_LockSecurityDoor_FixCustomText.cs" />
     <Compile Include="Patch_OverwriteSurvivalWaveSpawnPosition_Hardcoded.cs" />
     <Compile Include="Patch_HardcodedBehaviour_L3E2.cs" />
     <Compile Include="Patch_PickupItem_Hardcoded.cs" />

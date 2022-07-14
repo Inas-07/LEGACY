@@ -58,6 +58,42 @@ namespace LEGACY.Patch
             return false;
         }
 
+        //private static bool LockSecurityDoor_Custom(WardenObjectiveEventData eventToTrigger, eWardenObjectiveEventTrigger trigger)
+        //{
+        //    // -===============================
+        //    //      some research
+        //    // -===============================
+        //    //LG_LayerType layer = eventToTrigger.Layer;
+        //    //eLocalZoneIndex localIndex = eventToTrigger.LocalIndex;
+        //    //eDimensionIndex dimensionIndex = eventToTrigger.DimensionIndex;
+        //    //LG_Zone zoneToBeLocked = null;
+        //    //Builder.CurrentFloor.TryGetZoneByLocalIndex(dimensionIndex, layer, localIndex, out zoneToBeLocked);
+        //    //if (zoneToBeLocked == null)
+        //    //{
+        //    //    Logger.Error("Failed to get target zone {0}, layer {1}, dimension {2}.", localIndex, layer, dimensionIndex);
+        //    //    return true;
+        //    //}
+            
+        //    //zoneToBeLocked.m_sourceGate.SpawnedDoor.
+
+        //    // -===============================
+        //    // possible implementation.
+        //    // -===============================
+        //    //LG_LayerType layer = eventToTrigger.Layer;
+        //    //eLocalZoneIndex localIndex = eventToTrigger.LocalIndex;
+        //    //eDimensionIndex dimensionIndex = eventToTrigger.DimensionIndex;
+        //    //LG_Zone zoneToBeLocked = null;
+        //    //Builder.CurrentFloor.TryGetZoneByLocalIndex(dimensionIndex, layer, localIndex, out zoneToBeLocked);
+        //    //if (zoneToBeLocked == null)
+        //    //{
+        //    //    Logger.Error("Failed to get target zone {0}, layer {1}, dimension {2}.", localIndex, layer, dimensionIndex);
+        //    //    return true;
+        //    //}
+
+        //    //Builder.CurrentFloor
+
+        //    return true;
+        //}
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(WardenObjectiveManager), nameof(WardenObjectiveManager.CheckAndExecuteEventsOnTrigger), new System.Type[] {
@@ -72,17 +108,16 @@ namespace LEGACY.Patch
             bool ignoreTrigger = false,
             float currentDuration = 0.0f)
         {
-            bool result = true;
             switch(eventToTrigger.Type)
             {
                 case eWardenObjectiveEventType.SetTerminalCommand:
-                    result = SetTerminalCommand_Custom(eventToTrigger, trigger);
-                    break;
+                    return SetTerminalCommand_Custom(eventToTrigger, trigger);
+
+                //case eWardenObjectiveEventType.LockSecurityDoor:
+                //    return LockSecurityDoor_Custom(eventToTrigger, trigger);
 
                 default: return true;
             }
-
-            return result;
         }
     }
 }
