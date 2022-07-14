@@ -11,13 +11,6 @@ namespace LEGACY.Hardcoded_Behaviour
     [HarmonyPatch]
     internal class Patch_OverwriteSurvivalWaveSpawnPosition_Hardcoded
     {
-        enum MainLayerUID
-        {
-            L3E1 = 50000,
-            L3E2 = 40000,
-            L0E1 = 30000
-        }
-
         private static uint currentMainLayerUID = 0u;
 
         [HarmonyPostfix]
@@ -117,6 +110,31 @@ namespace LEGACY.Hardcoded_Behaviour
             }
 
             return minAreaIndex;
+        }
+
+        private static SurvivalWave.ScoredSpawnPoint L2E1_GetScoredSpawnPoint_FromElevator_Overwrite()
+        {
+            eLocalZoneIndex minLocalIndex;// = eLocalZoneIndex.Zone_20;
+            LG_LayerType minLayerType;// = LG_LayerType.SecondaryLayer;
+
+            GetMinLayerAndLocalIndex(out minLayerType, out minLocalIndex);
+            if (minLayerType != LG_LayerType.MainLayer) return null;
+            AIG_CourseNode spawnNode = null;
+            switch (minLocalIndex)
+            {
+                case eLocalZoneIndex.Zone_0:
+                case eLocalZoneIndex.Zone_1:
+                    spawnNode = Builder.GetElevatorArea().m_courseNode;
+                    break;
+                case eLocalZoneIndex.Zone_2:
+                    spawnNode = Builder.GetElevatorZone().m_areas[1].m_courseNode;
+                    break;
+                default: return null;
+            }
+
+            return spawnNode == null ? null : new SurvivalWave.ScoredSpawnPoint(){
+                courseNode = spawnNode
+            };
         }
 
         private static SurvivalWave.ScoredSpawnPoint L3E1_GetScoredSpawnPoint_FromElevator_Overwrite()
@@ -374,7 +392,7 @@ namespace LEGACY.Hardcoded_Behaviour
             SurvivalWave.ScoredSpawnPoint overwritten_result = null;
             switch (currentMainLayerUID)
             {
-                case (uint)MainLayerUID.L3E1:
+                case (uint)MainLayerID.L3E1:
                     overwritten_result = L3E1_GetScoredSpawnPoint_FromElevator_Overwrite();
                     if (overwritten_result == null)
                     {
@@ -384,7 +402,7 @@ namespace LEGACY.Hardcoded_Behaviour
                     __result = overwritten_result;
                     return false;
 
-                case (uint)MainLayerUID.L3E2:
+                case (uint)MainLayerID.L3E2:
                     overwritten_result = L3E2_GetScoredSpawnPoint_FromElevator_Overwrite();
                     if (overwritten_result == null)
                     {
@@ -394,8 +412,8 @@ namespace LEGACY.Hardcoded_Behaviour
                     __result = overwritten_result;
                     return false;
 
-                case (uint)MainLayerUID.L0E1:
-                    overwritten_result = L0E1_GetScoredSpawnPoint_FromElevator_Overwrite();
+                case (uint)MainLayerID.L2E1:
+                    overwritten_result = L2E1_GetScoredSpawnPoint_FromElevator_Overwrite();
                     if (overwritten_result == null)
                     {
                         return true;
@@ -403,6 +421,16 @@ namespace LEGACY.Hardcoded_Behaviour
 
                     __result = overwritten_result;
                     return false;
+
+                //case (uint)MainLayerUID.L0E1:
+                //    overwritten_result = L0E1_GetScoredSpawnPoint_FromElevator_Overwrite();
+                //    if (overwritten_result == null)
+                //    {
+                //        return true;
+                //    }
+
+                //    __result = overwritten_result;
+                //    return false;
 
                 default: return true;
             }
@@ -423,7 +451,7 @@ namespace LEGACY.Hardcoded_Behaviour
 
             switch (currentMainLayerUID)
             {
-                case (uint)MainLayerUID.L3E2:
+                case (uint)MainLayerID.L3E2:
                     SurvivalWave.ScoredSpawnPoint scoredSpawnPoint = __instance.GetScoredSpawnPoint(__instance.m_spawnDirection);
 
                     if (scoredSpawnPoint == null || scoredSpawnPoint.courseNode == null)

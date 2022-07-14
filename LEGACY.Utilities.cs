@@ -180,5 +180,13 @@ namespace LEGACY.Utilities
             return zone.m_sourceGate.SpawnedDoor.LastStatus == eDoorStatus.Open;
         }
     }
+
+    public enum MainLayerID 
+    {
+        L2E1 = 60000,
+        L3E1 = 50000,
+        L3E2 = 40000,
+        L0E1 = 30000
+    }
 }
 

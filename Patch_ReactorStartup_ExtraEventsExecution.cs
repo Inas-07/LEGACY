@@ -33,7 +33,14 @@ namespace LEGACY.Patch
         [HarmonyPatch(typeof(LG_WardenObjective_Reactor), nameof(LG_WardenObjective_Reactor.OnBuildDone))]
         private static void Post_OnBuildDone(LG_WardenObjective_Reactor __instance)
         {
-            WardenObjectiveDataBlock db = WardenObjectiveManager.ActiveWardenObjective(__instance.SpawnNode.LayerType);
+            WardenObjectiveDataBlock db;
+            if (WardenObjectiveManager.Current.TryGetActiveWardenObjectiveData(__instance.SpawnNode.LayerType, out db) == false
+                || db == null)
+            {
+                Utilities.Logger.Error("Patch_ReactorStartup_ExtraEventsExecution: ");
+                Utilities.Logger.Error("Failed to get warden objective");
+                return;
+            }
 
             if (db.Type != eWardenObjectiveType.Reactor_Startup || db.OnActivateOnSolveItem == true) return;
 

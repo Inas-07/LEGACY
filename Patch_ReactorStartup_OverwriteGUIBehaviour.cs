@@ -27,7 +27,15 @@ namespace LEGACY.Patch
         [HarmonyPatch(typeof(LG_WardenObjective_Reactor), nameof(LG_WardenObjective_Reactor.OnBuildDone))]
         private static void Post_OnBuildDone(LG_WardenObjective_Reactor __instance)
         {
-            WardenObjectiveDataBlock db = WardenObjectiveManager.ActiveWardenObjective(__instance.SpawnNode.LayerType);
+            WardenObjectiveDataBlock db = null;
+
+            if(WardenObjectiveManager.Current.TryGetActiveWardenObjectiveData(__instance.SpawnNode.LayerType, out db) == false 
+                || db == null)
+            {
+                Utilities.Logger.Error("Patch_ReactorStartup_OverwriteGUIBehaviour: ");
+                Utilities.Logger.Error("Failed to get warden objective datablock");
+                return;
+            }
 
             if (db.Type != eWardenObjectiveType.Reactor_Startup) return;
 
@@ -190,7 +198,22 @@ namespace LEGACY.Patch
                 switch (newState.status)
                 {
                     case eReactorStatus.Startup_intro:
-                        __instance.m_lightCollection.SetMode(WardenObjectiveManager.ActiveWardenObjective(__instance.SpawnNode.LayerType).LightsOnDuringIntro);
+                        // R7 migration 
+                        WardenObjectiveDataBlock db = null;
+
+                        if (WardenObjectiveManager.Current.TryGetActiveWardenObjectiveData(__instance.SpawnNode.LayerType, out db) == false
+                            || db == null)
+                        {
+                            Utilities.Logger.Error("Patch_ReactorStartup_OverwriteGUIBehaviour: ");
+                            Utilities.Logger.Error("Failed to get warden objective datablock");
+                            break;
+                        }
+                        __instance.m_lightCollection.SetMode(db.LightsOnDuringIntro);
+                        // R7 migration End
+                        
+                        // R6 impl.
+                        //__instance.m_lightCollection.SetMode(WardenObjectiveManager.ActiveWardenObjective(__instance.SpawnNode.LayerType).LightsOnDuringIntro);
+
                         __instance.m_lightCollection.ResetUpdateValues(true);
                         __instance.lcReset = true;
                         __instance.m_lightsBlinking = false;

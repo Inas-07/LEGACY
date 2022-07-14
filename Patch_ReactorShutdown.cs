@@ -15,7 +15,15 @@ namespace LEGACY.Patch
 
             if (oldState.status == newState.status) return;
 
-            WardenObjectiveDataBlock db = WardenObjectiveManager.ActiveWardenObjective(__instance.SpawnNode.LayerType);
+            WardenObjectiveDataBlock db = null;
+            if (WardenObjectiveManager.Current.TryGetActiveWardenObjectiveData(__instance.SpawnNode.LayerType, out db) == false
+                || db == null)
+            {
+                Utilities.Logger.Error("Patch_ReactorShutdown: ");
+                Utilities.Logger.Error("Failed to get warden objective");
+                return;
+            }
+
 
             if (db.Type != eWardenObjectiveType.Reactor_Shutdown) return;
             if (db.OnActivateOnSolveItem == true) return;
@@ -39,7 +47,15 @@ namespace LEGACY.Patch
         [HarmonyPatch(typeof(LG_WardenObjective_Reactor), nameof(LG_WardenObjective_Reactor.OnBuildDone))]
         private static void Pre_OnBuildDone_ChainedPuzzleMidObjectiveFix(LG_WardenObjective_Reactor __instance)
         {
-            WardenObjectiveDataBlock objective = WardenObjectiveManager.ActiveWardenObjective(__instance.SpawnNode.LayerType);
+            //WardenObjectiveDataBlock objective = WardenObjectiveManager.ActiveWardenObjective(__instance.SpawnNode.LayerType);
+            WardenObjectiveDataBlock objective = null;
+            if (WardenObjectiveManager.Current.TryGetActiveWardenObjectiveData(__instance.SpawnNode.LayerType, out objective) == false
+                || objective == null)
+            {
+                Utilities.Logger.Error("Patch_ReactorShutdown: ");
+                Utilities.Logger.Error("Failed to get warden objective");
+                return;
+            }
 
             if (objective.Type != eWardenObjectiveType.Reactor_Shutdown) return;
             if (objective.ChainedPuzzleMidObjective <= 0U) return;
