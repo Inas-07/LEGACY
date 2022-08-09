@@ -5,6 +5,7 @@ using System;
 using AK;
 using Localization;
 using UnityEngine;
+using LEGACY.Utilities;
 namespace LEGACY.Patch
 {
     // won't work if there's multiple reactor
@@ -274,7 +275,7 @@ namespace LEGACY.Patch
 
         private static bool ForceDisable()
         {
-            return RundownManager.ActiveExpedition.LevelLayoutData == 40000u;
+            return RundownManager.ActiveExpedition.LevelLayoutData == (uint)MainLayerID.L3E2;
         }
 
         [HarmonyPostfix]
