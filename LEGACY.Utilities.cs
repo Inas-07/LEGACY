@@ -177,19 +177,16 @@ namespace LEGACY.Utilities
         {
             if (zone == null)
             {
-                Logger.Error("Zone was Null!");
                 door = null;
                 return false;
             }
             if (zone.m_sourceGate == null)
             {
-                Logger.Error("Entrace Gate is Null!");
                 door = null;
                 return false;
             }
             if (zone.m_sourceGate.SpawnedDoor == null)
             {
-                Logger.Error("SpawnedDoor is Null!");
                 door = null;
                 return false;
             }

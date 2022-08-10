@@ -14,6 +14,7 @@ namespace LEGACY.Patch
     enum EventType
     {
         CloseSecurityDoor_Custom = 100,
+        KillEnemiesInDimension_Custom = 101
     }
 
     [HarmonyPatch]
@@ -61,7 +62,7 @@ namespace LEGACY.Patch
             }
         }
 
-        private static void CloseSecurityDoor_Custom(WardenObjectiveEventData eventToTrigger, eWardenObjectiveEventTrigger trigger)
+        private static void CloseSecurityDoor_Custom(WardenObjectiveEventData eventToTrigger)
         {
             LG_Zone zone = null;
             if(Builder.CurrentFloor.TryGetZoneByLocalIndex(eventToTrigger.DimensionIndex, eventToTrigger.Layer, eventToTrigger.LocalIndex, out zone) == false || zone == null)
@@ -95,8 +96,45 @@ namespace LEGACY.Patch
             LG_Gate gate = door.Gate;
             gate.HasBeenOpenedDuringPlay = false;
             gate.IsTraversable = false;
+        }
 
-            WardenObjectiveManager.DisplayWardenIntel(eventToTrigger.Layer, eventToTrigger.WardenIntel);
+        private static void KillEnemiesInDimension_Custom(WardenObjectiveEventData eventToTrigger)
+        {
+            if (!SNet.IsMaster) return;
+            Dimension dimension = null;
+            Dimension.GetDimension(eventToTrigger.DimensionIndex, out dimension);
+
+            for (int index1 = 0; index1 < dimension.Layers.Count; ++index1)
+            {
+                LG_Layer layer = dimension.Layers[index1];
+                for (int index2 = 0; index2 < layer.m_zones.Count; ++index2)
+                {
+                    LG_Zone zone2 = layer.m_zones[index2];
+                    LG_SecurityDoor door;
+
+                    Utils.TryGetZoneEntranceSecDoor(zone2, out door);
+
+                    // limited kill
+                    if (index2 == 0 || (door != null && door.m_sync.GetCurrentSyncState().status == eDoorStatus.Open)) // door opened, kill all
+                    {
+                        for (int index3 = 0; index3 < zone2.m_courseNodes.Count; ++index3)
+                        {
+                            EnemyAgent[] array = zone2.m_courseNodes[index3].m_enemiesInNode.ToArray();
+                            int num2 = 0;
+                            for (int index4 = 0; index4 < array.Length; ++index4)
+                            {
+                                EnemyAgent enemyAgent = array[index4];
+                                if (enemyAgent != null && enemyAgent.Damage != null)
+                                {
+                                    enemyAgent.Damage.MeleeDamage(float.MaxValue, null, UnityEngine.Vector3.zero, UnityEngine.Vector3.up, 0, 1f, 1f, 1f, 1f, false, DamageNoiseLevel.Normal);
+                                    ++num2;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
         }
 
         [HarmonyPrefix]
@@ -111,7 +149,17 @@ namespace LEGACY.Patch
             bool ignoreTrigger = false,
             float currentDuration = 0.0f)
         {
-            switch(eventToTrigger.Type)
+            // custom event
+            switch((int)eventToTrigger.Type)
+            {
+                case (int)EventType.CloseSecurityDoor_Custom:
+                case (int)EventType.KillEnemiesInDimension_Custom:
+                    CoroutineManager.StartCoroutine(Handle(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
+                    return false;
+            }
+
+            // vanilla event modification
+            switch (eventToTrigger.Type)
             {
                 case eWardenObjectiveEventType.SetTerminalCommand:
                 case eWardenObjectiveEventType.DimensionFlashTeam:
@@ -147,86 +195,95 @@ namespace LEGACY.Patch
                 }
             }
 
+            switch((int)e.Type)
+            {
+                case (int)EventType.CloseSecurityDoor_Custom:
+                    CloseSecurityDoor_Custom(e);      yield break;
+                case (int)EventType.KillEnemiesInDimension_Custom:
+                    KillEnemiesInDimension_Custom(e);
+                    Logger.Warning("Killed.");
+                    yield break;
+            }
+
             switch(e.Type)
             {
                 case eWardenObjectiveEventType.SetTerminalCommand:
                     SetTerminalCommand_Custom(e);
-                    break;
-
-                case eWardenObjectiveEventType.DimensionFlashTeam:
-                case eWardenObjectiveEventType.DimensionWarpTeam:
-                    // cannot put this event to other places because of `Duration`
-                    PlayerAgent localPlayer = PlayerManager.GetLocalPlayerAgent();
-                    bool success = false;
-                    if (localPlayer != null)
-                    {
-                        eDimensionIndex flashFromDimensionIndex = localPlayer.DimensionIndex;
-                        Dimension flashToDimension;
-                        if (Dimension.GetDimension(e.DimensionIndex, out flashToDimension))
-                        {
-                            Il2CppSystem.ValueTuple<UnityEngine.Vector3, UnityEngine.Vector3> warpPoint1;
-                            if (GameStateManager.CurrentStateName == eGameStateName.InLevel && flashToDimension.GetValidDimensionWarpPoint(localPlayer, false, out warpPoint1) && localPlayer.TryWarpTo(e.DimensionIndex, warpPoint1.Item1, warpPoint1.Item2, true))
-                                success = true;
-                            Dimension flashFromDimension;
-                            if (success && Dimension.GetDimension(flashFromDimensionIndex, out flashFromDimension))
-                            {
-                                if (e.Duration > 0.0)
-                                    yield return new UnityEngine.WaitForSeconds(e.Duration);
-                                if (GameStateManager.CurrentStateName == eGameStateName.InLevel)
-                                {
-                                    Il2CppSystem.ValueTuple<UnityEngine.Vector3, UnityEngine.Vector3> warpPoint2;
-
-                                    if (e.Type == eWardenObjectiveEventType.DimensionFlashTeam && flashFromDimension.GetValidDimensionWarpPoint(localPlayer, false, out warpPoint2))
-                                        localPlayer.TryWarpTo(flashFromDimensionIndex, warpPoint2.Item1/*position*/, warpPoint2.Item2/*lookDirection*/, true);
-                                    if (e.ClearDimension && SNet.IsMaster)
-                                    {
-                                        Dimension dimension = e.Type == eWardenObjectiveEventType.DimensionFlashTeam ? flashToDimension : flashFromDimension;
-                                        for (int index1 = 0; index1 < dimension.Layers.Count; ++index1)
-                                        {
-                                            LG_Layer layer = dimension.Layers[index1];
-                                            for (int index2 = 0; index2 < layer.m_zones.Count; ++index2)
-                                            {
-                                                LG_Zone zone2 = layer.m_zones[index2];
-                                                LG_SecurityDoor door;
-
-                                                Utilities.Utils.TryGetZoneEntranceSecDoor(zone2, out door);
-
-                                                // limited kill
-                                                if (door == null // failed to get the door, use vanilla impl. anyway
-                                                    || door.m_sync.GetCurrentSyncState().status == eDoorStatus.Open) // door opened, kill all
-                                                {
-                                                    for (int index3 = 0; index3 < zone2.m_courseNodes.Count; ++index3)
-                                                    {
-                                                        EnemyAgent[] array = zone2.m_courseNodes[index3].m_enemiesInNode.ToArray();
-                                                        int num2 = 0;
-                                                        for (int index4 = 0; index4 < array.Length; ++index4)
-                                                        {
-                                                            EnemyAgent enemyAgent = array[index4];
-                                                            if (enemyAgent != null && enemyAgent.Damage != null)
-                                                            {
-                                                                enemyAgent.Damage.MeleeDamage(float.MaxValue, null, UnityEngine.Vector3.zero, UnityEngine.Vector3.up, 0, 1f, 1f, 1f, 1f, false, DamageNoiseLevel.Normal);
-                                                                ++num2;
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            flashFromDimension = null;
-                        }
-                        flashToDimension = null;
-                    }
-                    if (!success)
-                    {
-                        UnityEngine.Debug.LogError(string.Format("DimensionFlashTeam event tried to warp player {0} to {1} but failed!", localPlayer != null ? localPlayer.PlayerName : "Null", e.DimensionIndex));
-                    }
-                    break;
-
-                default: Logger.Error("Critical: ----Executing event in our Patch but we don't have its extra config! ----"); break;
+                    yield break;
             }
         }
     }
 }
+
+
+//case eWardenObjectiveEventType.DimensionFlashTeam:
+//case eWardenObjectiveEventType.DimensionWarpTeam:
+//    // cannot put this event to other places because of `Duration`
+//    PlayerAgent localPlayer = PlayerManager.GetLocalPlayerAgent();
+//    bool success = false;
+//    if (localPlayer != null)
+//    {
+//        eDimensionIndex flashFromDimensionIndex = localPlayer.DimensionIndex;
+//        Dimension flashToDimension;
+//        if (Dimension.GetDimension(e.DimensionIndex, out flashToDimension))
+//        {
+//            Il2CppSystem.ValueTuple<UnityEngine.Vector3, UnityEngine.Vector3> warpPoint1;
+//            if (GameStateManager.CurrentStateName == eGameStateName.InLevel && flashToDimension.GetValidDimensionWarpPoint(localPlayer, false, out warpPoint1) && localPlayer.TryWarpTo(e.DimensionIndex, warpPoint1.Item1, warpPoint1.Item2, true))
+//                success = true;
+//            Dimension flashFromDimension;
+//            if (success && Dimension.GetDimension(flashFromDimensionIndex, out flashFromDimension))
+//            {
+//                if (e.Duration > 0.0)
+//                    yield return new UnityEngine.WaitForSeconds(e.Duration);
+//                if (GameStateManager.CurrentStateName == eGameStateName.InLevel)
+//                {
+//                    Il2CppSystem.ValueTuple<UnityEngine.Vector3, UnityEngine.Vector3> warpPoint2;
+
+//                    if (e.Type == eWardenObjectiveEventType.DimensionFlashTeam && flashFromDimension.GetValidDimensionWarpPoint(localPlayer, false, out warpPoint2))
+//                        localPlayer.TryWarpTo(flashFromDimensionIndex, warpPoint2.Item1/*position*/, warpPoint2.Item2/*lookDirection*/, true);
+//                    if (e.ClearDimension && SNet.IsMaster)
+//                    {
+//                        Dimension dimension = e.Type == eWardenObjectiveEventType.DimensionFlashTeam ? flashToDimension : flashFromDimension;
+//                        for (int index1 = 0; index1 < dimension.Layers.Count; ++index1)
+//                        {
+//                            LG_Layer layer = dimension.Layers[index1];
+//                            for (int index2 = 0; index2 < layer.m_zones.Count; ++index2)
+//                            {
+//                                LG_Zone zone2 = layer.m_zones[index2];
+//                                LG_SecurityDoor door;
+
+//                                Utilities.Utils.TryGetZoneEntranceSecDoor(zone2, out door);
+
+//                                // limited kill
+//                                if (door == null // failed to get the door, use vanilla impl. anyway
+//                                    || door.m_sync.GetCurrentSyncState().status == eDoorStatus.Open) // door opened, kill all
+//                                {
+//                                    for (int index3 = 0; index3 < zone2.m_courseNodes.Count; ++index3)
+//                                    {
+//                                        EnemyAgent[] array = zone2.m_courseNodes[index3].m_enemiesInNode.ToArray();
+//                                        int num2 = 0;
+//                                        for (int index4 = 0; index4 < array.Length; ++index4)
+//                                        {
+//                                            EnemyAgent enemyAgent = array[index4];
+//                                            if (enemyAgent != null && enemyAgent.Damage != null)
+//                                            {
+//                                                enemyAgent.Damage.MeleeDamage(float.MaxValue, null, UnityEngine.Vector3.zero, UnityEngine.Vector3.up, 0, 1f, 1f, 1f, 1f, false, DamageNoiseLevel.Normal);
+//                                                ++num2;
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//            flashFromDimension = null;
+//        }
+//        flashToDimension = null;
+//    }
+//    if (!success)
+//    {
+//        UnityEngine.Debug.LogError(string.Format("DimensionFlashTeam event tried to warp player {0} to {1} but failed!", localPlayer != null ? localPlayer.PlayerName : "Null", e.DimensionIndex));
+//    }
+//    break;
