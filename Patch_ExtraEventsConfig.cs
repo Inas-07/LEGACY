@@ -111,7 +111,7 @@ namespace LEGACY.Patch
             bool ignoreTrigger = false,
             float currentDuration = 0.0f)
         {
-            switch((int)eventToTrigger.Type)
+            switch(eventToTrigger.Type)
             {
                 case eWardenObjectiveEventType.SetTerminalCommand:
                 case eWardenObjectiveEventType.DimensionFlashTeam:

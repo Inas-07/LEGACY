@@ -194,30 +194,6 @@ namespace LEGACY.Utilities
             door = zone.m_sourceGate.SpawnedDoor.TryCast<LG_SecurityDoor>();
             return door != null;
         }
-
-        public static bool TryGetZoneEntranceSecDoor(LG_Zone zone, out LG_SecurityDoor door)
-        {
-            if (zone == null)
-            {
-                Logger.Error("Zone was Null!");
-                door = null;
-                return false;
-            }
-            if (zone.m_sourceGate == null)
-            {
-                Logger.Error("Entrace Gate is Null!");
-                door = null;
-                return false;
-            }
-            if (zone.m_sourceGate.SpawnedDoor == null)
-            {
-                Logger.Error("SpawnedDoor is Null!");
-                door = null;
-                return false;
-            }
-            door = zone.m_sourceGate.SpawnedDoor.TryCast<LG_SecurityDoor>();
-            return door != null;
-        }
     }
 
 
