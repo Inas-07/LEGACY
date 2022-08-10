@@ -1,7 +1,7 @@
 ﻿<Project>
 
   <PropertyGroup>
-    <GameFolder>C:\Users\vcc\Desktop\GTFO_Assemblies</GameFolder>
+    <GameFolder>G:\SteamLibrary\steamapps\common\GTFO</GameFolder>
     <!-- <GameFolder>C:\Users\DELL\AppData\Roaming\Thunderstore Mod Manager\DataFolder\GTFO\profiles\Default</GameFolder> -->
     <BIELibsFolder>$(GameFolder)\BepInEx\core</BIELibsFolder>
     <DotnetFolder>$(GameFolder)\dotnet</DotnetFolder>

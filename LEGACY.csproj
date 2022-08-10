@@ -11,7 +11,7 @@
     -->
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Platforms>x64</Platforms>
-    <OutputPath>C:\Users\vcc\Desktop\GTFO_Assemblies\</OutputPath>
+    <OutputPath>G:\SteamLibrary\steamapps\common\GTFO\BepInEx\plugins</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
