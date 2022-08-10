@@ -5,6 +5,8 @@ using ChainedPuzzles;
 using GameData;
 using Il2CppSystem.Collections.Generic;
 using Player;
+using System;
+
 namespace LEGACY.Utilities
 {
     internal static class Logger
@@ -193,6 +195,15 @@ namespace LEGACY.Utilities
             }
             door = zone.m_sourceGate.SpawnedDoor.TryCast<LG_SecurityDoor>();
             return door != null;
+        }
+
+        internal static bool isSecDoorToZoneOpened(LG_Zone zone14)
+        {
+            LG_SecurityDoor door = null;
+            if (TryGetZoneEntranceSecDoor(zone14, out door) == false || door == null)
+                return false;
+
+            return door.m_sync.GetCurrentSyncState().status == eDoorStatus.Open;
         }
     }
 
