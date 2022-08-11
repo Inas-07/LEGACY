@@ -1,8 +1,8 @@
 ﻿<Project>
 
   <PropertyGroup>
-    <GameFolder>G:\SteamLibrary\steamapps\common\GTFO</GameFolder>
-    <!-- <GameFolder>C:\Users\DELL\AppData\Roaming\Thunderstore Mod Manager\DataFolder\GTFO\profiles\Default</GameFolder> -->
+    <!--<GameFolder>G:\SteamLibrary\steamapps\common\GTFO</GameFolder>-->
+    <GameFolder>C:\Users\vcc\Desktop\GTFO_Assemblies</GameFolder>
     <BIELibsFolder>$(GameFolder)\BepInEx\core</BIELibsFolder>
     <DotnetFolder>$(GameFolder)\dotnet</DotnetFolder>
     <CorLibsFolder>$(DotnetFolder)\corlib</CorLibsFolder>
@@ -18,7 +18,7 @@
     <!--<Reference Include="$(BIELibsFolder)\UnhollowerRuntimeLib.dll" Private="false" />-->
 
   </ItemGroup>
-
+ 
   <!-- Mono libs -->
   <ItemGroup>
     <Reference Include="$(CorLibsFolder)\Microsoft.Bcl.AsyncInterfaces.dll" Private="false" />

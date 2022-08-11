@@ -162,8 +162,6 @@ namespace LEGACY.Patch
             switch (eventToTrigger.Type)
             {
                 case eWardenObjectiveEventType.SetTerminalCommand:
-                case eWardenObjectiveEventType.DimensionFlashTeam:
-                case eWardenObjectiveEventType.DimensionWarpTeam:
                     CoroutineManager.StartCoroutine(Handle(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
                     return false;
                 default: return true;
