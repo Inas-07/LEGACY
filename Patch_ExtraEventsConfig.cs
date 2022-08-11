@@ -2,19 +2,19 @@
 using Enemies;
 using LevelGeneration;
 using GameData;
-using AIGraph;
-using Globals;
 using System.Collections;
 using LEGACY.Utilities;
 using Player;
 using BepInEx.IL2CPP.Utils.Collections;
 using SNetwork;
+
 namespace LEGACY.Patch
 {
     enum EventType
     {
         CloseSecurityDoor_Custom = 100,
-        KillEnemiesInDimension_Custom = 101
+        KillEnemiesInDimension_Custom = 101,
+        SetTimerTitle_Custom = 102
     }
 
     [HarmonyPatch]
@@ -154,6 +154,7 @@ namespace LEGACY.Patch
             {
                 case (int)EventType.CloseSecurityDoor_Custom:
                 case (int)EventType.KillEnemiesInDimension_Custom:
+                case (int)EventType.SetTimerTitle_Custom:
                     CoroutineManager.StartCoroutine(Handle(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
                     return false;
             }
@@ -196,18 +197,71 @@ namespace LEGACY.Patch
             switch((int)e.Type)
             {
                 case (int)EventType.CloseSecurityDoor_Custom:
-                    CloseSecurityDoor_Custom(e);      yield break;
+                    CloseSecurityDoor_Custom(e);        break;
                 case (int)EventType.KillEnemiesInDimension_Custom:
-                    KillEnemiesInDimension_Custom(e);
-                    Logger.Warning("Killed.");
-                    yield break;
+                    KillEnemiesInDimension_Custom(e);   break;
+
+                case (int)EventType.SetTimerTitle_Custom: {
+                        // 分两种：一种只显示title（比如在哪关闭无限警报
+                        // 一种就是 countdown
+                        float duration = e.Duration;
+
+                        // set title
+                        if (duration <= 0.0)
+                        {
+                            // disable title
+                            if (e.CustomSubObjectiveHeader == null || e.CustomSubObjectiveHeader.ToString().Length == 0)
+                            {
+                                GuiManager.PlayerLayer.m_objectiveTimer.SetTimerActive(false);
+                            }
+                            // enable title
+                            else
+                            {
+                                GuiManager.PlayerLayer.m_objectiveTimer.SetTimerActive(true);
+                                GuiManager.PlayerLayer.m_objectiveTimer.UpdateTimerTitle(e.CustomSubObjectiveHeader.ToString());
+                                GuiManager.PlayerLayer.m_objectiveTimer.SetTimerTextEnabled(false);
+                            }
+
+                            break;
+                        }
+
+                        // count down
+                        else
+                        {
+                            GuiManager.PlayerLayer.m_objectiveTimer.SetTimerActive(true, true);
+                            GuiManager.PlayerLayer.m_objectiveTimer.UpdateTimerTitle(e.CustomSubObjectiveHeader.ToString());
+                            GuiManager.PlayerLayer.m_objectiveTimer.SetTimerTextEnabled(true);
+
+                            UnityEngine.Color color;
+                            if (UnityEngine.ColorUtility.TryParseHtmlString(e.CustomSubObjective.ToString(), out color) == false)
+                            {
+                                color.r = color.g = color.b = 255.0f;
+                            }
+
+                            var time = 0.0f;
+                            while (time <= duration)
+                            {
+                                if (GameStateManager.CurrentStateName != eGameStateName.InLevel)
+                                {
+                                    break;
+                                }
+
+                                GuiManager.PlayerLayer.m_objectiveTimer.UpdateTimerText(duration - time, duration, color);
+                                time += UnityEngine.Time.deltaTime;
+                                yield return null;
+                            }
+
+                            GuiManager.PlayerLayer.m_objectiveTimer.SetTimerActive(false, false);
+
+                            break;
+                        }
+                }
             }
 
             switch(e.Type)
             {
                 case eWardenObjectiveEventType.SetTerminalCommand:
-                    SetTerminalCommand_Custom(e);
-                    yield break;
+                    SetTerminalCommand_Custom(e);       break;
             }
         }
     }
