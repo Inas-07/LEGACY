@@ -7,14 +7,21 @@ using LEGACY.Utilities;
 using Player;
 using BepInEx.IL2CPP.Utils.Collections;
 using SNetwork;
-
+using AIGraph;
 namespace LEGACY.Patch
 {
     enum EventType
     {
         CloseSecurityDoor_Custom = 100,
         KillEnemiesInDimension_Custom = 101,
-        SetTimerTitle_Custom = 102
+        SetTimerTitle_Custom = 102,
+        ToggleEnableDisableAllTerminalsInZone_Custom = 103,
+        ToggleEnableDisableTerminalInZone_Custom = 104
+    }
+
+    enum Extended_TERM_STATE
+    {
+        Disabled = 100
     }
 
     [HarmonyPatch]
@@ -68,11 +75,11 @@ namespace LEGACY.Patch
             if(Builder.CurrentFloor.TryGetZoneByLocalIndex(eventToTrigger.DimensionIndex, eventToTrigger.Layer, eventToTrigger.LocalIndex, out zone) == false || zone == null)
             {
                 Logger.Error("CloseSecurityDoor_Custom: Failed to get zone {0}, layer {1}, dimensionIndex {2}", eventToTrigger.LocalIndex, eventToTrigger.Layer, eventToTrigger.DimensionIndex);
-                return ;
+                return;
             }
 
             LG_SecurityDoor door = null;
-            if(Utilities.Utils.TryGetZoneEntranceSecDoor(zone, out door) == false || door == null)
+            if(Utils.TryGetZoneEntranceSecDoor(zone, out door) == false || door == null)
             {
                 Logger.Error("CloseSecurityDoor_Custom: failed to get LG_SecurityDoor!");
                 return;
@@ -137,6 +144,110 @@ namespace LEGACY.Patch
 
         }
 
+        private static void SpawnSurvialWave_InSuppliedCourseNodeZone_Custom(WardenObjectiveEventData eventToTrigger, float currentDuration)
+        {
+            var waveData = eventToTrigger.EnemyWaveData;
+
+            if (waveData.WaveSettings > 0U && waveData.WavePopulation > 0U && (currentDuration == 0.0 || waveData.SpawnDelay >= currentDuration))
+            {
+                AIG_CourseNode suppliedCourseNode = null;
+                LG_Zone specified_zone;
+                Builder.CurrentFloor.TryGetZoneByLocalIndex(eventToTrigger.DimensionIndex, eventToTrigger.Layer, eventToTrigger.LocalIndex, out specified_zone);
+                if(specified_zone == null)
+                {
+                    Logger.Error("SpawnSurvialWave_InSuppliedCourseNodeZone - Failed to find LG_Zone.");
+                    Logger.Error("DimensionIndex: {0}, Layer: {1}, LocalIndex: {2}", eventToTrigger.DimensionIndex, eventToTrigger.Layer, eventToTrigger.LocalIndex);
+                    return;
+                }
+
+                suppliedCourseNode = specified_zone.m_courseNodes[0];
+                Logger.Warning("Starting wave with spawn type InSuppliedCourseNodeZone!");
+                Logger.Warning("DimensionIndex: {0}, Layer: {1}, LocalIndex: {2}", eventToTrigger.DimensionIndex, eventToTrigger.Layer, eventToTrigger.LocalIndex);
+                
+                UnityEngine.Coroutine coroutine = CoroutineManager.StartCoroutine(WardenObjectiveManager.Current.TriggerEnemyWaveData(waveData, suppliedCourseNode, SurvivalWaveSpawnType.InSuppliedCourseNodeZone, currentDuration), null);
+                WardenObjectiveManager.m_wardenObjectiveWaveCoroutines.Add(coroutine);
+            }
+        }
+
+        private static void ToggleEnableDisableTerminal(LG_ComputerTerminal terminal, bool Enabled)
+        {
+            if (terminal == null) return;
+
+            if (Enabled == false)
+            {
+                terminal.m_command.ClearOutputQueueAndScreenBuffer();
+                //terminal.TrySyncSetCommandHidden(TERM_Command.MAX_COUNT);
+            }
+            else
+            {
+                terminal.m_command.AddInitialTerminalOutput();
+                //terminal.TrySyncSetCommandShow(TERM_Command.MAX_COUNT);
+            }
+
+            terminal.transform.FindChild("Interaction").gameObject.active = Enabled;
+            UnityEngine.Transform child = terminal.transform.FindChild("Graphics/kit_ElectronicsTerminalConsole/Display");
+            if (child != null)
+            {
+                child.gameObject.active = Enabled;
+            }
+
+
+            // TODO: Implement state replicator
+
+            //Logger.Error("terminal.TrySyncSetCommandHidden(TERM_Command.MAX_COUNT): {0}", terminal.CommandIsHidden(TERM_Command.MAX_COUNT));
+
+            //pComputerTerminalState e;
+            //Logger.Error("terminal.m_stateReplicator.m_currentState.CommandIsRemoved(TERM_Command.MAX_COUNT): {0}", terminal.m_stateReplicator.m_currentState.CommandIsRemoved(TERM_Command.MAX_COUNT));
+
+        }
+
+        private static void ToggleEnableDisableAllTerminalsInZone_Custom(WardenObjectiveEventData eventToTrigger)
+        {
+            WardenObjectiveEventData e = eventToTrigger;
+
+            LG_Zone zone = null;
+            Builder.CurrentFloor.TryGetZoneByLocalIndex(e.DimensionIndex, e.Layer, e.LocalIndex, out zone);
+            if(zone == null)
+            {
+                Logger.Error("ToggleEnableDisableAllTerminalsInZone_Custom - Failed to find LG_Zone.");
+                Logger.Error("DimensionIndex: {0}, Layer: {1}, LocalIndex: {2}", eventToTrigger.DimensionIndex, eventToTrigger.Layer, eventToTrigger.LocalIndex);
+                return;
+            }
+
+            foreach(LG_ComputerTerminal terminalInZone in zone.TerminalsSpawnedInZone)
+            {
+                ToggleEnableDisableTerminal(terminalInZone, e.Enabled);
+            }
+        }
+
+        private static void ToggleEnableDisableTerminalInZone_Custom(WardenObjectiveEventData eventToTrigger)
+        {
+            WardenObjectiveEventData e = eventToTrigger;
+
+            if(e.Count < 0)
+            {
+                Logger.Error("ToggleEnableDisableTerminalInZone_Custom - Count < 0");
+                return;
+            }
+
+            LG_Zone zone = null;
+            Builder.CurrentFloor.TryGetZoneByLocalIndex(e.DimensionIndex, e.Layer, e.LocalIndex, out zone);
+            if (zone == null)
+            {
+                Logger.Error("ToggleEnableDisableTerminalInZone_Custom - Failed to find LG_Zone.");
+                Logger.Error("DimensionIndex: {0}, Layer: {1}, LocalIndex: {2}", eventToTrigger.DimensionIndex, eventToTrigger.Layer, eventToTrigger.LocalIndex);
+                return;
+            }
+
+            if(e.Count >= zone.TerminalsSpawnedInZone.Count)
+            {
+                Logger.Error("ToggleEnableDisableTerminalInZone_Custom - Count >= Spawned terminal count");
+                return;
+            }
+
+            ToggleEnableDisableTerminal(zone.TerminalsSpawnedInZone[e.Count], e.Enabled);
+        }
+
         [HarmonyPrefix]
         [HarmonyPatch(typeof(WardenObjectiveManager), nameof(WardenObjectiveManager.CheckAndExecuteEventsOnTrigger), new System.Type[] {
             typeof(WardenObjectiveEventData),
@@ -146,16 +257,23 @@ namespace LEGACY.Patch
         })]
         private static bool Pre_CheckAndExecuteEventsOnTrigger(WardenObjectiveEventData eventToTrigger,
             eWardenObjectiveEventTrigger trigger,
-            bool ignoreTrigger = false,
-            float currentDuration = 0.0f)
+            bool ignoreTrigger,
+            float currentDuration)
         {
-            // custom event
-            switch((int)eventToTrigger.Type)
+            if (eventToTrigger == null || !ignoreTrigger && eventToTrigger.Trigger != trigger || currentDuration != 0.0 && eventToTrigger.Delay <= currentDuration)
+                return true;
+
+            UnityEngine.Coroutine coroutine = null;
+
+                // custom event
+            switch ((int)eventToTrigger.Type)
             {
                 case (int)EventType.CloseSecurityDoor_Custom:
                 case (int)EventType.KillEnemiesInDimension_Custom:
                 case (int)EventType.SetTimerTitle_Custom:
-                    CoroutineManager.StartCoroutine(Handle(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
+                case (int)EventType.ToggleEnableDisableAllTerminalsInZone_Custom:
+                    coroutine = CoroutineManager.StartCoroutine(Handle(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
+                    WardenObjectiveManager.m_wardenObjectiveEventCoroutines.Add(coroutine);    
                     return false;
             }
 
@@ -163,8 +281,28 @@ namespace LEGACY.Patch
             switch (eventToTrigger.Type)
             {
                 case eWardenObjectiveEventType.SetTerminalCommand:
-                    CoroutineManager.StartCoroutine(Handle(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
+                    coroutine = CoroutineManager.StartCoroutine(Handle(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
+                    WardenObjectiveManager.m_wardenObjectiveEventCoroutines.Add(coroutine);
                     return false;
+                case eWardenObjectiveEventType.SpawnEnemyWave:
+                    PlayerAgent localPlayer = PlayerManager.GetLocalPlayerAgent();
+                    if (!SNet.IsMaster || localPlayer == null)
+                        return true;
+
+                    var wavesetting = SurvivalWaveSettingsDataBlock.GetBlock(eventToTrigger.EnemyWaveData.WaveSettings);
+
+                    // the only spawn type we're gonna change
+                    if(wavesetting.m_overrideWaveSpawnType && wavesetting.m_survivalWaveSpawnType == SurvivalWaveSpawnType.InSuppliedCourseNodeZone)
+                    {
+                        coroutine = CoroutineManager.StartCoroutine(Handle(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
+                        WardenObjectiveManager.m_wardenObjectiveEventCoroutines.Add(coroutine);
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+
                 default: return true;
             }
         }
@@ -200,17 +338,18 @@ namespace LEGACY.Patch
                     CloseSecurityDoor_Custom(e);        break;
                 case (int)EventType.KillEnemiesInDimension_Custom:
                     KillEnemiesInDimension_Custom(e);   break;
-
+                case (int)EventType.ToggleEnableDisableAllTerminalsInZone_Custom:
+                    ToggleEnableDisableAllTerminalsInZone_Custom(e);  break;
+                case (int)EventType.ToggleEnableDisableTerminalInZone_Custom:
+                    ToggleEnableDisableTerminalInZone_Custom(e); break;
                 case (int)EventType.SetTimerTitle_Custom: {
-                        // 分两种：一种只显示title（比如在哪关闭无限警报
-                        // 一种就是 countdown
                         float duration = e.Duration;
 
                         // set title
-                        if (duration <= 0.0)
+                        if (duration <= 0.0) // no idea why this fked up
                         {
                             // disable title
-                            if (e.CustomSubObjectiveHeader == null || e.CustomSubObjectiveHeader.ToString().Length == 0)
+                            if (e.CustomSubObjectiveHeader.ToString().Length == 0)
                             {
                                 GuiManager.PlayerLayer.m_objectiveTimer.SetTimerActive(false);
                             }
@@ -251,7 +390,7 @@ namespace LEGACY.Patch
                                 yield return null;
                             }
 
-                            GuiManager.PlayerLayer.m_objectiveTimer.SetTimerActive(false, false);
+                            GuiManager.PlayerLayer.m_objectiveTimer.SetTimerActive(false, true);
 
                             break;
                         }
@@ -262,80 +401,9 @@ namespace LEGACY.Patch
             {
                 case eWardenObjectiveEventType.SetTerminalCommand:
                     SetTerminalCommand_Custom(e);       break;
+                case eWardenObjectiveEventType.SpawnEnemyWave:
+                    SpawnSurvialWave_InSuppliedCourseNodeZone_Custom(e, currentDuration); break;
             }
         }
     }
 }
-
-
-//case eWardenObjectiveEventType.DimensionFlashTeam:
-//case eWardenObjectiveEventType.DimensionWarpTeam:
-//    // cannot put this event to other places because of `Duration`
-//    PlayerAgent localPlayer = PlayerManager.GetLocalPlayerAgent();
-//    bool success = false;
-//    if (localPlayer != null)
-//    {
-//        eDimensionIndex flashFromDimensionIndex = localPlayer.DimensionIndex;
-//        Dimension flashToDimension;
-//        if (Dimension.GetDimension(e.DimensionIndex, out flashToDimension))
-//        {
-//            Il2CppSystem.ValueTuple<UnityEngine.Vector3, UnityEngine.Vector3> warpPoint1;
-//            if (GameStateManager.CurrentStateName == eGameStateName.InLevel && flashToDimension.GetValidDimensionWarpPoint(localPlayer, false, out warpPoint1) && localPlayer.TryWarpTo(e.DimensionIndex, warpPoint1.Item1, warpPoint1.Item2, true))
-//                success = true;
-//            Dimension flashFromDimension;
-//            if (success && Dimension.GetDimension(flashFromDimensionIndex, out flashFromDimension))
-//            {
-//                if (e.Duration > 0.0)
-//                    yield return new UnityEngine.WaitForSeconds(e.Duration);
-//                if (GameStateManager.CurrentStateName == eGameStateName.InLevel)
-//                {
-//                    Il2CppSystem.ValueTuple<UnityEngine.Vector3, UnityEngine.Vector3> warpPoint2;
-
-//                    if (e.Type == eWardenObjectiveEventType.DimensionFlashTeam && flashFromDimension.GetValidDimensionWarpPoint(localPlayer, false, out warpPoint2))
-//                        localPlayer.TryWarpTo(flashFromDimensionIndex, warpPoint2.Item1/*position*/, warpPoint2.Item2/*lookDirection*/, true);
-//                    if (e.ClearDimension && SNet.IsMaster)
-//                    {
-//                        Dimension dimension = e.Type == eWardenObjectiveEventType.DimensionFlashTeam ? flashToDimension : flashFromDimension;
-//                        for (int index1 = 0; index1 < dimension.Layers.Count; ++index1)
-//                        {
-//                            LG_Layer layer = dimension.Layers[index1];
-//                            for (int index2 = 0; index2 < layer.m_zones.Count; ++index2)
-//                            {
-//                                LG_Zone zone2 = layer.m_zones[index2];
-//                                LG_SecurityDoor door;
-
-//                                Utilities.Utils.TryGetZoneEntranceSecDoor(zone2, out door);
-
-//                                // limited kill
-//                                if (door == null // failed to get the door, use vanilla impl. anyway
-//                                    || door.m_sync.GetCurrentSyncState().status == eDoorStatus.Open) // door opened, kill all
-//                                {
-//                                    for (int index3 = 0; index3 < zone2.m_courseNodes.Count; ++index3)
-//                                    {
-//                                        EnemyAgent[] array = zone2.m_courseNodes[index3].m_enemiesInNode.ToArray();
-//                                        int num2 = 0;
-//                                        for (int index4 = 0; index4 < array.Length; ++index4)
-//                                        {
-//                                            EnemyAgent enemyAgent = array[index4];
-//                                            if (enemyAgent != null && enemyAgent.Damage != null)
-//                                            {
-//                                                enemyAgent.Damage.MeleeDamage(float.MaxValue, null, UnityEngine.Vector3.zero, UnityEngine.Vector3.up, 0, 1f, 1f, 1f, 1f, false, DamageNoiseLevel.Normal);
-//                                                ++num2;
-//                                            }
-//                                        }
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//            flashFromDimension = null;
-//        }
-//        flashToDimension = null;
-//    }
-//    if (!success)
-//    {
-//        UnityEngine.Debug.LogError(string.Format("DimensionFlashTeam event tried to warp player {0} to {1} but failed!", localPlayer != null ? localPlayer.PlayerName : "Null", e.DimensionIndex));
-//    }
-//    break;
