@@ -4,6 +4,7 @@ using GameData;
 
 namespace LEGACY.Patch
 {
+    [HarmonyPatch]
     class Patch_LG_SecurityDoor_Fix_EventsOnUnlockDoor_Powergenerator
     {
         [HarmonyPrefix]

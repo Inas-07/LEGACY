@@ -1,11 +1,10 @@
 ﻿using HarmonyLib;
 using Enemies;
-using Player;
-using SNetwork;
+
 namespace LEGACY.Patch
 {
     [HarmonyPatch]
-    internal class Patch_Enemies_ES_ScoutScream
+    internal class Patch_FixScoutFreeze
     {
         //private static AgentTarget replacedAgent = null;
 
