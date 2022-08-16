@@ -8,6 +8,7 @@ using Player;
 using BepInEx.IL2CPP.Utils.Collections;
 using SNetwork;
 using AIGraph;
+using AK;
 namespace LEGACY.Patch
 {
     enum EventType
@@ -104,6 +105,11 @@ namespace LEGACY.Patch
             LG_Gate gate = door.Gate;
             gate.HasBeenOpenedDuringPlay = false;
             gate.IsTraversable = false;
+
+            if (door.ActiveEnemyWaveData.HasActiveEnemyWave)
+            {
+                door.m_sound.Post(EVENTS.MONSTER_RUCKUS_FROM_BEHIND_SECURITY_DOOR_LOOP_START);
+            }
         }
 
         private static void KillEnemiesInZone(LG_Zone zone)
@@ -161,7 +167,6 @@ namespace LEGACY.Patch
                     }
                 }
             }
-
         }
 
         private static void SpawnSurvialWave_InSuppliedCourseNodeZone_Custom(WardenObjectiveEventData eventToTrigger, float currentDuration)
@@ -313,7 +318,7 @@ namespace LEGACY.Patch
                 case (int)EventType.ToggleEnableDisableTerminalInZone_Custom:
                 case (int)EventType.KillEnemiesInZone_Custom:
                     coroutine = CoroutineManager.StartCoroutine(Handle(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
-                    WardenObjectiveManager.m_wardenObjectiveEventCoroutines.Add(coroutine);    
+                    WardenObjectiveManager.m_wardenObjectiveEventCoroutines.Add(coroutine);
                     return false;
             }
 
@@ -375,7 +380,15 @@ namespace LEGACY.Patch
             switch((int)e.Type)
             {
                 case (int)EventType.CloseSecurityDoor_Custom:
-                    CloseSecurityDoor_Custom(e);        break;
+                    CloseSecurityDoor_Custom(e);
+                    LG_Zone zone = null;
+                    Builder.CurrentFloor.TryGetZoneByLocalIndex(eventToTrigger.DimensionIndex, eventToTrigger.Layer, eventToTrigger.LocalIndex, out zone);
+                    if (zone != null && e.ClearDimension)
+                    {
+                        yield return new UnityEngine.WaitForSeconds(5.0f);
+                        KillEnemiesInZone(zone);
+                    }
+                    break;
                 case (int)EventType.KillEnemiesInDimension_Custom:
                     KillEnemiesInDimension_Custom(e);   break;
                 case (int)EventType.ToggleEnableDisableAllTerminalsInZone_Custom:
