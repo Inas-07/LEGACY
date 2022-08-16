@@ -16,7 +16,8 @@ namespace LEGACY.Patch
         KillEnemiesInDimension_Custom = 101,
         SetTimerTitle_Custom = 102,
         ToggleEnableDisableAllTerminalsInZone_Custom = 103,
-        ToggleEnableDisableTerminalInZone_Custom = 104
+        ToggleEnableDisableTerminalInZone_Custom = 104,
+        KillEnemiesInZone_Custom = 105
     }
 
     enum Extended_TERM_STATE
@@ -105,6 +106,24 @@ namespace LEGACY.Patch
             gate.IsTraversable = false;
         }
 
+        private static void KillEnemiesInZone(LG_Zone zone)
+        {
+            if (zone == null) return;
+
+            for (int i = 0; i < zone.m_courseNodes.Count; ++i)
+            {
+                EnemyAgent[] array = zone.m_courseNodes[i].m_enemiesInNode.ToArray();
+                for (int j = 0; j < array.Length; ++j)
+                {
+                    EnemyAgent enemyAgent = array[j];
+                    if (enemyAgent != null && enemyAgent.Damage != null)
+                    {
+                        enemyAgent.Damage.MeleeDamage(float.MaxValue, null, UnityEngine.Vector3.zero, UnityEngine.Vector3.up, 0, 1f, 1f, 1f, 1f, false, DamageNoiseLevel.Normal);
+                    }
+                }
+            }
+        }
+
         private static void KillEnemiesInDimension_Custom(WardenObjectiveEventData eventToTrigger)
         {
             if (!SNet.IsMaster) return;
@@ -124,20 +143,21 @@ namespace LEGACY.Patch
                     // limited kill
                     if (index2 == 0 || (door != null && door.m_sync.GetCurrentSyncState().status == eDoorStatus.Open)) // door opened, kill all
                     {
-                        for (int index3 = 0; index3 < zone2.m_courseNodes.Count; ++index3)
-                        {
-                            EnemyAgent[] array = zone2.m_courseNodes[index3].m_enemiesInNode.ToArray();
-                            int num2 = 0;
-                            for (int index4 = 0; index4 < array.Length; ++index4)
-                            {
-                                EnemyAgent enemyAgent = array[index4];
-                                if (enemyAgent != null && enemyAgent.Damage != null)
-                                {
-                                    enemyAgent.Damage.MeleeDamage(float.MaxValue, null, UnityEngine.Vector3.zero, UnityEngine.Vector3.up, 0, 1f, 1f, 1f, 1f, false, DamageNoiseLevel.Normal);
-                                    ++num2;
-                                }
-                            }
-                        }
+                        KillEnemiesInZone(zone2);
+                        //for (int index3 = 0; index3 < zone2.m_courseNodes.Count; ++index3)
+                        //{
+                        //    EnemyAgent[] array = zone2.m_courseNodes[index3].m_enemiesInNode.ToArray();
+                        //    int num2 = 0;
+                        //    for (int index4 = 0; index4 < array.Length; ++index4)
+                        //    {
+                        //        EnemyAgent enemyAgent = array[index4];
+                        //        if (enemyAgent != null && enemyAgent.Damage != null)
+                        //        {
+                        //            enemyAgent.Damage.MeleeDamage(float.MaxValue, null, UnityEngine.Vector3.zero, UnityEngine.Vector3.up, 0, 1f, 1f, 1f, 1f, false, DamageNoiseLevel.Normal);
+                        //            ++num2;
+                        //        }
+                        //    }
+                        //}
                     }
                 }
             }
@@ -248,6 +268,24 @@ namespace LEGACY.Patch
             ToggleEnableDisableTerminal(zone.TerminalsSpawnedInZone[e.Count], e.Enabled);
         }
 
+        private static void KillEnemiesInZone_Custom(WardenObjectiveEventData eventToTrigger)
+        {
+            if (!SNet.IsMaster) return;
+
+            WardenObjectiveEventData e = eventToTrigger;
+
+            LG_Zone zone = null;
+            Builder.CurrentFloor.TryGetZoneByLocalIndex(e.DimensionIndex, e.Layer, e.LocalIndex, out zone);
+            if (zone == null)
+            {
+                Logger.Error("KillEnemiesInZone_Custom - Failed to find LG_Zone.");
+                Logger.Error("DimensionIndex: {0}, Layer: {1}, LocalIndex: {2}", eventToTrigger.DimensionIndex, eventToTrigger.Layer, eventToTrigger.LocalIndex);
+                return;
+            }
+
+            KillEnemiesInZone(zone);
+        }
+
         [HarmonyPrefix]
         [HarmonyPatch(typeof(WardenObjectiveManager), nameof(WardenObjectiveManager.CheckAndExecuteEventsOnTrigger), new System.Type[] {
             typeof(WardenObjectiveEventData),
@@ -272,6 +310,8 @@ namespace LEGACY.Patch
                 case (int)EventType.KillEnemiesInDimension_Custom:
                 case (int)EventType.SetTimerTitle_Custom:
                 case (int)EventType.ToggleEnableDisableAllTerminalsInZone_Custom:
+                case (int)EventType.ToggleEnableDisableTerminalInZone_Custom:
+                case (int)EventType.KillEnemiesInZone_Custom:
                     coroutine = CoroutineManager.StartCoroutine(Handle(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
                     WardenObjectiveManager.m_wardenObjectiveEventCoroutines.Add(coroutine);    
                     return false;
@@ -342,6 +382,8 @@ namespace LEGACY.Patch
                     ToggleEnableDisableAllTerminalsInZone_Custom(e);  break;
                 case (int)EventType.ToggleEnableDisableTerminalInZone_Custom:
                     ToggleEnableDisableTerminalInZone_Custom(e); break;
+                case (int)EventType.KillEnemiesInZone_Custom:
+                    KillEnemiesInZone_Custom(e);                break;
                 case (int)EventType.SetTimerTitle_Custom: {
                         float duration = e.Duration;
 
