@@ -71,29 +71,29 @@ namespace LEGACY.Patch
             }
         }
 
-        private static void CloseSecurityDoor_Custom(WardenObjectiveEventData eventToTrigger)
+        private static bool CloseSecurityDoor_Custom(WardenObjectiveEventData eventToTrigger)
         {
             LG_Zone zone = null;
             if(Builder.CurrentFloor.TryGetZoneByLocalIndex(eventToTrigger.DimensionIndex, eventToTrigger.Layer, eventToTrigger.LocalIndex, out zone) == false || zone == null)
             {
                 Logger.Error("CloseSecurityDoor_Custom: Failed to get zone {0}, layer {1}, dimensionIndex {2}", eventToTrigger.LocalIndex, eventToTrigger.Layer, eventToTrigger.DimensionIndex);
-                return;
+                return false;
             }
 
             LG_SecurityDoor door = null;
             if(Utils.TryGetZoneEntranceSecDoor(zone, out door) == false || door == null)
             {
                 Logger.Error("CloseSecurityDoor_Custom: failed to get LG_SecurityDoor!");
-                return;
+                return false;
             }
 
             pDoorState currentSyncState1 = door.m_sync.GetCurrentSyncState();
             if (currentSyncState1.status != eDoorStatus.Open && currentSyncState1.status != eDoorStatus.Opening)
-                return;
+                return false;
             Logger.Debug("Door Closed!");
             LG_Door_Sync lgDoorSync = door.m_sync.TryCast<LG_Door_Sync>();
             
-            if (lgDoorSync == null) return;
+            if (lgDoorSync == null) return false;
             
             pDoorState currentSyncState2 = lgDoorSync.GetCurrentSyncState() with
             {
@@ -110,6 +110,8 @@ namespace LEGACY.Patch
             {
                 door.m_sound.Post(EVENTS.MONSTER_RUCKUS_FROM_BEHIND_SECURITY_DOOR_LOOP_START);
             }
+
+            return true;
         }
 
         private static void KillEnemiesInZone(LG_Zone zone)
@@ -182,6 +184,15 @@ namespace LEGACY.Patch
                 {
                     Logger.Error("SpawnSurvialWave_InSuppliedCourseNodeZone - Failed to find LG_Zone.");
                     Logger.Error("DimensionIndex: {0}, Layer: {1}, LocalIndex: {2}", eventToTrigger.DimensionIndex, eventToTrigger.Layer, eventToTrigger.LocalIndex);
+                    return;
+                }
+
+                LG_SecurityDoor door = null;
+                Utils.TryGetZoneEntranceSecDoor(specified_zone, out door);
+                if(door.m_sync.GetCurrentSyncState().status != eDoorStatus.Open && door.LinkedToZoneData.ActiveEnemyWave.HasActiveEnemyWave == false)
+                {
+                    Logger.Warning("The LG_SecurityDoor to the supplied zone is inaccessible, and the door has no active enemy wave!");
+                    Logger.Warning("Aborted wave spawn.");
                     return;
                 }
 
@@ -380,7 +391,12 @@ namespace LEGACY.Patch
             switch((int)e.Type)
             {
                 case (int)EventType.CloseSecurityDoor_Custom:
-                    CloseSecurityDoor_Custom(e);
+                    bool close_success = CloseSecurityDoor_Custom(e);
+                    if (close_success == false)
+                    {
+                        break;
+                    }
+
                     LG_Zone zone = null;
                     Builder.CurrentFloor.TryGetZoneByLocalIndex(eventToTrigger.DimensionIndex, eventToTrigger.Layer, eventToTrigger.LocalIndex, out zone);
                     if (zone != null && e.ClearDimension)

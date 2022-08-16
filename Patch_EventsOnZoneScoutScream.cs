@@ -3,9 +3,6 @@ using Enemies;
 using SNetwork;
 using LevelGeneration;
 using GameData;
-using AIGraph;
-using Globals;
-using System.Collections.Generic;
 using LEGACY.Utilities;
 
 namespace LEGACY
@@ -13,7 +10,6 @@ namespace LEGACY
     [HarmonyPatch]
     class Patch_EventsOnZoneScoutScream
     {
-        private static eWardenObjectiveEventTrigger ScoutScreamEventTrigger = (eWardenObjectiveEventTrigger)100;
 
         // TODO: potential optimization: do via coroutine?
         [HarmonyPrefix]
@@ -30,7 +26,8 @@ namespace LEGACY
 
             if (door != null && door.LinkedToZoneData.EventsOnPortalWarp != null && door.LinkedToZoneData.EventsOnPortalWarp.Count > 0)
             {
-                WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(door.LinkedToZoneData.EventsOnPortalWarp, ScoutScreamEventTrigger, false);
+                Logger.Warning("EventsOnZoneScoutScream: executing events in EventsOnPortalWarp!");
+                WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(door.LinkedToZoneData.EventsOnPortalWarp, eWardenObjectiveEventTrigger.None, true);
             }
             else // use default scout wave settings.
             {

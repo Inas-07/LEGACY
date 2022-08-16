@@ -1,8 +1,8 @@
 ﻿<Project>
 
   <PropertyGroup>
-    <!--<GameFolder>G:\SteamLibrary\steamapps\common\GTFO</GameFolder>-->
-    <GameFolder>C:\Users\vcc\Desktop\GTFO_Assemblies</GameFolder>
+    <GameFolder>G:\SteamLibrary\steamapps\common\GTFO</GameFolder>
+    <!--<GameFolder>C:\Users\vcc\Desktop\GTFO_Assemblies</GameFolder>-->
     <BIELibsFolder>$(GameFolder)\BepInEx\core</BIELibsFolder>
     <DotnetFolder>$(GameFolder)\dotnet</DotnetFolder>
     <CorLibsFolder>$(DotnetFolder)\corlib</CorLibsFolder>
