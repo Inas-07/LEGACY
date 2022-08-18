@@ -3,7 +3,9 @@ using GameData;
 using System.Collections;
 using LEGACY.Utilities;
 using Player;
-using BepInEx.IL2CPP.Utils.Collections;
+using BepInEx.Unity.IL2CPP.Utils.Collections;
+//using BepInEx.IL2CPP.Utils.Collections;
+
 using SNetwork;
 using AIGraph;
 using AK;

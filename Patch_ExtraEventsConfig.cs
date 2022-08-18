@@ -5,7 +5,9 @@ using GameData;
 using System.Collections;
 using LEGACY.Utilities;
 using Player;
-using BepInEx.IL2CPP.Utils.Collections;
+using BepInEx.Unity.IL2CPP.Utils.Collections; // Bep 3.0
+//using BepInEx.IL2CPP.Utils.Collections; // Bep 2.0
+
 using SNetwork;
 using Globals;
 using AK;
