@@ -17,6 +17,19 @@ namespace LEGACY.Patch.ExtraEventsConfig.SpawnEnemyWave_Custom
     {
         private static System.Collections.Generic.Dictionary<string, ushort> WaveEventsMap = new();
 
+        public static void StopSpecifiedWave(WardenObjectiveEventData eventToTrigger, bool ignoreTrigger, float currentDuration)
+        {
+            if (string.IsNullOrEmpty(eventToTrigger.WorldEventObjectFilter)) return;
+
+
+        }
+
+        private static IEnumerator StopWave(WardenObjectiveEventData eventToTrigger, float currentDuration)
+        {
+
+        }
+
+
         public static bool SpawnWave(WardenObjectiveEventData eventToTrigger, bool ignoreTrigger, float currentDuration)
         {
 
@@ -35,11 +48,13 @@ namespace LEGACY.Patch.ExtraEventsConfig.SpawnEnemyWave_Custom
             //    return true;
             //}
 
-            UnityEngine.Coroutine coroutine = CoroutineManager.StartCoroutine(Handle(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
+            UnityEngine.Coroutine coroutine = CoroutineManager.StartCoroutine(SpawnWave(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
             WardenObjectiveManager.m_wardenObjectiveEventCoroutines.Add(coroutine);
+
+            return false;
         }
 
-        private static IEnumerator Handle(WardenObjectiveEventData eventToTrigger, float currentDuration)
+        private static IEnumerator SpawnWave(WardenObjectiveEventData eventToTrigger, float currentDuration)
         {
             WardenObjectiveEventData e = eventToTrigger;
 
