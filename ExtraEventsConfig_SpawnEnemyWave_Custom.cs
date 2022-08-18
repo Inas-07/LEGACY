@@ -1,6 +1,4 @@
-﻿using HarmonyLib;
-using Enemies;
-using LevelGeneration;
+﻿using LevelGeneration;
 using GameData;
 using System.Collections;
 using LEGACY.Utilities;
@@ -9,44 +7,93 @@ using BepInEx.IL2CPP.Utils.Collections;
 using SNetwork;
 using AIGraph;
 using AK;
-using AIGraph;
+
 namespace LEGACY.Patch.ExtraEventsConfig.SpawnEnemyWave_Custom
 {
 
     sealed class ExtraEventsConfig_SpawnEnemyWave_Custom
     {
-        private static System.Collections.Generic.Dictionary<string, ushort> WaveEventsMap = new();
+        private static System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<ushort>> WaveEventsMap = null;
 
         public static void StopSpecifiedWave(WardenObjectiveEventData eventToTrigger, bool ignoreTrigger, float currentDuration)
         {
-            if (string.IsNullOrEmpty(eventToTrigger.WorldEventObjectFilter)) return;
-
-
+            UnityEngine.Coroutine coroutine = CoroutineManager.StartCoroutine(StopWave(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
+            WardenObjectiveManager.m_wardenObjectiveEventCoroutines.Add(coroutine);
         }
 
         private static IEnumerator StopWave(WardenObjectiveEventData eventToTrigger, float currentDuration)
         {
+            WardenObjectiveEventData e = eventToTrigger;
 
+            float delay = UnityEngine.Mathf.Max(e.Delay - currentDuration, 0f);
+            if (delay > 0f)
+            {
+                yield return new UnityEngine.WaitForSeconds(delay);
+            }
+
+            WardenObjectiveManager.DisplayWardenIntel(e.Layer, e.WardenIntel);
+            if (e.DialogueID > 0u)
+            {
+                PlayerDialogManager.WantToStartDialog(e.DialogueID, -1, false, false);
+            }
+            if (e.SoundID > 0u)
+            {
+                WardenObjectiveManager.Current.m_sound.Post(e.SoundID, true);
+                var line = e.SoundSubtitle.ToString();
+                if (!string.IsNullOrWhiteSpace(line))
+                {
+                    GuiManager.PlayerLayer.ShowMultiLineSubtitle(line);
+                }
+            }
+
+            if (!SNet.IsMaster) yield break;
+
+            if (string.IsNullOrEmpty(e.WorldEventObjectFilter))
+            {
+                Logger.Error("WorldEventObjectFilter is empty. Aborted stop wave event.");
+                yield break;
+            }
+
+            if (!WaveEventsMap.ContainsKey(e.WorldEventObjectFilter))
+            {
+                Logger.Error("Wave Filter {0} is unregistered, cannot stop wave.", e.WorldEventObjectFilter);
+                yield break;
+            }
+
+            WaveEventsMap.TryGetValue(e.WorldEventObjectFilter, out var eventIDList);
+            WaveEventsMap.Remove(e.WorldEventObjectFilter);
+
+            Mastermind.MastermindEvent masterMindEvent_StopWave;
+            foreach(ushort eventID in eventIDList)
+            {
+                if (Mastermind.Current.TryGetEvent(eventID, out masterMindEvent_StopWave))
+                {
+                    masterMindEvent_StopWave.StopEvent();
+                }
+            }
+
+            Logger.Debug("Wave(s) with filter {0} stopped.", e.WorldEventObjectFilter);
         }
 
+        public static void OnStopAllWave()
+        {
+            WaveEventsMap.Clear();
+        }
 
         public static bool SpawnWave(WardenObjectiveEventData eventToTrigger, bool ignoreTrigger, float currentDuration)
         {
+            if (!string.IsNullOrEmpty(eventToTrigger.WorldEventObjectFilter))
+            {
+                if (!WaveEventsMap.ContainsKey(eventToTrigger.WorldEventObjectFilter))
+                {
+                    System.Collections.Generic.List<ushort> eventIDList = new();
+                    WaveEventsMap.Add(eventToTrigger.WorldEventObjectFilter, eventIDList);
+                    Logger.Debug("Registering Wave(s) with filter {0}", eventToTrigger.WorldEventObjectFilter);
 
-            //var wavesetting = SurvivalWaveSettingsDataBlock.GetBlock(eventToTrigger.EnemyWaveData.WaveSettings);
-
-            // the only spawn type we're gonna change
-            //if ((wavesetting.m_overrideWaveSpawnType && wavesetting.m_survivalWaveSpawnType == SurvivalWaveSpawnType.InSuppliedCourseNodeZone)
-            //    || eventToTrigger.WorldEventObjectFilter.Length > 0 )
-            //{
-            //    UnityEngine.Coroutine coroutine = CoroutineManager.StartCoroutine(Handle(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
-            //    WardenObjectiveManager.m_wardenObjectiveEventCoroutines.Add(coroutine);
-            //    return false;
-            //}
-            //else
-            //{
-            //    return true;
-            //}
+                    // added list here instead of in coroutine to get around with issue caused by concurrency.
+                    // the WaveEventsMap will be cleaned OnApplicationQuit and AfterLevel
+                }
+            }
 
             UnityEngine.Coroutine coroutine = CoroutineManager.StartCoroutine(SpawnWave(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
             WardenObjectiveManager.m_wardenObjectiveEventCoroutines.Add(coroutine);
@@ -135,6 +182,17 @@ namespace LEGACY.Patch.ExtraEventsConfig.SpawnEnemyWave_Custom
             WardenObjectiveManager.m_wardenObjectiveWaveCoroutines.Add(coroutine);
         }
 
+        internal static void OnMastermindBuildDone()
+        {
+            WaveEventsMap = new();
+        }
+
+        internal static void OnLevelCleanup()
+        {
+            WaveEventsMap.Clear();
+            WaveEventsMap = null;
+        }
+
         private static IEnumerator TriggerEnemyWaveDataAndRegisterWaveEventID(
           GenericEnemyWaveData data,
           AIG_CourseNode spawnNode,
@@ -152,7 +210,18 @@ namespace LEGACY.Patch.ExtraEventsConfig.SpawnEnemyWave_Custom
                     UnityEngine.Debug.Log("WardenObjectiveManager.TriggerEnemyWaveData - Enemy wave spawned (" + waveSpawnType + ") with edventID " + eventID);
                     if (!string.IsNullOrEmpty(worldEventObjectFilter))
                     {
-                        WaveEventsMap.Add(worldEventObjectFilter, eventID);
+                        if(WaveEventsMap.ContainsKey(worldEventObjectFilter))
+                        {
+                            System.Collections.Generic.List<ushort> eventIDList;
+                            WaveEventsMap.TryGetValue(worldEventObjectFilter, out eventIDList);
+                            eventIDList.Add(eventID);
+                        }
+                        else
+                        {
+                            Logger.Error("We should have instanitiated a List before call to coroutine, WTF???");
+                            yield break;
+                        }
+
                         Logger.Debug("Registered wave with filter {0}", worldEventObjectFilter);
                     }
                 }
@@ -211,6 +280,11 @@ namespace LEGACY.Patch.ExtraEventsConfig.SpawnEnemyWave_Custom
         //        WardenObjectiveManager.m_wardenObjectiveWaveCoroutines.Add(coroutine);
         //    }
         //}
+
+        public static void OnApplicationQuit()
+        {
+            WaveEventsMap = null;
+        }
 
         private ExtraEventsConfig_SpawnEnemyWave_Custom() { }
     }

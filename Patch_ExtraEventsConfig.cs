@@ -7,8 +7,9 @@ using LEGACY.Utilities;
 using Player;
 using BepInEx.IL2CPP.Utils.Collections;
 using SNetwork;
-using AIGraph;
+using Globals;
 using AK;
+using LEGACY.Patch.ExtraEventsConfig.SpawnEnemyWave_Custom;
 namespace LEGACY.Patch.ExtraEventsConfig
 {
     enum EventType
@@ -298,6 +299,9 @@ namespace LEGACY.Patch.ExtraEventsConfig
                     coroutine = CoroutineManager.StartCoroutine(Handle(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
                     WardenObjectiveManager.m_wardenObjectiveEventCoroutines.Add(coroutine);
                     return false;
+                case (int)EventType.StopSpecifiedEnemyWave:
+                    ExtraEventsConfig_SpawnEnemyWave_Custom.StopSpecifiedWave(eventToTrigger, ignoreTrigger, currentDuration);
+                    return false;
             }
 
             // vanilla event modification
@@ -308,8 +312,11 @@ namespace LEGACY.Patch.ExtraEventsConfig
                     WardenObjectiveManager.m_wardenObjectiveEventCoroutines.Add(coroutine);
                     return false;
                 case eWardenObjectiveEventType.SpawnEnemyWave:
-                    bool use_vanilla_impl = SpawnEnemyWave_Custom.ExtraEventsConfig_SpawnEnemyWave_Custom.SpawnWave(eventToTrigger, ignoreTrigger, currentDuration);
+                    bool use_vanilla_impl = ExtraEventsConfig_SpawnEnemyWave_Custom.SpawnWave(eventToTrigger, ignoreTrigger, currentDuration);
                     return use_vanilla_impl;
+                case eWardenObjectiveEventType.StopEnemyWaves:
+                    ExtraEventsConfig_SpawnEnemyWave_Custom.OnStopAllWave();
+                    return true;
 
                 default: return true;
             }
@@ -425,6 +432,27 @@ namespace LEGACY.Patch.ExtraEventsConfig
                 case eWardenObjectiveEventType.SetTerminalCommand:
                     SetTerminalCommand_Custom(e);       break;
             }
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(GS_AfterLevel), nameof(GS_AfterLevel.CleanupAfterExpedition))]
+        private static void Post_CleanupAfterExpedition()
+        {
+            ExtraEventsConfig_SpawnEnemyWave_Custom.OnLevelCleanup();
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Global), nameof(Global.OnApplicationQuit))]
+        private static void Post_OnApplicationQuit()
+        {
+            ExtraEventsConfig_SpawnEnemyWave_Custom.OnApplicationQuit();
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Mastermind), nameof(Mastermind.OnBuilderDone))]
+        private static void Post_MastermindOnBuilderDone(Mastermind __instance)
+        {
+            ExtraEventsConfig_SpawnEnemyWave_Custom.OnMastermindBuildDone();
         }
     }
 }

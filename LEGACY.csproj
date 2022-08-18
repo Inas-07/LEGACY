@@ -31,6 +31,7 @@
     <Compile Include="LEGACY.cs" />
     <Compile Include="LEGACY.Utilities.cs" />
     <Compile Include="ExtraEventsConfig_SpawnEnemyWave_Custom.cs" />
+    <Compile Include="Patch_FixHiddenCommandExecution.cs" />
     <Compile Include="Patch_FixScoutFreeze.cs" />
     <Compile Include="Patch_EventsOnBossDeath.cs" />
     <Compile Include="Patch_EventsOnZoneScoutScream.cs" />
