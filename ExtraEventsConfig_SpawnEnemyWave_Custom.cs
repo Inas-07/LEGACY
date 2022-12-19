@@ -20,7 +20,7 @@ namespace LEGACY.Patch.ExtraEventsConfig.SpawnEnemyWave_Custom
         public static void StopSpecifiedWave(WardenObjectiveEventData eventToTrigger, bool ignoreTrigger, float currentDuration)
         {
             UnityEngine.Coroutine coroutine = CoroutineManager.StartCoroutine(StopWave(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
-            WardenObjectiveManager.m_wardenObjectiveEventCoroutines.Add(coroutine);
+            //WardenObjectiveManager.m_wardenObjectiveEventCoroutines.Add(coroutine);
         }
 
         private static IEnumerator StopWave(WardenObjectiveEventData eventToTrigger, float currentDuration)
@@ -98,7 +98,7 @@ namespace LEGACY.Patch.ExtraEventsConfig.SpawnEnemyWave_Custom
             }
 
             UnityEngine.Coroutine coroutine = CoroutineManager.StartCoroutine(SpawnWave(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
-            WardenObjectiveManager.m_wardenObjectiveEventCoroutines.Add(coroutine);
+            //WardenObjectiveManager.m_wardenObjectiveEventCoroutines.Add(coroutine);
 
             return false;
         }

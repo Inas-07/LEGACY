@@ -28,6 +28,8 @@ namespace LEGACY
             {
                 Logger.Warning("EventsOnZoneScoutScream: executing events in EventsOnPortalWarp!");
                 WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(door.LinkedToZoneData.EventsOnPortalWarp, eWardenObjectiveEventTrigger.None, true);
+                //Utils.CheckAndExecuteEventsOnTrigger(door.LinkedToZoneData.EventsOnPortalWarp, eWardenObjectiveEventTrigger.None, true);
+
             }
             else // use default scout wave settings.
             {

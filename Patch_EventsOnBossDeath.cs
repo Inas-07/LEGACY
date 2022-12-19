@@ -94,7 +94,7 @@ namespace LEGACY.Patch
             if (bossesWithDeathEvents.TryGetValue(boss.GlobalID, out eventsOnBossDeath) == false || eventsOnBossDeath == null) return;
 
             WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(eventsOnBossDeath, eWardenObjectiveEventTrigger.None, true, 0.0f);
-
+            //Utils.CheckAndExecuteEventsOnTrigger(eventsOnBossDeath, eWardenObjectiveEventTrigger.None, true);
             bossesWithDeathEvents.Remove(boss.GlobalID);
         }
 

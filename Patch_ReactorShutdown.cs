@@ -2,6 +2,8 @@
 using LevelGeneration;
 using GameData;
 using Localization;
+using LEGACY.Utilities;
+
 namespace LEGACY.Patch
 {
     [HarmonyPatch]
@@ -41,6 +43,8 @@ namespace LEGACY.Patch
             LG_LayerType layer = __instance.SpawnNode.LayerType;
 
             WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(db.EventsOnActivate, trigger, false);
+            //Utils.CheckAndExecuteEventsOnTrigger(db.EventsOnActivate, trigger, false);
+            
         }
 
         [HarmonyPrefix]

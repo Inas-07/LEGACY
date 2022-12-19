@@ -202,6 +202,14 @@ namespace LEGACY.Utilities
 
             return door.m_sync.GetCurrentSyncState().status == eDoorStatus.Open;
         }
+
+        //public static void CheckAndExecuteEventsOnTrigger(List<WardenObjectiveEventData> eventDatas, eWardenObjectiveEventTrigger trigger = eWardenObjectiveEventTrigger.None, bool ignoreTrigger = false, float currentDuration = 0.0f)
+        //{
+        //    foreach (var e in eventDatas)
+        //    {
+        //        WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(e, e.Trigger, ignoreTrigger, currentDuration);
+        //    }
+        //}
     }
 
 

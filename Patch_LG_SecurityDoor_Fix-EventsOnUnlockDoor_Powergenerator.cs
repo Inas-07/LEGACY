@@ -1,7 +1,7 @@
 ﻿using HarmonyLib;
 using LevelGeneration;
 using GameData;
-
+using LEGACY.Utilities;
 namespace LEGACY.Patch
 {
     [HarmonyPatch]
@@ -18,6 +18,7 @@ namespace LEGACY.Patch
                 case eDoorStatus.Closed_LockedWithChainedPuzzle_Alarm:
                     if (__instance.m_lastState.status == eDoorStatus.Closed_LockedWithPowerGenerator)
                         WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(__instance.LinkedToZoneData.EventsOnUnlockDoor, eWardenObjectiveEventTrigger.None, true, 0.0f);
+                    //Utils.CheckAndExecuteEventsOnTrigger(__instance.LinkedToZoneData.EventsOnUnlockDoor, eWardenObjectiveEventTrigger.None, true, 0.0f);
                     return;
             }
         }

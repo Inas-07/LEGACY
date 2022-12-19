@@ -4,7 +4,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>LEGACY</RootNamespace>
     <AssemblyName>LEGACY</AssemblyName>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFramework>net6</TargetFramework>
     <LangVersion>preview</LangVersion>
     <!--
       Due to the nature of coding with IL2CPP, unsafe blocks will be allowed by default.

@@ -2,6 +2,7 @@
 using LevelGeneration;
 using GameData;
 using SNetwork;
+using LEGACY.Utilities;
 
 namespace LEGACY.Patch
 {
@@ -17,6 +18,7 @@ namespace LEGACY.Patch
 
             /* LG_WardenObjective_Reactor.OnTerminalStartupSequenceVerify is called on correct verification */
             WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(__instance.m_currentWaveData.Events, eWardenObjectiveEventTrigger.OnEnd, false);
+            //Utils.CheckAndExecuteEventsOnTrigger(__instance.m_currentWaveData.Events, eWardenObjectiveEventTrigger.OnEnd, false);
         }
 
         [HarmonyPostfix]
@@ -27,6 +29,7 @@ namespace LEGACY.Patch
             if (newState.status != eReactorStatus.Startup_intense) return;
 
             WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(__instance.m_currentWaveData.Events, eWardenObjectiveEventTrigger.None, false);
+            //Utils.CheckAndExecuteEventsOnTrigger(__instance.m_currentWaveData.Events, eWardenObjectiveEventTrigger.None, false);
         }
 
         [HarmonyPostfix]
@@ -46,6 +49,7 @@ namespace LEGACY.Patch
 
             __instance.m_chainedPuzzleToStartSequence.OnPuzzleSolved += new System.Action(() => {
                 WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(db.EventsOnActivate, eWardenObjectiveEventTrigger.None, true);
+                //Utils.CheckAndExecuteEventsOnTrigger(db.EventsOnActivate, eWardenObjectiveEventTrigger.None, true);
             });
         }
     }

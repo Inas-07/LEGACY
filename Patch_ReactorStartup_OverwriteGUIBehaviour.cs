@@ -223,6 +223,7 @@ namespace LEGACY.Patch
                         __instance.m_alarmCountdownPlayed = false;
                         __instance.m_currentDuration = !newState.verifyFailed ? __instance.m_currentWaveData.Warmup : __instance.m_currentWaveData.WarmupFail;
                         WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(__instance.m_currentWaveData.Events, eWardenObjectiveEventTrigger.OnStart, false, 0.0f);
+                        //Utils.CheckAndExecuteEventsOnTrigger(__instance.m_currentWaveData.Events, eWardenObjectiveEventTrigger.OnStart, false, 0.0f);
                         if (__instance.m_currentWaveCount == 1)
                         {
                             Debug.LogError("Reactor IDLE START");
@@ -262,6 +263,7 @@ namespace LEGACY.Patch
                         Debug.Log("Wait for verify! newState.verifyFailed? " + newState.verifyFailed.ToString());
                         __instance.m_currentDuration = !newState.verifyFailed ? __instance.m_currentWaveData.Verify : __instance.m_currentWaveData.VerifyFail;
                         WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(__instance.m_currentWaveData.Events, eWardenObjectiveEventTrigger.OnMid, false, 0.0f);
+                        //Utils.CheckAndExecuteEventsOnTrigger(__instance.m_currentWaveData.Events, eWardenObjectiveEventTrigger.OnMid, false, 0.0f);
                         //GuiManager.PlayerLayer.m_wardenIntel.ShowSubObjectiveMessage("", Text.Get(1078U));
                         break;
                 }

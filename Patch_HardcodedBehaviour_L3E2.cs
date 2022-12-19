@@ -275,6 +275,7 @@ namespace LEGACY.Hardcoded_Behaviour.L3E2
 
             // Descend fog
             WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(Colosseum1Events, eWardenObjectiveEventTrigger.OnMid, false);
+            //Utils.CheckAndExecuteEventsOnTrigger(Colosseum1Events, eWardenObjectiveEventTrigger.OnMid, false);
 
             if (SNet.IsMaster)
             {
@@ -313,6 +314,7 @@ namespace LEGACY.Hardcoded_Behaviour.L3E2
             puzzles2[2].AttemptInteract(eChainedPuzzleInteraction.Activate);
 
             WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(Colosseum1Events, eWardenObjectiveEventTrigger.OnEnd, false);
+            //Utils.CheckAndExecuteEventsOnTrigger(Colosseum1Events, eWardenObjectiveEventTrigger.OnEnd, false);
 
             if (SNet.IsMaster)
             {
@@ -385,8 +387,10 @@ namespace LEGACY.Hardcoded_Behaviour.L3E2
                 puzzles2[0].AttemptInteract(eChainedPuzzleInteraction.Activate);
 
                 Logger.Log("Fog descending for Puzzle1 Trio");
-                
+
                 WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(Colosseum1Events, eWardenObjectiveEventTrigger.OnStart, false);
+                //Utils.CheckAndExecuteEventsOnTrigger(Colosseum1Events, eWardenObjectiveEventTrigger.OnStart, false);
+
 
                 if (SNet.IsMaster)
                 {
@@ -431,6 +435,8 @@ namespace LEGACY.Hardcoded_Behaviour.L3E2
             puzzles2[0].OnPuzzleSolved += new System.Action(() => {
                 // Elevate fog. 
                 WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(Colosseum2Events, eWardenObjectiveEventTrigger.OnStart, false);
+                //Utils.CheckAndExecuteEventsOnTrigger(Colosseum2Events, eWardenObjectiveEventTrigger.OnStart, false);
+
                 if (!SNet.IsMaster)
                 {
                     puzzles2[0].m_stateReplicator.SetStateUnsynced(new pChainedPuzzleState() { status = eChainedPuzzleStatus.Solved });
@@ -470,6 +476,8 @@ namespace LEGACY.Hardcoded_Behaviour.L3E2
             });
             puzzles2[1].OnPuzzleSolved += new System.Action(() => {
                 WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(Colosseum2Events, eWardenObjectiveEventTrigger.OnMid, false);
+                //Utils.CheckAndExecuteEventsOnTrigger(Colosseum2Events, eWardenObjectiveEventTrigger.OnMid, false);
+
                 if (!SNet.IsMaster)
                 {
                     puzzles2[1].m_stateReplicator.SetStateUnsynced(new pChainedPuzzleState() { status = eChainedPuzzleStatus.Solved });
@@ -512,6 +520,8 @@ namespace LEGACY.Hardcoded_Behaviour.L3E2
                 }
 
                 WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(Colosseum2Events, eWardenObjectiveEventTrigger.OnEnd, false);
+                //Utils.CheckAndExecuteEventsOnTrigger(Colosseum2Events, eWardenObjectiveEventTrigger.OnEnd, false);
+
                 if (!puzzles1[3].IsSolved)
                 {
                     Logger.Log("Puzzle2 Trio Solved: Puzzles1 Solo scan is not finished.");
@@ -529,6 +539,7 @@ namespace LEGACY.Hardcoded_Behaviour.L3E2
             puzzles2[3].OnPuzzleSolved += new System.Action(() => {
                 // colosseum 2 events. Currently there's no event.
                 WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(Colosseum2Events, eWardenObjectiveEventTrigger.None, false);
+                //Utils.CheckAndExecuteEventsOnTrigger(Colosseum2Events, eWardenObjectiveEventTrigger.None, false);
 
                 if (SNet.IsMaster)
                 {
@@ -592,6 +603,7 @@ namespace LEGACY.Hardcoded_Behaviour.L3E2
             {
                 case (uint)PuzzleID.Colosseum1_1:
                     WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(Colosseum1Events, eWardenObjectiveEventTrigger.None, false);
+                    //Utils.CheckAndExecuteEventsOnTrigger(Colosseum1Events, eWardenObjectiveEventTrigger.None, false);
 
                     if (SNet.IsMaster)
                     {

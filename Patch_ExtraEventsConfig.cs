@@ -5,8 +5,7 @@ using GameData;
 using System.Collections;
 using LEGACY.Utilities;
 using Player;
-using BepInEx.Unity.IL2CPP.Utils.Collections; // Bep 3.0
-//using BepInEx.IL2CPP.Utils.Collections; // Bep 2.0
+using BepInEx.Unity.IL2CPP.Utils.Collections; 
 
 using SNetwork;
 using Globals;
@@ -299,7 +298,7 @@ namespace LEGACY.Patch.ExtraEventsConfig
                 case (int)EventType.ToggleEnableDisableTerminalInZone_Custom:
                 case (int)EventType.KillEnemiesInZone_Custom:
                     coroutine = CoroutineManager.StartCoroutine(Handle(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
-                    WardenObjectiveManager.m_wardenObjectiveEventCoroutines.Add(coroutine);
+                    //WardenObjectiveManager.m_wardenObjectiveEventCoroutines.Add(coroutine);
                     return false;
                 case (int)EventType.StopSpecifiedEnemyWave:
                     ExtraEventsConfig_SpawnEnemyWave_Custom.StopSpecifiedWave(eventToTrigger, ignoreTrigger, currentDuration);
@@ -311,7 +310,7 @@ namespace LEGACY.Patch.ExtraEventsConfig
             {
                 case eWardenObjectiveEventType.SetTerminalCommand:
                     coroutine = CoroutineManager.StartCoroutine(Handle(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
-                    WardenObjectiveManager.m_wardenObjectiveEventCoroutines.Add(coroutine);
+                    //WardenObjectiveManager.m_wardenObjectiveEventCoroutines.Add(coroutine);
                     return false;
                 case eWardenObjectiveEventType.SpawnEnemyWave:
                     bool use_vanilla_impl = ExtraEventsConfig_SpawnEnemyWave_Custom.SpawnWave(eventToTrigger, ignoreTrigger, currentDuration);

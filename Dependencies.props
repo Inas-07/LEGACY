@@ -10,40 +10,66 @@
     <PluginsFolder>$(GameFolder)\BepInEx\plugins</PluginsFolder>
   </PropertyGroup>
 
-  <!-- BepInEx Core libs --> 
+  <!-- BepInEx libs -->
   <ItemGroup>
     <Reference Include="$(BIELibsFolder)\BepInEx.*.dll" Private="false" />
     <Reference Include="$(BIELibsFolder)\0Harmony.dll" Private="false" />
-    <Reference Include="$(BIELibsFolder)\*.dll" Private="false" />
-    <!--<Reference Include="$(BIELibsFolder)\UnhollowerRuntimeLib.dll" Private="false" />-->
-
+    <Reference Include="$(BIELibsFolder)\MonoMod.RuntimeDetour.dll" Private="false" />
+    <Reference Include="$(BIELibsFolder)\Il2CppInterop.*.dll" Private="false" />
   </ItemGroup>
- 
-  <!-- Mono libs -->
+
+  <!-- CorLibs -->
   <ItemGroup>
-    <Reference Include="$(CorLibsFolder)\Microsoft.Bcl.AsyncInterfaces.dll" Private="false" />
-    <Reference Include="$(CorLibsFolder)\System.Text.Json.dll" Private="false" />
-    <Reference Include="$(CorLibsFolder)\System.Runtime.CompilerServices.Unsafe.dll" Private="false" />
-    
+    <Reference Include="$(CorLibsFolder)\*.dll" Private="false" />
+    <!--<Reference Include="$(CorLibsFolder)\System.Private.CoreLib.dll" Private="false" />-->
   </ItemGroup>
 
-  <!-- Interop assemblies -->
+  <!-- Interop -->
   <ItemGroup>
     <Reference Include="$(InteropFolder)/*.dll" Private="false" />
     <Reference Remove="$(InteropFolder)/netstandard.dll" />
     <Reference Remove="$(InteropFolder)/Newtonsoft.Json.dll" />
   </ItemGroup>
 
-  <!-- Additional Dependencies -->
   <ItemGroup>
-    <Reference Include="$(GameFolder)\GTFO-API.dll" Private="false" />
-    <Reference Include="$(GameFolder)\MTFO.dll" Private="false" />
-
-    <!-- FIX LIVEEIDTTING MYSELF-->
-    <Reference Include="$(GameFolder)\LGTuner.dll" Private="false" />
-    <Reference Include="$(GameFolder)\MTFO.Ext.PartialData.dll" Private="false" />
+    <Reference Include="$(PluginsFolder)/GTFO-API.dll" Private="false" />
+  </ItemGroup>
+  
+  
+  
+  <!-- BepInEx Core libs --><!-- 
+  <ItemGroup>
+    <Reference Include="$(BIELibsFolder)\BepInEx.*.dll" Private="false" />
+    <Reference Include="$(BIELibsFolder)\0Harmony.dll" Private="false" />
+    <Reference Include="$(BIELibsFolder)\*.dll" Private="false" />
+    --><!--<Reference Include="$(BIELibsFolder)\UnhollowerRuntimeLib.dll" Private="false" />--><!--
 
   </ItemGroup>
+
+  --><!-- CorLibs --><!--
+  <ItemGroup>
+    <Reference Include="$(CorLibsFolder)\*.dll" Private="false" />
+    <Reference Include="$(CorLibsFolder)\System.Private.CoreLib.dll" Private="false" />
+  </ItemGroup>
+
+
+  --><!-- Interop assemblies --><!--
+  <ItemGroup>
+    <Reference Include="$(InteropFolder)/*.dll" Private="false" />
+    <Reference Remove="$(InteropFolder)/netstandard.dll" />
+    <Reference Remove="$(InteropFolder)/Newtonsoft.Json.dll" />
+  </ItemGroup>
+
+  --><!-- Additional Dependencies --><!--
+  <ItemGroup>
+    <Reference Include="$(GameFolder)\BepInEx\plugins\GTFO-API.dll" Private="false" />
+    <Reference Include="$(GameFolder)\BepInEx\plugins\MTFO.dll" Private="false" />
+
+    --><!-- FIX LIVEEIDTTING MYSELF--><!--
+    <Reference Include="$(GameFolder)\BepInEx\plugins\LGTuner.dll" Private="false" />
+    <Reference Include="$(GameFolder)\BepInEx\plugins\MTFO.Ext.PartialData.dll" Private="false" />
+
+  </ItemGroup>-->
 
 
 </Project>
