@@ -11,6 +11,7 @@
 //        private static int[] last_break_indices = null;
 //        private static WardenObjectiveDataBlock[] dbs = null;
 
+
 //        private static void checkInit()
 //        {
 //            if (dbs != null) return;
@@ -31,7 +32,7 @@
 
 //            if (db != null) return; // multiple uplink terminals may exist in 1 layer.
 
-//            if (!WardenObjectiveManager.TryGetWardenObjectiveDataForLayer(layer, out db))
+//            if (!WardenObjectiveManager.Current.TryGetActiveWardenObjectiveData(layer, out db))
 //            {
 //                Logger.Error("Cannot get WardenObjectiveData for the uplink-terminal, layer: {0}", layer);
 //                return;
@@ -40,18 +41,20 @@
 //            if (db.Type != eWardenObjectiveType.TerminalUplink && db.Type != eWardenObjectiveType.CorruptedTerminalUplink)
 //            {
 //                Logger.Debug("{0}: How can you set up a non-uplink terminal in the uplink setup method?", layer.ToString());
+//                return;
 //            }
 
 //            dbs[(int)layer] = db;
 //            if (db.EventsOnActivate.Count == 0 || db.OnActivateOnSolveItem == true)
 //            {
 //                last_break_indices[(int)layer] = -1;
-//                if(db.EventsOnActivate.Count == 0)
+//                if (db.EventsOnActivate.Count == 0)
 //                {
 //                    Logger.Debug("Patch_Uplink: No EventsOnActivate Found for uplink terminal, skipped. Layer: {0}", layer);
 //                }
 //                else
 //                {
+//                    // TODO: consider change vanilla behaviour
 //                    Logger.Debug("Patch_Uplink: OnActivateOnSolveItem == true, will use vanilla implmentation. Skipped. Layer: {0}", layer);
 //                }
 //                return;
@@ -61,14 +64,14 @@
 //        }
 
 //        [HarmonyPostfix]
-//        [HarmonyPatch(typeof(LG_ComputerTerminal), "SetupAsWardenObjectiveCorruptedTerminalUplink")]
+//        [HarmonyPatch(typeof(LG_ComputerTerminal), nameof(LG_ComputerTerminal.SetupAsWardenObjectiveCorruptedTerminalUplink))]
 //        private static void Post_SetupAsWardenObjectiveCorruptedTerminalUplink(LG_ComputerTerminal __instance) // do initialization
 //        {
 //            registerLayerEventsOnActivate(__instance);
 //        }
 
 //        [HarmonyPostfix]
-//        [HarmonyPatch(typeof(LG_ComputerTerminal), "SetupAsWardenObjectiveTerminalUplink")]
+//        [HarmonyPatch(typeof(LG_ComputerTerminal), nameof(LG_ComputerTerminal.SetupAsWardenObjectiveTerminalUplink))]
 //        private static void Post_LG_ComputerTerminal(LG_ComputerTerminal __instance) // do initialization
 //        {
 //            registerLayerEventsOnActivate(__instance);
@@ -78,7 +81,7 @@
 //         You must guarantee that simultaneous uplink connection is logically impossible
 //         */
 //        [HarmonyPrefix]
-//        [HarmonyPatch(typeof(LG_ComputerTerminalCommandInterpreter), "TerminalUplinkVerify")]
+//        [HarmonyPatch(typeof(LG_ComputerTerminalCommandInterpreter), nameof(LG_ComputerTerminalCommandInterpreter.TerminalUplinkVerify))]
 //        private static void Pre_TerminalUplinkVerify(string param1, LG_ComputerTerminalCommandInterpreter __instance)
 //        {
 //            if (__instance == null) return;
@@ -118,7 +121,7 @@
 //        }
 
 //        [HarmonyPostfix]
-//        [HarmonyPatch(typeof(GS_AfterLevel), "CleanupAfterExpedition")]
+//        [HarmonyPatch(typeof(GS_AfterLevel), nameof(GS_AfterLevel.CleanupAfterExpedition))]
 //        private static void Post_CleanupAfterExpedition()
 //        {
 //            if (dbs != null)

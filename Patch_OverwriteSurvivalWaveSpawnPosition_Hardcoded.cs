@@ -137,8 +137,10 @@ namespace LEGACY.Hardcoded_Behaviour
             };
         }
 
+        // TODO: modify this according to new layout.
         private static SurvivalWave.ScoredSpawnPoint L3E1_GetScoredSpawnPoint_FromElevator_Overwrite()
         {
+            Logger.Warning("L3E1 hardcoded spawn-overwrite method not updated. Remember to update it according to new layout");
             eLocalZoneIndex minLocalIndex;// = eLocalZoneIndex.Zone_20;
             LG_LayerType minLayerType;// = LG_LayerType.SecondaryLayer;
 

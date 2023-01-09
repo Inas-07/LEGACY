@@ -31,12 +31,15 @@
     <Compile Include="LEGACY.cs" />
     <Compile Include="LEGACY.Utilities.cs" />
     <Compile Include="ExtraEventsConfig_SpawnEnemyWave_Custom.cs" />
+    <Compile Include="Patch_EventsOnUplinkCommence.cs" />
     <Compile Include="Patch_FixHiddenCommandExecution.cs" />
     <Compile Include="Patch_FixScoutFreeze.cs" />
     <Compile Include="Patch_EventsOnBossDeath.cs" />
     <Compile Include="Patch_EventsOnZoneScoutScream.cs" />
     <Compile Include="Patch_ExtraEventsConfig.cs" />
     <Compile Include="Patch_ChangeElevatorCargo_Hardcoded.cs" />
+    <Compile Include="Patch_Dep_UseStaticBioscanPoints_FixClusterScan.cs" />
+    <Compile Include="Patch_UseStaticBioscanPoints_FixClusterScan.cs" />
     <Compile Include="Patch_LG_SecurityDoor_Fix-EventsOnUnlockDoor_Powergenerator.cs" />
     <Compile Include="Patch_LockSecurityDoor_FixCustomText.cs" />
     <Compile Include="Patch_OverwriteSurvivalWaveSpawnPosition_Hardcoded.cs" />

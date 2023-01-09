@@ -1,14 +1,14 @@
-﻿using LevelGeneration;
-using GameData;
-using System.Collections;
-using LEGACY.Utilities;
-using Player;
+﻿using AIGraph;
+using AK;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
+using GameData;
+using LEGACY.Utilities;
+using LevelGeneration;
+using Player;
 //using BepInEx.IL2CPP.Utils.Collections;
 
 using SNetwork;
-using AIGraph;
-using AK;
+using System.Collections;
 
 namespace LEGACY.Patch.ExtraEventsConfig.SpawnEnemyWave_Custom
 {
@@ -17,7 +17,7 @@ namespace LEGACY.Patch.ExtraEventsConfig.SpawnEnemyWave_Custom
     {
         private static System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<ushort>> WaveEventsMap = null;
 
-        public static void StopSpecifiedWave(WardenObjectiveEventData eventToTrigger, bool ignoreTrigger, float currentDuration)
+        public static void StopSpecifiedWave(WardenObjectiveEventData eventToTrigger, float currentDuration)
         {
             UnityEngine.Coroutine coroutine = CoroutineManager.StartCoroutine(StopWave(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
             //WardenObjectiveManager.m_wardenObjectiveEventCoroutines.Add(coroutine);
@@ -66,7 +66,7 @@ namespace LEGACY.Patch.ExtraEventsConfig.SpawnEnemyWave_Custom
             WaveEventsMap.Remove(e.WorldEventObjectFilter);
 
             Mastermind.MastermindEvent masterMindEvent_StopWave;
-            foreach(ushort eventID in eventIDList)
+            foreach (ushort eventID in eventIDList)
             {
                 if (Mastermind.Current.TryGetEvent(eventID, out masterMindEvent_StopWave))
                 {
@@ -82,8 +82,10 @@ namespace LEGACY.Patch.ExtraEventsConfig.SpawnEnemyWave_Custom
             WaveEventsMap.Clear();
         }
 
-        public static bool SpawnWave(WardenObjectiveEventData eventToTrigger, bool ignoreTrigger, float currentDuration)
+        public static bool SpawnWave(WardenObjectiveEventData eventToTrigger, float currentDuration)
         {
+            bool use_vanilla_impl = true;
+
             if (!string.IsNullOrEmpty(eventToTrigger.WorldEventObjectFilter))
             {
                 if (!WaveEventsMap.ContainsKey(eventToTrigger.WorldEventObjectFilter))
@@ -95,15 +97,30 @@ namespace LEGACY.Patch.ExtraEventsConfig.SpawnEnemyWave_Custom
                     // added list here instead of in coroutine to get around with issue caused by concurrency.
                     // the WaveEventsMap will be cleaned OnApplicationQuit and AfterLevel
                 }
+                use_vanilla_impl = false;
             }
 
-            UnityEngine.Coroutine coroutine = CoroutineManager.StartCoroutine(SpawnWave(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
+            if (use_vanilla_impl == true)
+            {
+                SurvivalWaveSettingsDataBlock waveSettingDB = SurvivalWaveSettingsDataBlock.GetBlock(eventToTrigger.EnemyWaveData.WaveSettings);
+                if (waveSettingDB.m_overrideWaveSpawnType == true && 
+                    (waveSettingDB.m_survivalWaveSpawnType == SurvivalWaveSpawnType.InSuppliedCourseNodeZone
+                    || waveSettingDB.m_survivalWaveSpawnType == SurvivalWaveSpawnType.InSuppliedCourseNode))
+                {
+                    use_vanilla_impl = false;
+                }
+            }
+
+            if(!use_vanilla_impl)
+            {
+                UnityEngine.Coroutine coroutine = CoroutineManager.StartCoroutine(SpawnWave(eventToTrigger, currentDuration, 0).WrapToIl2Cpp(), null);
+            }
             //WardenObjectiveManager.m_wardenObjectiveEventCoroutines.Add(coroutine);
 
-            return false;
+            return use_vanilla_impl;
         }
 
-        private static IEnumerator SpawnWave(WardenObjectiveEventData eventToTrigger, float currentDuration)
+        private static IEnumerator SpawnWave(WardenObjectiveEventData eventToTrigger, float currentDuration, int ph = 0) // place holder int, unused.
         {
             WardenObjectiveEventData e = eventToTrigger;
 
@@ -127,7 +144,7 @@ namespace LEGACY.Patch.ExtraEventsConfig.SpawnEnemyWave_Custom
                     GuiManager.PlayerLayer.ShowMultiLineSubtitle(line);
                 }
             }
-            
+
             // spawn code rewrite
             PlayerAgent localPlayer = PlayerManager.GetLocalPlayerAgent();
             if (!SNet.IsMaster || localPlayer == null)
@@ -146,35 +163,45 @@ namespace LEGACY.Patch.ExtraEventsConfig.SpawnEnemyWave_Custom
 
             if (waveSettingDB.m_overrideWaveSpawnType == true)
             {
-                switch (waveSettingDB.m_survivalWaveSpawnType)
+                if (waveSettingDB.m_survivalWaveSpawnType == SurvivalWaveSpawnType.InSuppliedCourseNodeZone
+                    || waveSettingDB.m_survivalWaveSpawnType == SurvivalWaveSpawnType.InSuppliedCourseNode)
                 {
-                    case SurvivalWaveSpawnType.InSuppliedCourseNodeZone:
-                        LG_Zone specified_zone = null;
-                        Builder.CurrentFloor.TryGetZoneByLocalIndex(eventToTrigger.DimensionIndex, eventToTrigger.Layer, eventToTrigger.LocalIndex, out specified_zone);
-                        if (specified_zone == null)
+                    LG_Zone specified_zone = null;
+                    Builder.CurrentFloor.TryGetZoneByLocalIndex(eventToTrigger.DimensionIndex, eventToTrigger.Layer, eventToTrigger.LocalIndex, out specified_zone);
+                    if (specified_zone == null)
+                    {
+                        Logger.Error("SpawnSurvialWave_InSuppliedCourseNodeZone - Failed to find LG_Zone.");
+                        Logger.Error("DimensionIndex: {0}, Layer: {1}, LocalIndex: {2}", eventToTrigger.DimensionIndex, eventToTrigger.Layer, eventToTrigger.LocalIndex);
+                    }
+
+                    LG_SecurityDoor door = null;
+                    Utils.TryGetZoneEntranceSecDoor(specified_zone, out door);
+                    if (waveSettingDB.m_survivalWaveSpawnType == SurvivalWaveSpawnType.InSuppliedCourseNodeZone
+                        && door.m_sync.GetCurrentSyncState().status != eDoorStatus.Open && door.LinkedToZoneData.ActiveEnemyWave.HasActiveEnemyWave == false)
+                    {
+                        Logger.Warning("Spawn InSuppliedCourseNodeZone: The LG_SecurityDoor to the supplied zone is inaccessible, and the door has no active enemy wave!");
+                        Logger.Warning("Aborted wave spawn.");
+                        abort_spawn = true;
+                    }
+
+                    spawnNode = specified_zone.m_courseNodes[0];
+                    spawnType = SurvivalWaveSpawnType.InSuppliedCourseNodeZone;
+
+                    if (waveSettingDB.m_survivalWaveSpawnType == SurvivalWaveSpawnType.InSuppliedCourseNode)
+                    {
+                        if (e.Count < specified_zone.m_courseNodes.Count)
                         {
-                            Logger.Error("SpawnSurvialWave_InSuppliedCourseNodeZone - Failed to find LG_Zone.");
-                            Logger.Error("DimensionIndex: {0}, Layer: {1}, LocalIndex: {2}", eventToTrigger.DimensionIndex, eventToTrigger.Layer, eventToTrigger.LocalIndex);
-                            break;
+                            spawnNode = specified_zone.m_courseNodes[e.Count];
+                            spawnType = SurvivalWaveSpawnType.InSuppliedCourseNode;
                         }
-
-                        LG_SecurityDoor door = null;
-                        Utils.TryGetZoneEntranceSecDoor(specified_zone, out door);
-                        if (door.m_sync.GetCurrentSyncState().status != eDoorStatus.Open && door.LinkedToZoneData.ActiveEnemyWave.HasActiveEnemyWave == false)
+                        else
                         {
-                            Logger.Warning("The LG_SecurityDoor to the supplied zone is inaccessible, and the door has no active enemy wave!");
-                            Logger.Warning("Aborted wave spawn.");
-                            abort_spawn = true;
-                            break;
+                            Logger.Error("Spawn InSuppliedCourseNode but zone {0}-{1} does not exist! Falling back to InSuppliedCourseNodeZone", specified_zone.Alias, ('A' + e.Count));
                         }
+                    }
 
-                        Logger.Warning("Starting wave with spawn type InSuppliedCourseNodeZone!");
-                        Logger.Warning("DimensionIndex: {0}, Layer: {1}, LocalIndex: {2}", eventToTrigger.DimensionIndex, eventToTrigger.Layer, eventToTrigger.LocalIndex);
-                        spawnNode = specified_zone.m_courseNodes[0];
-                        spawnType = SurvivalWaveSpawnType.InSuppliedCourseNodeZone;
-
-                        break;
-                    default: break;
+                    Logger.Warning("Starting wave with spawn type InSuppliedCourseNodeZone / InSuppliedCourseNode!");
+                    Logger.Warning("DimensionIndex: {0}, Layer: {1}, LocalIndex: {2}", eventToTrigger.DimensionIndex, eventToTrigger.Layer, eventToTrigger.LocalIndex);
                 }
             }
 
@@ -191,8 +218,11 @@ namespace LEGACY.Patch.ExtraEventsConfig.SpawnEnemyWave_Custom
 
         internal static void OnLevelCleanup()
         {
-            WaveEventsMap.Clear();
-            WaveEventsMap = null;
+            if (WaveEventsMap != null)
+            {
+                WaveEventsMap.Clear();
+                WaveEventsMap = null;
+            }
         }
 
         private static IEnumerator TriggerEnemyWaveDataAndRegisterWaveEventID(
@@ -207,12 +237,12 @@ namespace LEGACY.Patch.ExtraEventsConfig.SpawnEnemyWave_Custom
             if (spawnNode != null)
             {
                 ushort eventID;
-                if (SNet.IsMaster && Mastermind.Current.TriggerSurvivalWave(spawnNode, data.WaveSettings, data.WavePopulation, out eventID, waveSpawnType, 2f))
+                if (SNet.IsMaster && Mastermind.Current.TriggerSurvivalWave(spawnNode, data.WaveSettings, data.WavePopulation, out eventID, waveSpawnType, 2f, data.AreaDistance)) // areaDistance here has no effect. 
                 {
-                    UnityEngine.Debug.Log("WardenObjectiveManager.TriggerEnemyWaveData - Enemy wave spawned (" + waveSpawnType + ") with edventID " + eventID);
+                    UnityEngine.Debug.Log("WardenObjectiveManager.TriggerEnemyWaveData - Enemy wave spawned (" + waveSpawnType + ") with eventID " + eventID);
                     if (!string.IsNullOrEmpty(worldEventObjectFilter))
                     {
-                        if(WaveEventsMap.ContainsKey(worldEventObjectFilter))
+                        if (WaveEventsMap.ContainsKey(worldEventObjectFilter))
                         {
                             System.Collections.Generic.List<ushort> eventIDList;
                             WaveEventsMap.TryGetValue(worldEventObjectFilter, out eventIDList);
@@ -233,7 +263,7 @@ namespace LEGACY.Patch.ExtraEventsConfig.SpawnEnemyWave_Custom
 
             if (!string.IsNullOrEmpty(data.IntelMessage))
                 GuiManager.PlayerLayer.m_wardenIntel.ShowSubObjectiveMessage("", data.IntelMessage);
-            
+
             if (spawnNode != null)
             {
                 if (data.TriggerAlarm)

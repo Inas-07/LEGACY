@@ -109,7 +109,7 @@ namespace LEGACY.Patch.ExtraEventsConfig
             gate.HasBeenOpenedDuringPlay = false;
             gate.IsTraversable = false;
 
-            if (door.ActiveEnemyWaveData.HasActiveEnemyWave)
+            if (door.ActiveEnemyWaveData != null && door.ActiveEnemyWaveData.HasActiveEnemyWave)
             {
                 door.m_sound.Post(EVENTS.MONSTER_RUCKUS_FROM_BEHIND_SECURITY_DOOR_LOOP_START);
             }
@@ -301,7 +301,7 @@ namespace LEGACY.Patch.ExtraEventsConfig
                     //WardenObjectiveManager.m_wardenObjectiveEventCoroutines.Add(coroutine);
                     return false;
                 case (int)EventType.StopSpecifiedEnemyWave:
-                    ExtraEventsConfig_SpawnEnemyWave_Custom.StopSpecifiedWave(eventToTrigger, ignoreTrigger, currentDuration);
+                    ExtraEventsConfig_SpawnEnemyWave_Custom.StopSpecifiedWave(eventToTrigger, currentDuration);
                     return false;
             }
 
@@ -313,7 +313,7 @@ namespace LEGACY.Patch.ExtraEventsConfig
                     //WardenObjectiveManager.m_wardenObjectiveEventCoroutines.Add(coroutine);
                     return false;
                 case eWardenObjectiveEventType.SpawnEnemyWave:
-                    bool use_vanilla_impl = ExtraEventsConfig_SpawnEnemyWave_Custom.SpawnWave(eventToTrigger, ignoreTrigger, currentDuration);
+                    bool use_vanilla_impl = ExtraEventsConfig_SpawnEnemyWave_Custom.SpawnWave(eventToTrigger, currentDuration);
                     return use_vanilla_impl;
                 case eWardenObjectiveEventType.StopEnemyWaves:
                     ExtraEventsConfig_SpawnEnemyWave_Custom.OnStopAllWave();

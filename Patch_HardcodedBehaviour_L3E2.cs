@@ -27,8 +27,7 @@ namespace LEGACY.Hardcoded_Behaviour.L3E2
         private static uint MainLayerID = 40000u;
         private static uint SecondaryLayoutID = 40001u;
 
-        private static int DimensionWarpCount = 0;
-        private static ChainedPuzzleInstance DIMENSION_Z0_CP = null;
+        private static ChainedPuzzleInstance[] DIMENSION_Z0_TERMINAL_CPS = null;
 
         private static CarryItemPickup_Core[] PowerCells_InDimension = null;
 
@@ -51,22 +50,22 @@ namespace LEGACY.Hardcoded_Behaviour.L3E2
         // survivial wave settings ID
         enum WaveSettings
         {
-            Trickle_12_20_ELEVATOR = 152,
-            Trickle_6_40_ELEVATOR = 153,
-            Trickle_3_60_ELEVATOR = 154,
-            Trickle_2_40_ELEVATOR = 155,
-            Trickle_6_30_ELEVATOR = 156,
-            FINITE_1_ELEVATOR = 157,
-            Trickle_1_60_SPAWNPOINT = 158,
-            Trickle_8_30_ELEVATOR = 159,
-            Trickle_4_15_SPAWNPOINT = 160,
-            Trickle_3_20_SPAWNPOINT = 161,
-            Trickle_2_30_ELEVATOR = 162,
-            Trickle_2_40_SPAWNPOINT = 163,
-            Apex_Surge_SPAWNPOINT = 164,
-            Trickle_8_30_SPAWNPOINT = 165,
-            Trickle_6_30_SPAWNPOINT = 166,
-            Trickle_2_30_SPAWNPOINT = 167,
+            Trickle_12_20_ELEVATOR = 240,
+            Trickle_6_40_ELEVATOR = 241,
+            Trickle_3_60_ELEVATOR = 242,
+            Trickle_2_40_ELEVATOR = 243,
+            Trickle_6_30_ELEVATOR = 244,
+            FINITE_1_ELEVATOR = 245,
+            Trickle_1_60_SPAWNPOINT = 246,
+            Trickle_8_30_ELEVATOR = 247,
+            Trickle_4_15_SPAWNPOINT = 248,
+            Trickle_3_20_SPAWNPOINT = 249,
+            Trickle_2_30_SPAWNPOINT_MODIFIED = 250,
+            Trickle_2_40_SPAWNPOINT = 251,
+            Apex_Surge_SPAWNPOINT = 252,
+            Trickle_8_30_SPAWNPOINT = 253,
+            Trickle_6_30_SPAWNPOINT = 254,
+            Trickle_2_30_SPAWNPOINT = 255,
         }
 
         enum WavePopulation
@@ -96,11 +95,11 @@ namespace LEGACY.Hardcoded_Behaviour.L3E2
                 }
             }
 
-            if(!succ)
+            if (!succ)
             {
-                
+
                 string msg = "Critical: Failed to spawn survival wave! IDs: [";
-                foreach(ushort id in WaveEventIDs)
+                foreach (ushort id in WaveEventIDs)
                 {
                     msg += id + ", ";
                 }
@@ -201,8 +200,6 @@ namespace LEGACY.Hardcoded_Behaviour.L3E2
 
         private static bool SetupDimensionWarpReqItem()
         {
-            DimensionWarpCount = 0;
-
             LG_Zone dim_Z12 = null;
 
             if (Builder.CurrentFloor.TryGetZoneByLocalIndex(eDimensionIndex.Dimension_1, LG_LayerType.MainLayer, eLocalZoneIndex.Zone_0, out dim_Z12) == false || dim_Z12 == null || dim_Z12.TerminalsSpawnedInZone.Count <= 0)
@@ -217,10 +214,17 @@ namespace LEGACY.Hardcoded_Behaviour.L3E2
                 return false;
             }
 
-            DIMENSION_Z0_CP = Utils.GetChainedPuzzleForCommandOnTerminal(dim_Z12.TerminalsSpawnedInZone[0], "RESTORE_MATTER_WAVE");
-            if (DIMENSION_Z0_CP == null)
+            DIMENSION_Z0_TERMINAL_CPS = new ChainedPuzzleInstance[3] { null, null, null };
+            DIMENSION_Z0_TERMINAL_CPS[0] = Utils.GetChainedPuzzleForCommandOnTerminal(dim_Z12.TerminalsSpawnedInZone[0], "RESTORE_MATTER_WAVE_PHASE_1");
+            DIMENSION_Z0_TERMINAL_CPS[1] = Utils.GetChainedPuzzleForCommandOnTerminal(dim_Z12.TerminalsSpawnedInZone[0], "RESTORE_MATTER_WAVE_PHASE_2");
+            DIMENSION_Z0_TERMINAL_CPS[2] = Utils.GetChainedPuzzleForCommandOnTerminal(dim_Z12.TerminalsSpawnedInZone[0], "RESTORE_MATTER_WAVE_PHASE_3");
+
+            if (DIMENSION_Z0_TERMINAL_CPS[0] == null || DIMENSION_Z0_TERMINAL_CPS[1] == null || DIMENSION_Z0_TERMINAL_CPS[2] == null)
             {
-                Logger.Error("Could not get chained puzzle for command RESTORE_MATTER_WAVE on terminal in dim_z12! Omitted Item Requirement for the scan");
+                Logger.Error("Could not get chained puzzles for commands on terminal in dim_z12! This should not happed! Omitting Item Requirement!");
+                Logger.Error("0 == {0}", DIMENSION_Z0_TERMINAL_CPS[0]);
+                Logger.Error("1 == {0}", DIMENSION_Z0_TERMINAL_CPS[1]);
+                Logger.Error("2 == {0}", DIMENSION_Z0_TERMINAL_CPS[2]);
                 return false;
             }
 
@@ -244,22 +248,24 @@ namespace LEGACY.Hardcoded_Behaviour.L3E2
                 }
             }
 
-            DIMENSION_Z0_CP.AddRequiredItems(new iWardenObjectiveItem[1] { new iWardenObjectiveItem(PowerCells_InDimension[0].Pointer) });
-            DIMENSION_Z0_CP.OnPuzzleSolved += new System.Action(() => {
-                DimensionWarpCount++;
-                if (DimensionWarpCount < PowerCells_InDimension.Length)
-                {
-                    ChainedPuzzleInstance CP = Utils.GetChainedPuzzleForCommandOnTerminal(dim_Z12.TerminalsSpawnedInZone[0], "RESTORE_MATTER_WAVE");
-                    CP.AddRequiredItems(new iWardenObjectiveItem[1] { new iWardenObjectiveItem(PowerCells_InDimension[DimensionWarpCount].Pointer) });
-                }
-            });
+            DIMENSION_Z0_TERMINAL_CPS[0].AddRequiredItems(new iWardenObjectiveItem[1] { new iWardenObjectiveItem(PowerCells_InDimension[0].Pointer) });
+            DIMENSION_Z0_TERMINAL_CPS[1].AddRequiredItems(new iWardenObjectiveItem[1] { new iWardenObjectiveItem(PowerCells_InDimension[1].Pointer) });
+            DIMENSION_Z0_TERMINAL_CPS[2].AddRequiredItems(new iWardenObjectiveItem[1] { new iWardenObjectiveItem(PowerCells_InDimension[2].Pointer) });
+            //DIMENSION_Z0_CP.OnPuzzleSolved += new System.Action(() => {
+            //    DimensionWarpCount++;
+            //    if (DimensionWarpCount < PowerCells_InDimension.Length)
+            //    {
+            //        ChainedPuzzleInstance CP = Utils.GetChainedPuzzleForCommandOnTerminal(dim_Z12.TerminalsSpawnedInZone[0], "RESTORE_MATTER_WAVE");
+            //        CP.AddRequiredItems(new iWardenObjectiveItem[1] { new iWardenObjectiveItem(PowerCells_InDimension[DimensionWarpCount].Pointer) });
+            //    }
+            //});
 
             return true;
         }
 
         private static void ActivateDuoScans()
         {
-            if(puzzles1[1].IsSolved && puzzles2[0].IsSolved)
+            if (puzzles1[1].IsSolved && puzzles2[0].IsSolved)
             {
                 Logger.Log("puzzles1 Trio and puzzles2 Solo solved. Activating Duo scans for both");
             }
@@ -275,7 +281,6 @@ namespace LEGACY.Hardcoded_Behaviour.L3E2
 
             // Descend fog
             WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(Colosseum1Events, eWardenObjectiveEventTrigger.OnMid, false);
-            //Utils.CheckAndExecuteEventsOnTrigger(Colosseum1Events, eWardenObjectiveEventTrigger.OnMid, false);
 
             if (SNet.IsMaster)
             {
@@ -351,7 +356,7 @@ namespace LEGACY.Hardcoded_Behaviour.L3E2
 
             puzzles2[3].AttemptInteract(eChainedPuzzleInteraction.Activate);
 
-            if(SNet.IsMaster)
+            if (SNet.IsMaster)
             {
                 if (Colosseum_WaveEventIDs == null)
                 {
@@ -418,7 +423,7 @@ namespace LEGACY.Hardcoded_Behaviour.L3E2
             //      OnPuzzleSolved: puzzles1 Trio and puzzles2 Solo 
             // ----------------------------------------------------
             puzzles1[1].OnPuzzleSolved += new System.Action(() => {
-                if(!SNet.IsMaster)
+                if (!SNet.IsMaster)
                 {
                     puzzles1[1].m_stateReplicator.SetStateUnsynced(new pChainedPuzzleState() { status = eChainedPuzzleStatus.Solved });
                 }
@@ -571,8 +576,8 @@ namespace LEGACY.Hardcoded_Behaviour.L3E2
             LG_SecurityDoor door = __instance.m_door;
 
             ExpeditionZoneData zoneData = door.LinkedToZoneData;
-            
-            if(zoneData == null)
+
+            if (zoneData == null)
             {
                 Logger.Warning("door.LinkedToZoneData == null");
                 return;
@@ -594,7 +599,7 @@ namespace LEGACY.Hardcoded_Behaviour.L3E2
 
         // puzzle starts event
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(ChainedPuzzleInstance), nameof(ChainedPuzzleInstance.AttemptInteract), new System.Type[] {typeof(eChainedPuzzleInteraction)})]
+        [HarmonyPatch(typeof(ChainedPuzzleInstance), nameof(ChainedPuzzleInstance.AttemptInteract), new System.Type[] { typeof(eChainedPuzzleInteraction) })]
         private static void Post_ChainedPuzzleInstance_AttemptInteract(ChainedPuzzleInstance __instance, eChainedPuzzleInteraction interaction)
         {
             if (interaction != eChainedPuzzleInteraction.Activate) return;
@@ -656,210 +661,17 @@ namespace LEGACY.Hardcoded_Behaviour.L3E2
         private static void Post_CleanupAfterExpedition()
         {
             Colosseum_WaveEventIDs = null;
-            if(puzzles1 != null)
+            if (puzzles1 != null)
             {
                 puzzles1.Clear();
                 puzzles2.Clear();
             }
+            is_L3E2 = false;
             puzzles1 = puzzles2 = null;
             Colosseum1Events = Colosseum2Events = null;
-            DIMENSION_Z0_CP = null;
+            DIMENSION_Z0_TERMINAL_CPS = null;
             PowerCells_InDimension = null;
             CustomTextToPrefix = null;
         }
     }
 }
-
-/*
-iChainedPuzzleCore p1_1 = CP_1_1.GetPuzzle(0);
-iChainedPuzzleCore p1_2 = CP_1_1.GetPuzzle(1);
-iChainedPuzzleCore p1_3 = CP_1_1.GetPuzzle(2);
-iChainedPuzzleCore p1_4 = CP_1_1.GetPuzzle(3);
-
-p1_1.add_OnPuzzleDone(new System.Action<int>((index) => {
-    if (SNet.IsMaster)
-    {
-        if (Colosseum_WaveEventIDs == null)
-        {
-            Logger.Error("Wave Event ID not stored!");
-            return;
-        }
-        StopSpecifiedWaves(Colosseum_WaveEventIDs);
-
-        Colosseum_WaveEventIDs = new ushort[2] { 0, 0 };
-        Colosseum_WaveEventIDs[0] = StartSurvivalWave(puzzles1, (uint)WaveSettings.Trickle_12_20_ELEVATOR, (uint)WavePopulation.SHADOWS_ONLY, SurvivalWaveSpawnType.FromElevatorDirection);
-        Colosseum_WaveEventIDs[1] = StartSurvivalWave(puzzles1, (uint)WaveSettings.Trickle_2_40_ELEVATOR, (uint)WavePopulation.SHADOWS_GIANT_ONLY, SurvivalWaveSpawnType.FromElevatorDirection);
-
-        if (!WaveSpawnedSuccessful(Colosseum_WaveEventIDs))
-        {
-            Logger.Error("Critical: Failed to spawn survival wave! PuzzleIndex: {2}, ID1: {0}, ID2: {1}", Colosseum_WaveEventIDs[0], Colosseum_WaveEventIDs[1], index);
-            return;
-        }
-
-        Logger.Log("Oops! Spawning waves for 2nd puzzle!");
-    }
-
-    WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(Colosseum1Events, eWardenObjectiveEventTrigger.OnStart, false);
-    Logger.Log("Oops! Executing events for 2nd puzzle!");
-}));
-p1_2.add_OnPuzzleDone(new System.Action<int>((index) => {
-    if (SNet.IsMaster)
-    {
-        if (Colosseum_WaveEventIDs == null)
-        {
-            Logger.Error("Wave Event ID not stored!");
-            return;
-        }
-        StopSpecifiedWaves(Colosseum_WaveEventIDs);
-
-        Colosseum_WaveEventIDs = new ushort[2] { 0, 0 };
-        Colosseum_WaveEventIDs[0] = StartSurvivalWave(puzzles1, (uint)WaveSettings.Trickle_6_30_ELEVATOR, (uint)WavePopulation.BULLRUSH_ONLY, SurvivalWaveSpawnType.FromElevatorDirection);
-        Colosseum_WaveEventIDs[1] = StartSurvivalWave(puzzles1, (uint)WaveSettings.FINITE_1_ELEVATOR, (uint)WavePopulation.TANK, SurvivalWaveSpawnType.FromElevatorDirection);
-        //Colosseum1_WaveEventIDs[2] = StartSurvivalWave(puzzle1, (uint)WaveSettings.Trickle_1_60_SPAWNPOINT, (uint)WavePopulation.FLYERS_BIG, SurvivalWaveSpawnType.OnSpawnPoints);
-
-        if (!WaveSpawnedSuccessful(Colosseum_WaveEventIDs))
-        {
-            Logger.Error("Critical: Failed to spawn survival wave! PuzzleIndex: {3}, ID1: {0}, ID2: {1}", Colosseum_WaveEventIDs[0], Colosseum_WaveEventIDs[1], index);
-            return;
-        }
-
-        Logger.Log("Oops! Spawning waves for 3rd puzzle!");
-    }
-
-    WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(Colosseum1Events, eWardenObjectiveEventTrigger.OnMid, false);
-    Logger.Log("Oops! Executing events for 3rd puzzle!");
-}));
-p1_3.add_OnPuzzleDone(new System.Action<int>((index) => {
-    if (SNet.IsMaster)
-    {
-        if (Colosseum_WaveEventIDs == null)
-        {
-            Logger.Error("Wave Event ID not stored!");
-            return;
-        }
-        StopSpecifiedWaves(Colosseum_WaveEventIDs);
-
-        Colosseum_WaveEventIDs = new ushort[1] { 0 };
-        Colosseum_WaveEventIDs[0] = StartSurvivalWave(puzzles1, (uint)WaveSettings.Trickle_8_30_ELEVATOR, (uint)WavePopulation.BASELINE, SurvivalWaveSpawnType.FromElevatorDirection);
-
-        if (!WaveSpawnedSuccessful(Colosseum_WaveEventIDs))
-        {
-            Logger.Error("Critical: Failed to spawn survival wave! PuzzleIndex: {1}, ID1: {0}", Colosseum_WaveEventIDs[0], index);
-            return;
-        }
-
-        Logger.Log("Oops! Spawning waves for 4th puzzle!");
-    }
-
-    WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(Colosseum1Events, eWardenObjectiveEventTrigger.OnEnd, false);
-    Logger.Log("Oops! Executing events for 4th puzzle!");
-}));
-p1_4.add_OnPuzzleDone(new System.Action<int>((index) => {
-    if (SNet.IsMaster)
-    {
-        if (Colosseum_WaveEventIDs == null)
-        {
-            Logger.Error("Wave Event ID not stored!");
-            return;
-        }
-        StopSpecifiedWaves(Colosseum_WaveEventIDs);
-        Colosseum_WaveEventIDs = null;
-        Logger.Log("Colosseum 1 ended successfully!");
-    }
-}));
-
-
-iChainedPuzzleCore p2_1 = CP_2_1.GetPuzzle(0);
-iChainedPuzzleCore p2_2 = CP_2_1.GetPuzzle(1);
-iChainedPuzzleCore p2_3 = CP_2_1.GetPuzzle(2);
-iChainedPuzzleCore p2_4 = CP_2_1.GetPuzzle(3);
-p2_1.add_OnPuzzleDone(new System.Action<int>((index) => {
-    if (SNet.IsMaster)
-    {
-        if (Colosseum2_WaveEventIDs == null)
-        {
-            Logger.Error("Wave Event ID not stored!");
-            return;
-        }
-        StopSpecifiedWaves(Colosseum2_WaveEventIDs);
-
-        // doesn't new another ushort array.
-        Colosseum2_WaveEventIDs[0] = 0;
-
-        Colosseum2_WaveEventIDs[0] = StartSurvivalWave(puzzles2, (uint)WaveSettings.Trickle_6_30_SPAWNPOINT, (uint)WavePopulation.BULLRUSH_ONLY, SurvivalWaveSpawnType.OnSpawnPoints);
-        if (!WaveSpawnedSuccessful(Colosseum2_WaveEventIDs))
-        {
-            Logger.Error("Critical: Failed to spawn survival wave! PuzzleIndex: {4}, ID1: {0}", Colosseum2_WaveEventIDs[0], index);
-            return;
-        }
-        Logger.Log("Oops! Spawning waves for 2ND puzzle!");
-    }
-
-    Logger.Log("Oops! Executing events for 2nd puzzle!");
-}));
-p2_2.add_OnPuzzleDone(new System.Action<int>((index) => {
-    if (SNet.IsMaster)
-    {
-        if (Colosseum2_WaveEventIDs == null)
-        {
-            Logger.Error("Wave Event ID not stored!");
-            return;
-        }
-        StopSpecifiedWaves(Colosseum2_WaveEventIDs);
-
-        Colosseum2_WaveEventIDs = new ushort[2] { 0, 0 };
-        Colosseum2_WaveEventIDs[0] = StartSurvivalWave(puzzles2, (uint)WaveSettings.Trickle_2_30_SPAWNPOINT, (uint)WavePopulation.HYBRID_ONLY, SurvivalWaveSpawnType.OnSpawnPoints);
-        Colosseum2_WaveEventIDs[1] = StartSurvivalWave(puzzles2, (uint)WaveSettings.Trickle_2_30_SPAWNPOINT, (uint)WavePopulation.BULLRUSH_BOSS_ONLY, SurvivalWaveSpawnType.OnSpawnPoints);
-
-        if (!WaveSpawnedSuccessful(Colosseum2_WaveEventIDs))
-        {
-            Logger.Error("Critical: Failed to spawn survival wave! PuzzleIndex: {4}, ID1: {0}, ID2: {1}, ID3: {2}, ID4: {3}", Colosseum2_WaveEventIDs[0], Colosseum2_WaveEventIDs[1], Colosseum2_WaveEventIDs[2], Colosseum2_WaveEventIDs[3], index);
-            return;
-        }
-
-        Logger.Log("Oops! Spawning waves for 3rd puzzle!");
-    }
-
-    WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(Colosseum2Events, eWardenObjectiveEventTrigger.OnMid, false);
-    Logger.Log("Oops! Executing events for 3rd puzzle!");
-}));
-p2_3.add_OnPuzzleDone(new System.Action<int>((index) =>
-{
-    if (SNet.IsMaster)
-    {
-        if (Colosseum2_WaveEventIDs == null)
-        {
-            Logger.Error("Wave Event ID not stored!");
-            return;
-        }
-        StopSpecifiedWaves(Colosseum2_WaveEventIDs);
-
-        Colosseum2_WaveEventIDs = new ushort[1] { 0 };
-        Colosseum2_WaveEventIDs[0] = StartSurvivalWave(puzzles2, (uint)WaveSettings.Apex_Surge_SPAWNPOINT, (uint)WavePopulation.BASELINE, SurvivalWaveSpawnType.OnSpawnPoints);
-
-        if (!WaveSpawnedSuccessful(Colosseum2_WaveEventIDs))
-        {
-            Logger.Error("Critical: Failed to spawn survival wave! PuzzleIndex: {1}, ID1: {0}", Colosseum2_WaveEventIDs[0], index);
-            return;
-        }
-
-        Logger.Log("Oops! Spawning waves for 4th puzzle!");
-    }
-
-    WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(Colosseum2Events, eWardenObjectiveEventTrigger.OnEnd, false);
-    Logger.Log("Oops! Executing events for 4th puzzle!");
-}));
-p2_4.add_OnPuzzleDone(new System.Action<int>((index) => {
-    if (SNet.IsMaster)
-    {
-        if (Colosseum2_WaveEventIDs == null)
-        {
-            Logger.Error("Wave Event ID not stored!");
-            return;
-        }
-        StopSpecifiedWaves(Colosseum2_WaveEventIDs);
-        Colosseum2_WaveEventIDs = null;
-        Logger.Log("Colosseum 2 ended successfully!");
-    }
-}));
-*/
