@@ -6,7 +6,7 @@ using UnityEngine;
 using AIGraph;
 using System;
 using GameData;
-
+using GTFO.API;
 namespace LEGACY.Patch
 {
     [HarmonyPatch]
@@ -84,7 +84,7 @@ namespace LEGACY.Patch
                 }
             }
 
-            if(inArea.m_geomorph.m_geoPrefab.name == "geo_64x64_mining_refinery_I_HA_01_v2") // remove that stupid duplicate scan point.
+            if (inArea.m_geomorph.m_geoPrefab.name == "geo_64x64_mining_refinery_I_HA_01_v2") // remove that stupid duplicate scan point.
             {
                 nodePositions.RemoveAt(0);
             }
@@ -175,12 +175,12 @@ namespace LEGACY.Patch
                     if (offset_1_scan == null) offset_1_scan = new();
                     offset_1_scan.Add(owner.Pointer);
 
-                    return; 
+                    return;
                 }
 
                 static_pos_idx = ScanCount(cp_instance, puzzleIndex);
-                
-                if(offset_1_scan != null && offset_1_scan.Contains(owner.Pointer))
+
+                if (offset_1_scan != null && offset_1_scan.Contains(owner.Pointer))
                 {
                     static_pos_idx -= 1;
                 }
@@ -244,7 +244,7 @@ namespace LEGACY.Patch
             }
 
             ChainedPuzzleInstance cp_instance = new ChainedPuzzleInstance(owner.Pointer);
-            int static_pos_idx = ScanCount(cp_instance, puzzleIndex) ;
+            int static_pos_idx = ScanCount(cp_instance, puzzleIndex);
 
             if (offset_1_scan != null && offset_1_scan.Contains(owner.Pointer))
             {
@@ -256,8 +256,8 @@ namespace LEGACY.Patch
             // modify prevPuzzlePos
             if (puzzleIndex > 0)
             {
-                if(puzzleIndex == 1 && offset_1_scan!= null && offset_1_scan.Contains(owner.Pointer)) 
-                { 
+                if (puzzleIndex == 1 && offset_1_scan != null && offset_1_scan.Contains(owner.Pointer))
+                {
                     // use sec-door transform, do nothing
                 }
                 else
@@ -302,9 +302,7 @@ namespace LEGACY.Patch
             return false;
         }
 
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(GS_AfterLevel), nameof(GS_AfterLevel.CleanupAfterExpedition))]
-        private static void Post_CleanupAfterExpedition()
+        private static void CleanupAfterExpedition()
         {
             if (static_cp != null)
             {
@@ -313,6 +311,12 @@ namespace LEGACY.Patch
             }
 
             offset_1_scan = null;
+            Utilities.Logger.Warning("clean Patch_UseStaticBioscanPoints_FixClusterScan");
+        }
+
+        static Patch_UseStaticBioscanPoints_FixClusterScan()
+        {
+            LevelAPI.OnLevelCleanup += CleanupAfterExpedition;
         }
     }
 }

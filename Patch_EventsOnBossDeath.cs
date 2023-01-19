@@ -6,13 +6,15 @@ using AIGraph;
 using Globals;
 using System.Collections.Generic;
 using LEGACY.Utilities;
+using GTFO.API;
+
 namespace LEGACY.Patch
 {
     [HarmonyPatch]
     internal class Patch_EventsOnBossDeath
     {
         private static Dictionary<ushort, Il2CppSystem.Collections.Generic.List<WardenObjectiveEventData>> bossesWithDeathEvents = null;
-        private static HashSet<uint> bossPID = new HashSet<uint>() { 29, 36, 37 };
+        private static readonly HashSet<uint> bossPID = new HashSet<uint>() { 29, 36, 37, 49 }; // 49 - LEGACY birther no tag
 
         private static bool LogOnClient = true;
 
@@ -98,26 +100,19 @@ namespace LEGACY.Patch
             bossesWithDeathEvents.Remove(boss.GlobalID);
         }
 
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(GS_AfterLevel), nameof(GS_AfterLevel.CleanupAfterExpedition))]
-        private static void Post_CleanupAfterExpedition()
+        private static void CleanupAfterExpedition()
         {
             if (bossesWithDeathEvents != null)
             {
                 bossesWithDeathEvents.Clear();
                 bossesWithDeathEvents = null;
+                Logger.Log("Clean EventsOnBossDeath.");
             }
         }
 
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(Global),  nameof(Global.OnApplicationQuit))]
-        private static void Post_OnApplicationQuit()
+        static Patch_EventsOnBossDeath()
         {
-            bossPID = null;
-            if (bossesWithDeathEvents != null)
-                bossesWithDeathEvents.Clear();
-            bossesWithDeathEvents = null;
-            Logger.Log("Clean Patch_EventsOnBossDeath for the game");
+            LevelAPI.OnLevelCleanup += CleanupAfterExpedition;
         }
     }
 }

@@ -5,6 +5,7 @@ using GameData;
 using LEGACY.Utilities;
 using AIGraph;
 using Player;
+using GTFO.API;
 
 namespace LEGACY.Hardcoded_Behaviour
 {
@@ -13,11 +14,10 @@ namespace LEGACY.Hardcoded_Behaviour
     {
         private static uint currentMainLayerUID = 0u;
 
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(Mastermind), nameof(Mastermind.OnBuilderDone))]
-        private static void Post_MastermindOnBuilderDone(Mastermind __instance)
+        private static void OnBuildDone()
         {
             currentMainLayerUID = RundownManager.ActiveExpedition.LevelLayoutData;
+            Logger.Warning("OnBuildDone Patch_OverwriteSurvivalWaveSpawnPosition_Hardcoded");
         }
 
         private static eDimensionIndex GetCurrentDimensionIndex()
@@ -112,6 +112,7 @@ namespace LEGACY.Hardcoded_Behaviour
             return minAreaIndex;
         }
 
+        // Note: no longer required since I can now overwrite scout wave in EventsOnPortalWarp via Patch_EventsOnZoneScoutScream
         private static SurvivalWave.ScoredSpawnPoint L2E1_GetScoredSpawnPoint_FromElevator_Overwrite()
         {
             eLocalZoneIndex minLocalIndex;// = eLocalZoneIndex.Zone_20;
@@ -137,7 +138,7 @@ namespace LEGACY.Hardcoded_Behaviour
             };
         }
 
-        // TODO: modify this according to new layout.
+        // Note: no longer required since I can now overwrite scout wave in EventsOnPortalWarp via Patch_EventsOnZoneScoutScream
         private static SurvivalWave.ScoredSpawnPoint L3E1_GetScoredSpawnPoint_FromElevator_Overwrite()
         {
             Logger.Warning("L3E1 hardcoded spawn-overwrite method not updated. Remember to update it according to new layout");
@@ -159,7 +160,7 @@ namespace LEGACY.Hardcoded_Behaviour
             {
                 if (mainZone2 == null)
                 {
-                    Utilities.Logger.Error("sth went wrong with try get zone by main layer, local index 2");
+                    Logger.Error("sth went wrong with try get zone by main layer, local index 2");
                     return null;
                 }
             }
@@ -364,29 +365,6 @@ namespace LEGACY.Hardcoded_Behaviour
             return new SurvivalWave.ScoredSpawnPoint() { courseNode = spawnNode };
         }
 
-        private static SurvivalWave.ScoredSpawnPoint L0E1_GetScoredSpawnPoint_FromElevator_Overwrite()
-        {
-            LG_Zone zone10;
-            if(Builder.CurrentFloor.TryGetZoneByLocalIndex(eDimensionIndex.Reality, LG_LayerType.MainLayer, eLocalZoneIndex.Zone_1, out zone10) 
-                && zone10 != null
-                && zone10.m_sourceGate.SpawnedDoor.LastStatus == eDoorStatus.ChainedPuzzleActivated)
-            {
-                return new SurvivalWave.ScoredSpawnPoint() { courseNode = Builder.GetElevatorZone().m_areas[1].m_courseNode };
-            }
-
-            LG_LayerType layerType = LG_LayerType.MainLayer;
-            eLocalZoneIndex localIndex = eLocalZoneIndex.Zone_20;
-
-            //GetMaxLayerAndLocalIndex(out layerType, out localIndex);
-            //// first surge scan
-            //if (layerType == LG_LayerType.MainLayer && localIndex == eLocalZoneIndex.Zone_0)
-            //{
-
-            //}
-
-            return null;
-        }
-
         [HarmonyPrefix]
         [HarmonyPatch(typeof(SurvivalWave), nameof(SurvivalWave.GetScoredSpawnPoint_FromElevator))]
         private static bool Pre_GetScoredSpawnPoint_FromElevator(SurvivalWave __instance, ref SurvivalWave.ScoredSpawnPoint __result)
@@ -395,14 +373,16 @@ namespace LEGACY.Hardcoded_Behaviour
             switch (currentMainLayerUID)
             {
                 case (uint)MainLayerID.L3E1:
-                    overwritten_result = L3E1_GetScoredSpawnPoint_FromElevator_Overwrite();
-                    if (overwritten_result == null)
-                    {
-                        return true;
-                    }
+                    return true; // now we don't use FromElevatorDirection spawn - just too lazy :) 
 
-                    __result = overwritten_result;
-                    return false;
+                    //overwritten_result = L3E1_GetScoredSpawnPoint_FromElevator_Overwrite();
+                    //if (overwritten_result == null)
+                    //{
+                    //    return true;
+                    //}
+
+                    //__result = overwritten_result;
+                    //return false;
 
                 case (uint)MainLayerID.L3E2:
                     overwritten_result = L3E2_GetScoredSpawnPoint_FromElevator_Overwrite();
@@ -415,30 +395,23 @@ namespace LEGACY.Hardcoded_Behaviour
                     return false;
 
                 case (uint)MainLayerID.L2E1:
-                    overwritten_result = L2E1_GetScoredSpawnPoint_FromElevator_Overwrite();
-                    if (overwritten_result == null)
-                    {
-                        return true;
-                    }
+                    return true;
+                    //overwritten_result = L2E1_GetScoredSpawnPoint_FromElevator_Overwrite();
+                    //if (overwritten_result == null)
+                    //{
+                    //    return true;
+                    //}
 
-                    __result = overwritten_result;
-                    return false;
-
-                //case (uint)MainLayerUID.L0E1:
-                //    overwritten_result = L0E1_GetScoredSpawnPoint_FromElevator_Overwrite();
-                //    if (overwritten_result == null)
-                //    {
-                //        return true;
-                //    }
-
-                //    __result = overwritten_result;
-                //    return false;
+                    //__result = overwritten_result;
+                    //return false;
 
                 default: return true;
             }
         }
 
         // Overwrite OnSpawnPoint: instead of spawn at specified postion, instead spawn at random position in the course node
+        // Note: no longer required since I now have more powerful spawn type.
+        //       Just left this patch unmodified.
         [HarmonyPrefix]
         [HarmonyPatch(typeof(SurvivalWave), nameof(SurvivalWave.SpawnGroup))]
         private static bool Pre_SpawnGroup_Overwrite_OnSpawnPoint_SpawnPosition(SurvivalWave __instance)
@@ -473,7 +446,7 @@ namespace LEGACY.Hardcoded_Behaviour
                             return false;
                         }
 
-                        pos = scoredSpawnPoint.courseNode.GetRandomPositionInside();
+                        pos = scoredSpawnPoint.courseNode.GetRandomPositionInside(); // modified line
                         spawnType = Enemies.eEnemyGroupSpawnType.RandomInArea;
                         Enemies.EnemyGroup.Spawn(pos, rot, scoredSpawnPoint.courseNode, Enemies.EnemyGroupType.Survival, spawnType, 0U, 0.0f, __instance.Replicator, __instance);
                     }
@@ -482,6 +455,11 @@ namespace LEGACY.Hardcoded_Behaviour
 
                 default: return true;
             }
+        }
+    
+        static Patch_OverwriteSurvivalWaveSpawnPosition_Hardcoded()
+        {
+            LevelAPI.OnBuildDone += OnBuildDone;
         }
     }
 }

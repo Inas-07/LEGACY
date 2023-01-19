@@ -6,6 +6,7 @@ using SNetwork;
 using ChainedPuzzles;
 using LevelGeneration;
 using Localization;
+using GTFO.API;
 
 namespace LEGACY.Hardcoded_Behaviour.L3E2
 {
@@ -372,9 +373,7 @@ namespace LEGACY.Hardcoded_Behaviour.L3E2
             }
         }
 
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(Mastermind), nameof(Mastermind.OnBuilderDone))]
-        private static void Post_MastermindOnBuilderDone(Mastermind __instance)
+        private static void OnBuildDone()
         {
             is_L3E2 = RundownManager.ActiveExpedition.LevelLayoutData == MainLayerID;
             if (!is_L3E2) return;
@@ -656,10 +655,9 @@ namespace LEGACY.Hardcoded_Behaviour.L3E2
             }
         }
 
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(GS_AfterLevel), nameof(GS_AfterLevel.CleanupAfterExpedition))]
-        private static void Post_CleanupAfterExpedition()
+        private static void CleanupAfterExpedition()
         {
+            if (!is_L3E2) return;
             Colosseum_WaveEventIDs = null;
             if (puzzles1 != null)
             {
@@ -672,6 +670,14 @@ namespace LEGACY.Hardcoded_Behaviour.L3E2
             DIMENSION_Z0_TERMINAL_CPS = null;
             PowerCells_InDimension = null;
             CustomTextToPrefix = null;
+
+            Logger.Warning("L3E2 cleanup");
+        }
+
+        static Patch_HardcodedBehaviour_L3E2()
+        {
+            LevelAPI.OnBuildDone += OnBuildDone;
+            LevelAPI.OnLevelCleanup += CleanupAfterExpedition;
         }
     }
 }

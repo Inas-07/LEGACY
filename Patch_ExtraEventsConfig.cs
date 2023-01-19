@@ -6,11 +6,12 @@ using System.Collections;
 using LEGACY.Utilities;
 using Player;
 using BepInEx.Unity.IL2CPP.Utils.Collections; 
-
 using SNetwork;
-using Globals;
+using GTFO.API;
 using AK;
 using LEGACY.Patch.ExtraEventsConfig.SpawnEnemyWave_Custom;
+
+
 namespace LEGACY.Patch.ExtraEventsConfig
 {
     enum EventType
@@ -21,17 +22,52 @@ namespace LEGACY.Patch.ExtraEventsConfig
         ToggleEnableDisableAllTerminalsInZone_Custom = 103,
         ToggleEnableDisableTerminalInZone_Custom = 104,
         KillEnemiesInZone_Custom = 105,
-        StopSpecifiedEnemyWave = 106
-    }
-
-    enum Extended_TERM_STATE
-    {
-        Disabled = 100
+        StopSpecifiedEnemyWave = 106,
+        //AlertEnemiesInZone = 107
     }
 
     [HarmonyPatch]
     class Patch_ExtraEventsConfig
     {
+        //private static void AlertEnemiesInZone(WardenObjectiveEventData e)
+        //{
+        //    LG_Zone zone = null;
+        //    if (Builder.CurrentFloor.TryGetZoneByLocalIndex(e.DimensionIndex, e.Layer, e.LocalIndex, out zone) == false)
+        //    {
+        //        Logger.Error("AlertEnemiesInZone: Zone is Missing?");
+        //        return;
+        //    }
+            
+        //    PlayerAgent LocalPlayer = PlayerManager.GetLocalPlayerAgent();
+        //    foreach (var node in zone.m_courseNodes)
+        //    {
+        //        if (node.m_enemiesInNode == null)
+        //            continue;
+
+        //        foreach (var enemy in node.m_enemiesInNode)
+        //        {
+        //            var mode = enemy.AI.Mode;
+        //            if (mode == AgentMode.Hibernate)
+        //            {
+        //                if (enemy.CourseNode.m_playerCoverage.GetNodeDistanceToClosestPlayer_Unblocked() > 2)
+        //                {
+        //                    enemy.AI.m_behaviour.ChangeState(EB_States.InCombat);
+        //                }
+        //                else
+        //                {
+        //                    var delta = (LocalPlayer.Position - enemy.Position);
+        //                    enemy.Locomotion.HibernateWakeup.ActivateState(delta.normalized, delta.magnitude, 0.0f, false);
+        //                }
+        //            }
+        //            else if (mode == AgentMode.Scout)
+        //            {
+                        
+        //                enemy.Locomotion.ScoutScream.ActivateState(enemy.AI.m_behaviourData.GetTarget(LocalPlayer));
+        //            }
+        //        }
+        //    }
+        //}
+
         private static void SetTerminalCommand_Custom(WardenObjectiveEventData eventToTrigger)
         {
             LG_LayerType layer = eventToTrigger.Layer;
@@ -297,6 +333,7 @@ namespace LEGACY.Patch.ExtraEventsConfig
                 case (int)EventType.ToggleEnableDisableAllTerminalsInZone_Custom:
                 case (int)EventType.ToggleEnableDisableTerminalInZone_Custom:
                 case (int)EventType.KillEnemiesInZone_Custom:
+                //case (int)EventType.AlertEnemiesInZone:
                     coroutine = CoroutineManager.StartCoroutine(Handle(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
                     //WardenObjectiveManager.m_wardenObjectiveEventCoroutines.Add(coroutine);
                     return false;
@@ -373,6 +410,8 @@ namespace LEGACY.Patch.ExtraEventsConfig
                     ToggleEnableDisableTerminalInZone_Custom(e); break;
                 case (int)EventType.KillEnemiesInZone_Custom:
                     KillEnemiesInZone_Custom(e);                break;
+                //case (int)EventType.AlertEnemiesInZone:
+                //    AlertEnemiesInZone(e); break;
                 case (int)EventType.SetTimerTitle_Custom: {
                         float duration = e.Duration;
 
@@ -433,27 +472,6 @@ namespace LEGACY.Patch.ExtraEventsConfig
                 case eWardenObjectiveEventType.SetTerminalCommand:
                     SetTerminalCommand_Custom(e);       break;
             }
-        }
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(GS_AfterLevel), nameof(GS_AfterLevel.CleanupAfterExpedition))]
-        private static void Post_CleanupAfterExpedition()
-        {
-            ExtraEventsConfig_SpawnEnemyWave_Custom.OnLevelCleanup();
-        }
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(Global), nameof(Global.OnApplicationQuit))]
-        private static void Post_OnApplicationQuit()
-        {
-            ExtraEventsConfig_SpawnEnemyWave_Custom.OnApplicationQuit();
-        }
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(Mastermind), nameof(Mastermind.OnBuilderDone))]
-        private static void Post_MastermindOnBuilderDone(Mastermind __instance)
-        {
-            ExtraEventsConfig_SpawnEnemyWave_Custom.OnMastermindBuildDone();
         }
     }
 }

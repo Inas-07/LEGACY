@@ -9,7 +9,7 @@ namespace LEGACY
 {
     [BepInDependency("com.dak.MTFO")]
     [BepInDependency("dev.gtfomodding.gtfo-api")]
-    [BepInPlugin("Inas07.LEGACY", "LEGACY", "1.0.0.0")]
+    [BepInPlugin("Inas07.LEGACY", "LEGACY", "1.0.0.1")]
     
     public class EntryPoint: BasePlugin
     {

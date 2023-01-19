@@ -5,8 +5,7 @@ using GameData;
 using LEGACY.Utilities;
 using LevelGeneration;
 using Player;
-//using BepInEx.IL2CPP.Utils.Collections;
-
+using HarmonyLib;
 using SNetwork;
 using System.Collections;
 
@@ -15,7 +14,7 @@ namespace LEGACY.Patch.ExtraEventsConfig.SpawnEnemyWave_Custom
 
     sealed class ExtraEventsConfig_SpawnEnemyWave_Custom
     {
-        private static System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<ushort>> WaveEventsMap = null;
+        private static System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<ushort>> WaveEventsMap = new();
 
         public static void StopSpecifiedWave(WardenObjectiveEventData eventToTrigger, float currentDuration)
         {
@@ -172,17 +171,22 @@ namespace LEGACY.Patch.ExtraEventsConfig.SpawnEnemyWave_Custom
                     {
                         Logger.Error("SpawnSurvialWave_InSuppliedCourseNodeZone - Failed to find LG_Zone.");
                         Logger.Error("DimensionIndex: {0}, Layer: {1}, LocalIndex: {2}", eventToTrigger.DimensionIndex, eventToTrigger.Layer, eventToTrigger.LocalIndex);
+                        yield break;
                     }
 
-                    LG_SecurityDoor door = null;
-                    Utils.TryGetZoneEntranceSecDoor(specified_zone, out door);
-                    if (waveSettingDB.m_survivalWaveSpawnType == SurvivalWaveSpawnType.InSuppliedCourseNodeZone
-                        && door.m_sync.GetCurrentSyncState().status != eDoorStatus.Open && door.LinkedToZoneData.ActiveEnemyWave.HasActiveEnemyWave == false)
-                    {
-                        Logger.Warning("Spawn InSuppliedCourseNodeZone: The LG_SecurityDoor to the supplied zone is inaccessible, and the door has no active enemy wave!");
-                        Logger.Warning("Aborted wave spawn.");
-                        abort_spawn = true;
-                    }
+                    //LG_SecurityDoor door = null;
+                    //Utils.TryGetZoneEntranceSecDoor(specified_zone, out door);
+                    //if(door == null)
+                    //{
+                    //    Logger.Debug("Spawning in zone without sec-door (i.e. elevator zone)");
+                    //} 
+                    //else if (waveSettingDB.m_survivalWaveSpawnType == SurvivalWaveSpawnType.InSuppliedCourseNodeZone
+                    //    && door.m_sync.GetCurrentSyncState().status != eDoorStatus.Open && door.LinkedToZoneData.ActiveEnemyWave.HasActiveEnemyWave == false)
+                    //{
+                    //    Logger.Warning("Spawn InSuppliedCourseNodeZone: The LG_SecurityDoor to the supplied zone is inaccessible, and the door has no active enemy wave!");
+                    //    Logger.Warning("Aborted wave spawn.");
+                    //    abort_spawn = true;
+                    //}
 
                     spawnNode = specified_zone.m_courseNodes[0];
                     spawnType = SurvivalWaveSpawnType.InSuppliedCourseNodeZone;
@@ -200,8 +204,8 @@ namespace LEGACY.Patch.ExtraEventsConfig.SpawnEnemyWave_Custom
                         }
                     }
 
-                    Logger.Warning("Starting wave with spawn type InSuppliedCourseNodeZone / InSuppliedCourseNode!");
-                    Logger.Warning("DimensionIndex: {0}, Layer: {1}, LocalIndex: {2}", eventToTrigger.DimensionIndex, eventToTrigger.Layer, eventToTrigger.LocalIndex);
+                    Logger.Debug("Starting wave with spawn type InSuppliedCourseNodeZone / InSuppliedCourseNode!");
+                    Logger.Debug("DimensionIndex: {0}, Layer: {1}, LocalIndex: {2}", eventToTrigger.DimensionIndex, eventToTrigger.Layer, eventToTrigger.LocalIndex);
                 }
             }
 
@@ -209,20 +213,6 @@ namespace LEGACY.Patch.ExtraEventsConfig.SpawnEnemyWave_Custom
 
             UnityEngine.Coroutine coroutine = CoroutineManager.StartCoroutine(TriggerEnemyWaveDataAndRegisterWaveEventID(waveData, spawnNode, spawnType, currentDuration, eventToTrigger.WorldEventObjectFilter).WrapToIl2Cpp(), null);
             WardenObjectiveManager.m_wardenObjectiveWaveCoroutines.Add(coroutine);
-        }
-
-        internal static void OnMastermindBuildDone()
-        {
-            WaveEventsMap = new();
-        }
-
-        internal static void OnLevelCleanup()
-        {
-            if (WaveEventsMap != null)
-            {
-                WaveEventsMap.Clear();
-                WaveEventsMap = null;
-            }
         }
 
         private static IEnumerator TriggerEnemyWaveDataAndRegisterWaveEventID(
@@ -279,45 +269,11 @@ namespace LEGACY.Patch.ExtraEventsConfig.SpawnEnemyWave_Custom
                 UnityEngine.Debug.LogError("WardenobjectiveManager.TriggerEnemyWaveData got NO SPAWNNODE for the enemy wave!");
         }
 
-        //private static void SpawnSurvialWave_InSuppliedCourseNodeZone_Custom(WardenObjectiveEventData eventToTrigger, float currentDuration)
-        //{
-        //    var waveData = eventToTrigger.EnemyWaveData;
-
-        //    if (waveData.WaveSettings > 0U && waveData.WavePopulation > 0U && (currentDuration == 0.0 || waveData.SpawnDelay >= currentDuration))
-        //    {
-        //        AIG_CourseNode suppliedCourseNode = null;
-        //        LG_Zone specified_zone;
-        //        Builder.CurrentFloor.TryGetZoneByLocalIndex(eventToTrigger.DimensionIndex, eventToTrigger.Layer, eventToTrigger.LocalIndex, out specified_zone);
-        //        if (specified_zone == null)
-        //        {
-        //            Logger.Error("SpawnSurvialWave_InSuppliedCourseNodeZone - Failed to find LG_Zone.");
-        //            Logger.Error("DimensionIndex: {0}, Layer: {1}, LocalIndex: {2}", eventToTrigger.DimensionIndex, eventToTrigger.Layer, eventToTrigger.LocalIndex);
-        //            return;
-        //        }
-
-        //        LG_SecurityDoor door = null;
-        //        Utils.TryGetZoneEntranceSecDoor(specified_zone, out door);
-        //        if (door.m_sync.GetCurrentSyncState().status != eDoorStatus.Open && door.LinkedToZoneData.ActiveEnemyWave.HasActiveEnemyWave == false)
-        //        {
-        //            Logger.Warning("The LG_SecurityDoor to the supplied zone is inaccessible, and the door has no active enemy wave!");
-        //            Logger.Warning("Aborted wave spawn.");
-        //            return;
-        //        }
-
-        //        suppliedCourseNode = specified_zone.m_courseNodes[0];
-        //        Logger.Warning("Starting wave with spawn type InSuppliedCourseNodeZone!");
-        //        Logger.Warning("DimensionIndex: {0}, Layer: {1}, LocalIndex: {2}", eventToTrigger.DimensionIndex, eventToTrigger.Layer, eventToTrigger.LocalIndex);
-
-        //        UnityEngine.Coroutine coroutine = CoroutineManager.StartCoroutine(WardenObjectiveManager.Current.TriggerEnemyWaveData(waveData, suppliedCourseNode, SurvivalWaveSpawnType.InSuppliedCourseNodeZone, currentDuration), null);
-        //        WardenObjectiveManager.m_wardenObjectiveWaveCoroutines.Add(coroutine);
-        //    }
-        //}
-
-        public static void OnApplicationQuit()
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(GS_AfterLevel), nameof(GS_AfterLevel.CleanupAfterExpedition))]
+        internal static void CleanupAfterExpedition()
         {
-            WaveEventsMap = null;
+            WaveEventsMap.Clear();
         }
-
-        private ExtraEventsConfig_SpawnEnemyWave_Custom() { }
     }
 }

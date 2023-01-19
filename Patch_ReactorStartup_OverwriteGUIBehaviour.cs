@@ -6,6 +6,8 @@ using AK;
 using Localization;
 using UnityEngine;
 using LEGACY.Utilities;
+using GTFO.API;
+
 namespace LEGACY.Patch
 {
     // won't work if there's multiple reactor
@@ -280,10 +282,14 @@ namespace LEGACY.Patch
             return RundownManager.ActiveExpedition.LevelLayoutData == (uint)MainLayerID.L3E2;
         }
 
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(GS_AfterLevel), nameof(GS_AfterLevel.CleanupAfterExpedition))]
-        private static void Post_CleanupAfterExpedition()
+        static Patch_ReactorStartup_OverwriteGUIBehaviour()
         {
+            LevelAPI.OnLevelCleanup += CleanupAfterExpedition;
+        }
+
+        private static void CleanupAfterExpedition()
+        {
+            Utilities.Logger.Warning("clean Patch_ReactorStartup_OverwriteGUIBehaviour");
             overrideHideGUITimer = null;
         }
     }

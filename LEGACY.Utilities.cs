@@ -5,7 +5,6 @@ using ChainedPuzzles;
 using GameData;
 using Il2CppSystem.Collections.Generic;
 using Player;
-using System;
 
 namespace LEGACY.Utilities
 {

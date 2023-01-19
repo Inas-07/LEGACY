@@ -38,7 +38,6 @@
     <Compile Include="Patch_EventsOnZoneScoutScream.cs" />
     <Compile Include="Patch_ExtraEventsConfig.cs" />
     <Compile Include="Patch_ChangeElevatorCargo_Hardcoded.cs" />
-    <Compile Include="Patch_Dep_UseStaticBioscanPoints_FixClusterScan.cs" />
     <Compile Include="Patch_UseStaticBioscanPoints_FixClusterScan.cs" />
     <Compile Include="Patch_LG_SecurityDoor_Fix-EventsOnUnlockDoor_Powergenerator.cs" />
     <Compile Include="Patch_LockSecurityDoor_FixCustomText.cs" />
