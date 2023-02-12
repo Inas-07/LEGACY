@@ -1,7 +1,7 @@
 ﻿using HarmonyLib;
 using Enemies;
 
-namespace LEGACY.Patch
+namespace LEGACY.VanillaFix
 {
     [HarmonyPatch]
     internal class Patch_FixScoutFreeze

@@ -8,15 +8,13 @@ using System.Collections.Generic;
 using LEGACY.Utilities;
 using GTFO.API;
 
-namespace LEGACY.Patch
+namespace LEGACY.ExtraEventsConfig
 {
     [HarmonyPatch]
     internal class Patch_EventsOnBossDeath
     {
         private static Dictionary<ushort, Il2CppSystem.Collections.Generic.List<WardenObjectiveEventData>> bossesWithDeathEvents = null;
         private static readonly HashSet<uint> bossPID = new HashSet<uint>() { 29, 36, 37, 49 }; // 49 - LEGACY birther no tag
-
-        private static bool LogOnClient = true;
 
         private static void checkInit()
         {
@@ -56,7 +54,7 @@ namespace LEGACY.Patch
         {
             AIG_CourseNode node = null;
 
-            if(spawnData.courseNode.TryGet(out node) == false || node == null)
+            if (spawnData.courseNode.TryGet(out node) == false || node == null)
             {
                 Logger.Error("Failed to get spawnnode for a boss! Skipped EventsOnBossDeath for it");
             }

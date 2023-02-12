@@ -2,7 +2,8 @@
 using LevelGeneration;
 using GameData;
 using LEGACY.Utilities;
-namespace LEGACY.Patch
+
+namespace LEGACY.VanillaFix
 {
     [HarmonyPatch]
     class Patch_LG_SecurityDoor_Fix_EventsOnUnlockDoor_Powergenerator

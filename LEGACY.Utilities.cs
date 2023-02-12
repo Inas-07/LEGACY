@@ -221,9 +221,7 @@ namespace LEGACY.Utilities
         L2E1 = 60000,
         L2E2 = 61000,
         L2E3 = 62000,
-        L3E1 = 50000,
         L3E2 = 40000,
-        L0E1 = 30000
     }
 }
 

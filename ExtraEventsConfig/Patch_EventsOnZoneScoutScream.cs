@@ -5,7 +5,7 @@ using LevelGeneration;
 using GameData;
 using LEGACY.Utilities;
 
-namespace LEGACY
+namespace LEGACY.ExtraEventsConfig
 {
     [HarmonyPatch]
     class Patch_EventsOnZoneScoutScream
@@ -23,22 +23,12 @@ namespace LEGACY
 
             var EventsOnPortalWarp = __instance.m_enemyAgent.m_courseNode.m_zone.m_settings.m_zoneData.EventsOnPortalWarp;
 
-            if(EventsOnPortalWarp != null && EventsOnPortalWarp.Count > 0)
+            if (EventsOnPortalWarp != null && EventsOnPortalWarp.Count > 0)
             {
                 Logger.Warning("EventsOnZoneScoutScream: executing events in EventsOnPortalWarp (would skip level scout wave)!");
                 WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(EventsOnPortalWarp, eWardenObjectiveEventTrigger.None, true);
-                //Utils.CheckAndExecuteEventsOnTrigger(door.LinkedToZoneData.EventsOnPortalWarp, eWardenObjectiveEventTrigger.None, true);
             }
 
-            //LG_SecurityDoor door = null;
-            //Utils.TryGetZoneEntranceSecDoor(zone, out door);
-            //if (door != null && door.LinkedToZoneData.EventsOnPortalWarp != null && door.LinkedToZoneData.EventsOnPortalWarp.Count > 0)
-            //{
-            //    Logger.Warning("EventsOnZoneScoutScream: executing events in EventsOnPortalWarp!");
-            //    WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(door.LinkedToZoneData.EventsOnPortalWarp, eWardenObjectiveEventTrigger.None, true);
-            //    //Utils.CheckAndExecuteEventsOnTrigger(door.LinkedToZoneData.EventsOnPortalWarp, eWardenObjectiveEventTrigger.None, true);
-
-            //}
             else // use default scout wave settings.
             {
                 if (SNet.IsMaster)
@@ -53,7 +43,7 @@ namespace LEGACY
                 }
             }
 
-            if(SNet.IsMaster)
+            if (SNet.IsMaster)
             {
                 __instance.m_enemyAgent.AI.m_behaviour.ChangeState(EB_States.InCombat);
             }

@@ -8,7 +8,7 @@ using LevelGeneration;
 using Localization;
 using GTFO.API;
 
-namespace LEGACY.Hardcoded_Behaviour.L3E2
+namespace LEGACY.HardcodedBehaviours
 {
     [HarmonyPatch]
     internal class Patch_HardcodedBehaviour_L3E2
@@ -385,7 +385,8 @@ namespace LEGACY.Hardcoded_Behaviour.L3E2
             // ----------------------------------------------------
             //      OnPuzzleSolved: puzzles1 full team config
             // ----------------------------------------------------
-            puzzles1[0].add_OnPuzzleSolved(new System.Action(() => {
+            puzzles1[0].add_OnPuzzleSolved(new System.Action(() =>
+            {
                 Logger.Log("Puzzles1 Full Team Solved: Activating puzzles1 Trio and puzzles2 Solo.");
                 puzzles1[1].AttemptInteract(eChainedPuzzleInteraction.Activate);
                 puzzles2[0].AttemptInteract(eChainedPuzzleInteraction.Activate);
@@ -421,7 +422,8 @@ namespace LEGACY.Hardcoded_Behaviour.L3E2
             // ----------------------------------------------------
             //      OnPuzzleSolved: puzzles1 Trio and puzzles2 Solo 
             // ----------------------------------------------------
-            puzzles1[1].OnPuzzleSolved += new System.Action(() => {
+            puzzles1[1].OnPuzzleSolved += new System.Action(() =>
+            {
                 if (!SNet.IsMaster)
                 {
                     puzzles1[1].m_stateReplicator.SetStateUnsynced(new pChainedPuzzleState() { status = eChainedPuzzleStatus.Solved });
@@ -436,10 +438,10 @@ namespace LEGACY.Hardcoded_Behaviour.L3E2
                     ActivateDuoScans();
                 }
             });
-            puzzles2[0].OnPuzzleSolved += new System.Action(() => {
+            puzzles2[0].OnPuzzleSolved += new System.Action(() =>
+            {
                 // Elevate fog. 
                 WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(Colosseum2Events, eWardenObjectiveEventTrigger.OnStart, false);
-                //Utils.CheckAndExecuteEventsOnTrigger(Colosseum2Events, eWardenObjectiveEventTrigger.OnStart, false);
 
                 if (!SNet.IsMaster)
                 {
@@ -462,7 +464,8 @@ namespace LEGACY.Hardcoded_Behaviour.L3E2
             // ----------------------------------------------------
             //      OnPuzzleSolved: puzzles1 Duo and puzzles2 Duo
             // ----------------------------------------------------
-            puzzles1[2].OnPuzzleSolved += new System.Action(() => {
+            puzzles1[2].OnPuzzleSolved += new System.Action(() =>
+            {
                 if (!SNet.IsMaster)
                 {
                     puzzles1[2].m_stateReplicator.SetStateUnsynced(new pChainedPuzzleState() { status = eChainedPuzzleStatus.Solved });
@@ -478,7 +481,8 @@ namespace LEGACY.Hardcoded_Behaviour.L3E2
                     ActivateSoloTrioScan();
                 }
             });
-            puzzles2[1].OnPuzzleSolved += new System.Action(() => {
+            puzzles2[1].OnPuzzleSolved += new System.Action(() =>
+            {
                 WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(Colosseum2Events, eWardenObjectiveEventTrigger.OnMid, false);
                 //Utils.CheckAndExecuteEventsOnTrigger(Colosseum2Events, eWardenObjectiveEventTrigger.OnMid, false);
 
@@ -501,7 +505,8 @@ namespace LEGACY.Hardcoded_Behaviour.L3E2
             // ----------------------------------------------------
             //      OnPuzzleSolved: puzzles1 Solo and puzzles2 Trio
             // ----------------------------------------------------
-            puzzles1[3].OnPuzzleSolved += new System.Action(() => {
+            puzzles1[3].OnPuzzleSolved += new System.Action(() =>
+            {
                 if (!SNet.IsMaster)
                 {
                     puzzles1[3].m_stateReplicator.SetStateUnsynced(new pChainedPuzzleState() { status = eChainedPuzzleStatus.Solved });
@@ -517,7 +522,8 @@ namespace LEGACY.Hardcoded_Behaviour.L3E2
                     ActivateLastFullTeamScan();
                 }
             });
-            puzzles2[2].OnPuzzleSolved += new System.Action(() => {
+            puzzles2[2].OnPuzzleSolved += new System.Action(() =>
+            {
                 if (!SNet.IsMaster)
                 {
                     puzzles2[2].m_stateReplicator.SetStateUnsynced(new pChainedPuzzleState() { status = eChainedPuzzleStatus.Solved });
@@ -540,7 +546,8 @@ namespace LEGACY.Hardcoded_Behaviour.L3E2
             // ----------------------------------------------------
             //      OnPuzzleSolved: puzzles2 full team config
             // ----------------------------------------------------
-            puzzles2[3].OnPuzzleSolved += new System.Action(() => {
+            puzzles2[3].OnPuzzleSolved += new System.Action(() =>
+            {
                 // colosseum 2 events. Currently there's no event.
                 WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(Colosseum2Events, eWardenObjectiveEventTrigger.None, false);
                 //Utils.CheckAndExecuteEventsOnTrigger(Colosseum2Events, eWardenObjectiveEventTrigger.None, false);

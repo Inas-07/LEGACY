@@ -5,7 +5,7 @@ using GameData;
 using LEGACY.Utilities;
 using ChainedPuzzles;
 
-namespace LEGACY.Patch
+namespace LEGACY.VanillaFix
 {
     [HarmonyPatch]
     [HarmonyWrapSafe]
@@ -42,22 +42,22 @@ namespace LEGACY.Patch
             int TerminalDataIndex = TerminalsInZone.IndexOf(__instance.m_terminal);
 
             ExpeditionZoneData TargetZoneData = null;
-            foreach(ExpeditionZoneData zonedata in levellayoutData.Zones)
-            {   
-                if(zonedata.LocalIndex == __instance.m_terminal.SpawnNode.m_zone.LocalIndex)
+            foreach (ExpeditionZoneData zonedata in levellayoutData.Zones)
+            {
+                if (zonedata.LocalIndex == __instance.m_terminal.SpawnNode.m_zone.LocalIndex)
                 {
                     TargetZoneData = zonedata;
                     break;
                 }
             }
 
-            if(TargetZoneData == null)
+            if (TargetZoneData == null)
             {
                 Logger.Error("Cannot find target zone data.");
                 return;
             }
 
-            if(TargetZoneData.TerminalPlacements.Count != TerminalsInZone.Count)
+            if (TargetZoneData.TerminalPlacements.Count != TerminalsInZone.Count)
             {
                 Logger.Error("The numbers of terminal placement and spawn, skipped for the zone terminal.");
                 return;
@@ -68,15 +68,15 @@ namespace LEGACY.Patch
             if (UniqueCommands.Count == 0) return;
 
             // Fix all ChainedPuzzle on this terminal
-            foreach(CustomTerminalCommand UniqueCommand in UniqueCommands)
+            foreach (CustomTerminalCommand UniqueCommand in UniqueCommands)
             {
                 if (UniqueCommand.SpecialCommandRule != TERM_CommandRule.Normal) continue;
 
                 TERM_Command CMD;
                 string param1, param2; // unused
-                if(__instance.TryGetCommand(UniqueCommand.Command, out CMD, out param1, out param2) == false)
+                if (__instance.TryGetCommand(UniqueCommand.Command, out CMD, out param1, out param2) == false)
                     continue;
-                
+
                 if (CMD != TERM_Command.UniqueCommand1 && CMD != TERM_Command.UniqueCommand2 && CMD != TERM_Command.UniqueCommand3 && CMD != TERM_Command.UniqueCommand4 && CMD != TERM_Command.UniqueCommand5)
                     continue;
 
@@ -84,49 +84,46 @@ namespace LEGACY.Patch
                 List<WardenObjectiveEventData> CommandEvents = UniqueCommand.CommandEvents;
 
                 int eventIndex;
-                for(eventIndex = 0; eventIndex < CommandEvents.Count; eventIndex++)
+                for (eventIndex = 0; eventIndex < CommandEvents.Count; eventIndex++)
                 {
                     if (CommandEvents[eventIndex].ChainPuzzle == 0) continue;
 
-                    if(__instance.m_terminal.TryGetChainPuzzleForCommand(CMD, eventIndex, out OldCPInstance) == true && OldCPInstance != null)
+                    if (__instance.m_terminal.TryGetChainPuzzleForCommand(CMD, eventIndex, out OldCPInstance) == true && OldCPInstance != null)
                     {
                         break;
                     }
                 }
 
                 if (OldCPInstance == null) continue;
-                
-                OldCPInstance.OnPuzzleSolved += new System.Action(
-                    () =>
+
+                OldCPInstance.OnPuzzleSolved += new System.Action(() => {
+                    // this result in the error
+                    ChainedPuzzleInstance newCPInstance = ChainedPuzzleManager.CreatePuzzleInstance(OldCPInstance.Data, OldCPInstance.m_sourceArea, __instance.m_terminal.m_wardenObjectiveSecurityScanAlign.position, __instance.m_terminal.m_wardenObjectiveSecurityScanAlign, CommandEvents[eventIndex].UseStaticBioscanPoints);
+
+                    Il2CppSystem.ValueTuple<TERM_Command, int> valueTuple = null;
+
+                    foreach (var entry in __instance.m_terminal.m_commandToChainPuzzleMap.entries)
                     {
-                        // see if the folloing lines work
-                        ChainedPuzzleInstance newCPInstance = ChainedPuzzleManager.CreatePuzzleInstance(OldCPInstance.Data, OldCPInstance.m_sourceArea, __instance.m_terminal.m_wardenObjectiveSecurityScanAlign.position, __instance.m_terminal.m_wardenObjectiveSecurityScanAlign, CommandEvents[eventIndex].UseStaticBioscanPoints);
-
-                        Il2CppSystem.ValueTuple<TERM_Command, int> valueTuple = null;
-                        
-                        foreach(var entry in __instance.m_terminal.m_commandToChainPuzzleMap.entries)
+                        ChainedPuzzleInstance CPInstance = entry.value;
+                        if (CPInstance.m_sourceArea == OldCPInstance.m_sourceArea && CPInstance.m_parent == OldCPInstance.m_parent)
                         {
-                            ChainedPuzzleInstance CPInstance = entry.value;
-                            if(CPInstance.m_sourceArea == OldCPInstance.m_sourceArea && CPInstance.m_parent == OldCPInstance.m_parent)
-                            {
-                                valueTuple = entry.key;
-                                break;
-                            }
-                        }
-
-                        if(valueTuple != null)
-                        {
-                            __instance.m_terminal.m_commandToChainPuzzleMap.Remove(valueTuple);
-                            __instance.m_terminal.SetChainPuzzleForCommand(CMD, eventIndex, newCPInstance);
-
-                            newCPInstance.OnPuzzleSolved = OldCPInstance.OnPuzzleSolved;
-                        }
-                        else
-                        {
-                            Logger.Error("value tuple is null!");
+                            valueTuple = entry.key;
+                            break;
                         }
                     }
-                );
+
+                    if (valueTuple != null)
+                    {
+                        __instance.m_terminal.m_commandToChainPuzzleMap.Remove(valueTuple);
+                        __instance.m_terminal.SetChainPuzzleForCommand(CMD, eventIndex, newCPInstance);
+
+                        newCPInstance.OnPuzzleSolved = OldCPInstance.OnPuzzleSolved;
+                    }
+                    else
+                    {
+                        Logger.Error("value tuple is null!");
+                    }
+                });
             }
         }
     }

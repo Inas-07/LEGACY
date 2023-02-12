@@ -2,7 +2,7 @@
 using LevelGeneration;
 using Localization;
 
-namespace LEGACY
+namespace LEGACY.VanillaFix
 {
     [HarmonyPatch]
     class Patch_LockSecurityDoor_FixCustomText

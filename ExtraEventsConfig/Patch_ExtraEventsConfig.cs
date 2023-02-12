@@ -5,14 +5,12 @@ using GameData;
 using System.Collections;
 using LEGACY.Utilities;
 using Player;
-using BepInEx.Unity.IL2CPP.Utils.Collections; 
+using BepInEx.Unity.IL2CPP.Utils.Collections;
 using SNetwork;
-using GTFO.API;
 using AK;
-using LEGACY.Patch.ExtraEventsConfig.SpawnEnemyWave_Custom;
+using LEGACY.Reactor;
 
-
-namespace LEGACY.Patch.ExtraEventsConfig
+namespace LEGACY.ExtraEventsConfig
 {
     enum EventType
     {
@@ -23,50 +21,112 @@ namespace LEGACY.Patch.ExtraEventsConfig
         ToggleEnableDisableTerminalInZone_Custom = 104,
         KillEnemiesInZone_Custom = 105,
         StopSpecifiedEnemyWave = 106,
-        //AlertEnemiesInZone = 107
+        AlertEnemiesInZone = 107,
+        AlertEnemiesInArea = 108,
+        CompleteCurrentReactorWave = 109,
+        Reactor_MoveCurrentWaveLog = 110, // unimplemented
+        ChainedPuzzle_AddReqItem = 111,
+        ChainedPuzzle_RemoveReqItem = 112
     }
 
     [HarmonyPatch]
     class Patch_ExtraEventsConfig
     {
-        //private static void AlertEnemiesInZone(WardenObjectiveEventData e)
-        //{
-        //    LG_Zone zone = null;
-        //    if (Builder.CurrentFloor.TryGetZoneByLocalIndex(e.DimensionIndex, e.Layer, e.LocalIndex, out zone) == false)
-        //    {
-        //        Logger.Error("AlertEnemiesInZone: Zone is Missing?");
-        //        return;
-        //    }
-            
-        //    PlayerAgent LocalPlayer = PlayerManager.GetLocalPlayerAgent();
-        //    foreach (var node in zone.m_courseNodes)
-        //    {
-        //        if (node.m_enemiesInNode == null)
-        //            continue;
+        private static void CompleteCurrentReactorWave(WardenObjectiveEventData e)
+        {
+            if (!SNet.IsMaster) return;
 
-        //        foreach (var enemy in node.m_enemiesInNode)
-        //        {
-        //            var mode = enemy.AI.Mode;
-        //            if (mode == AgentMode.Hibernate)
-        //            {
-        //                if (enemy.CourseNode.m_playerCoverage.GetNodeDistanceToClosestPlayer_Unblocked() > 2)
-        //                {
-        //                    enemy.AI.m_behaviour.ChangeState(EB_States.InCombat);
-        //                }
-        //                else
-        //                {
-        //                    var delta = (LocalPlayer.Position - enemy.Position);
-        //                    enemy.Locomotion.HibernateWakeup.ActivateState(delta.normalized, delta.magnitude, 0.0f, false);
-        //                }
-        //            }
-        //            else if (mode == AgentMode.Scout)
-        //            {
-                        
-        //                enemy.Locomotion.ScoutScream.ActivateState(enemy.AI.m_behaviourData.GetTarget(LocalPlayer));
-        //            }
-        //        }
-        //    }
-        //}
+            if (!ReactorConfigManager.Current.IsReactorStartup(e.Layer))
+            {
+                Logger.Error($"ExtraEventsConfig: {e.Layer} is not ReactorStartup. CompleteCurrentReactorWave is invalid.");
+                return;
+            }
+
+            LG_WardenObjective_Reactor reactor = ReactorConfigManager.Current.FindReactor(e.Layer);
+
+            if (reactor == null)
+            {
+                Logger.Error($"ExtraEventsConfig: Cannot find reactor in {e.Layer}.");
+                return;
+            }
+
+            switch (reactor.m_currentState.status)
+            {
+                case eReactorStatus.Inactive_Idle:
+                    reactor.AttemptInteract(eReactorInteraction.Initiate_startup);
+                    reactor.m_terminal.TrySyncSetCommandHidden(TERM_Command.ReactorStartup);
+                    break;
+                case eReactorStatus.Startup_complete:
+                    Logger.Error($"ExtraEventsConfig: Startup already completed for {e.Layer} reactor");
+                    break;
+                case eReactorStatus.Active_Idle:
+                case eReactorStatus.Startup_intro:
+                case eReactorStatus.Startup_intense:
+                case eReactorStatus.Startup_waitForVerify:
+                    if (reactor.m_currentWaveCount == reactor.m_waveCountMax)
+                        reactor.AttemptInteract(eReactorInteraction.Finish_startup);
+                    else
+                        reactor.AttemptInteract(eReactorInteraction.Verify_startup);
+                    break;
+            }
+        }
+
+        private static void AlertEnemies(WardenObjectiveEventData e, bool AlertAllAreas = false)
+        {
+            LG_Zone zone = null;
+            if (Builder.CurrentFloor.TryGetZoneByLocalIndex(e.DimensionIndex, e.Layer, e.LocalIndex, out zone) == false)
+            {
+                Logger.Error("AlertEnemies: Zone is Missing?");
+                return;
+            }
+
+            if (e.Count >= zone.m_areas.Count)
+            {
+                Logger.Error("event.Count >= zone.areas.Count! Falling back to AlertAllAreas!");
+                AlertAllAreas = true;
+            }
+
+            if (AlertAllAreas)
+            {
+                foreach (var node in zone.m_courseNodes)
+                {
+                    if (node.m_enemiesInNode.Count <= 0) continue;
+
+                    UnityEngine.Vector3 position = node.m_enemiesInNode[0].Position;
+                    NoiseManager.MakeNoise(new NM_NoiseData
+                    {
+                        noiseMaker = null,
+                        position = position,
+                        radiusMin = 50f,
+                        radiusMax = 120f,
+                        yScale = 1f,
+                        node = node,
+                        type = NM_NoiseType.InstaDetect,
+                        includeToNeightbourAreas = true,
+                        raycastFirstNode = false
+                    });
+                }
+            }
+            else
+            {
+                var node = zone.m_courseNodes[e.Count];
+                if (node.m_enemiesInNode.Count <= 0) return;
+
+                UnityEngine.Vector3 position = node.m_enemiesInNode[0].Position;
+                NoiseManager.MakeNoise(new NM_NoiseData
+                {
+                    noiseMaker = null,
+                    position = position,
+                    radiusMin = 50f,
+                    radiusMax = 120f,
+                    yScale = 1f,
+                    node = node,
+                    type = NM_NoiseType.InstaDetect,
+                    includeToNeightbourAreas = true,
+                    raycastFirstNode = false
+                });
+            }
+        }
 
         private static void SetTerminalCommand_Custom(WardenObjectiveEventData eventToTrigger)
         {
@@ -113,14 +173,14 @@ namespace LEGACY.Patch.ExtraEventsConfig
         private static bool CloseSecurityDoor_Custom(WardenObjectiveEventData eventToTrigger)
         {
             LG_Zone zone = null;
-            if(Builder.CurrentFloor.TryGetZoneByLocalIndex(eventToTrigger.DimensionIndex, eventToTrigger.Layer, eventToTrigger.LocalIndex, out zone) == false || zone == null)
+            if (Builder.CurrentFloor.TryGetZoneByLocalIndex(eventToTrigger.DimensionIndex, eventToTrigger.Layer, eventToTrigger.LocalIndex, out zone) == false || zone == null)
             {
                 Logger.Error("CloseSecurityDoor_Custom: Failed to get zone {0}, layer {1}, dimensionIndex {2}", eventToTrigger.LocalIndex, eventToTrigger.Layer, eventToTrigger.DimensionIndex);
                 return false;
             }
 
             LG_SecurityDoor door = null;
-            if(Utils.TryGetZoneEntranceSecDoor(zone, out door) == false || door == null)
+            if (Utils.TryGetZoneEntranceSecDoor(zone, out door) == false || door == null)
             {
                 Logger.Error("CloseSecurityDoor_Custom: failed to get LG_SecurityDoor!");
                 return false;
@@ -131,9 +191,9 @@ namespace LEGACY.Patch.ExtraEventsConfig
                 return false;
             Logger.Debug("Door Closed!");
             LG_Door_Sync lgDoorSync = door.m_sync.TryCast<LG_Door_Sync>();
-            
+
             if (lgDoorSync == null) return false;
-            
+
             pDoorState currentSyncState2 = lgDoorSync.GetCurrentSyncState() with
             {
                 status = eDoorStatus.Closed,
@@ -188,23 +248,9 @@ namespace LEGACY.Patch.ExtraEventsConfig
                     Utils.TryGetZoneEntranceSecDoor(zone2, out door);
 
                     // limited kill
-                    if (index2 == 0 || (door != null && door.m_sync.GetCurrentSyncState().status == eDoorStatus.Open)) // door opened, kill all
+                    if (index2 == 0 || door != null && door.m_sync.GetCurrentSyncState().status == eDoorStatus.Open) // door opened, kill all
                     {
                         KillEnemiesInZone(zone2);
-                        //for (int index3 = 0; index3 < zone2.m_courseNodes.Count; ++index3)
-                        //{
-                        //    EnemyAgent[] array = zone2.m_courseNodes[index3].m_enemiesInNode.ToArray();
-                        //    int num2 = 0;
-                        //    for (int index4 = 0; index4 < array.Length; ++index4)
-                        //    {
-                        //        EnemyAgent enemyAgent = array[index4];
-                        //        if (enemyAgent != null && enemyAgent.Damage != null)
-                        //        {
-                        //            enemyAgent.Damage.MeleeDamage(float.MaxValue, null, UnityEngine.Vector3.zero, UnityEngine.Vector3.up, 0, 1f, 1f, 1f, 1f, false, DamageNoiseLevel.Normal);
-                        //            ++num2;
-                        //        }
-                        //    }
-                        //}
                     }
                 }
             }
@@ -231,15 +277,6 @@ namespace LEGACY.Patch.ExtraEventsConfig
             {
                 child.gameObject.active = Enabled;
             }
-
-
-            // TODO: Implement state replicator
-
-            //Logger.Error("terminal.TrySyncSetCommandHidden(TERM_Command.MAX_COUNT): {0}", terminal.CommandIsHidden(TERM_Command.MAX_COUNT));
-
-            //pComputerTerminalState e;
-            //Logger.Error("terminal.m_stateReplicator.m_currentState.CommandIsRemoved(TERM_Command.MAX_COUNT): {0}", terminal.m_stateReplicator.m_currentState.CommandIsRemoved(TERM_Command.MAX_COUNT));
-
         }
 
         private static void ToggleEnableDisableAllTerminalsInZone_Custom(WardenObjectiveEventData eventToTrigger)
@@ -248,14 +285,14 @@ namespace LEGACY.Patch.ExtraEventsConfig
 
             LG_Zone zone = null;
             Builder.CurrentFloor.TryGetZoneByLocalIndex(e.DimensionIndex, e.Layer, e.LocalIndex, out zone);
-            if(zone == null)
+            if (zone == null)
             {
                 Logger.Error("ToggleEnableDisableAllTerminalsInZone_Custom - Failed to find LG_Zone.");
                 Logger.Error("DimensionIndex: {0}, Layer: {1}, LocalIndex: {2}", eventToTrigger.DimensionIndex, eventToTrigger.Layer, eventToTrigger.LocalIndex);
                 return;
             }
 
-            foreach(LG_ComputerTerminal terminalInZone in zone.TerminalsSpawnedInZone)
+            foreach (LG_ComputerTerminal terminalInZone in zone.TerminalsSpawnedInZone)
             {
                 ToggleEnableDisableTerminal(terminalInZone, e.Enabled);
             }
@@ -265,7 +302,7 @@ namespace LEGACY.Patch.ExtraEventsConfig
         {
             WardenObjectiveEventData e = eventToTrigger;
 
-            if(e.Count < 0)
+            if (e.Count < 0)
             {
                 Logger.Error("ToggleEnableDisableTerminalInZone_Custom - Count < 0");
                 return;
@@ -280,7 +317,7 @@ namespace LEGACY.Patch.ExtraEventsConfig
                 return;
             }
 
-            if(e.Count >= zone.TerminalsSpawnedInZone.Count)
+            if (e.Count >= zone.TerminalsSpawnedInZone.Count)
             {
                 Logger.Error("ToggleEnableDisableTerminalInZone_Custom - Count >= Spawned terminal count");
                 return;
@@ -322,9 +359,16 @@ namespace LEGACY.Patch.ExtraEventsConfig
             if (eventToTrigger == null || !ignoreTrigger && eventToTrigger.Trigger != trigger || currentDuration != 0.0 && eventToTrigger.Delay <= currentDuration)
                 return true;
 
+            // specified condition and condition unsatisfied
+            if (eventToTrigger.Condition.ConditionIndex >= 0
+                && WorldEventManager.GetCondition(eventToTrigger.Condition.ConditionIndex) != eventToTrigger.Condition.IsTrue)
+            {
+                return true;
+            }
+
             UnityEngine.Coroutine coroutine = null;
 
-                // custom event
+            // custom event
             switch ((int)eventToTrigger.Type)
             {
                 case (int)EventType.CloseSecurityDoor_Custom:
@@ -333,12 +377,25 @@ namespace LEGACY.Patch.ExtraEventsConfig
                 case (int)EventType.ToggleEnableDisableAllTerminalsInZone_Custom:
                 case (int)EventType.ToggleEnableDisableTerminalInZone_Custom:
                 case (int)EventType.KillEnemiesInZone_Custom:
-                //case (int)EventType.AlertEnemiesInZone:
+                case (int)EventType.AlertEnemiesInZone:
+                case (int)EventType.AlertEnemiesInArea:
+                case (int)EventType.CompleteCurrentReactorWave:
                     coroutine = CoroutineManager.StartCoroutine(Handle(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
-                    //WardenObjectiveManager.m_wardenObjectiveEventCoroutines.Add(coroutine);
+                    WorldEventManager.m_worldEventEventCoroutines.Add(coroutine);
                     return false;
                 case (int)EventType.StopSpecifiedEnemyWave:
-                    ExtraEventsConfig_SpawnEnemyWave_Custom.StopSpecifiedWave(eventToTrigger, currentDuration);
+                    SpawnEnemyWave_Custom.StopSpecifiedWave(eventToTrigger, currentDuration);
+                    return false;
+                case (int)EventType.Reactor_MoveCurrentWaveLog:
+                    Logger.Error("Impl. unfinished.");
+                    return true;
+                case (int)EventType.ChainedPuzzle_AddReqItem:
+                    coroutine = CoroutineManager.StartCoroutine(ChainedPuzzle_Custom.AddReqItem(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
+                    WorldEventManager.m_worldEventEventCoroutines.Add(coroutine);
+                    return false;
+                case (int)EventType.ChainedPuzzle_RemoveReqItem:
+                    coroutine = CoroutineManager.StartCoroutine(ChainedPuzzle_Custom.RemoveReqItem(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
+                    WorldEventManager.m_worldEventEventCoroutines.Add(coroutine);
                     return false;
             }
 
@@ -347,15 +404,19 @@ namespace LEGACY.Patch.ExtraEventsConfig
             {
                 case eWardenObjectiveEventType.SetTerminalCommand:
                     coroutine = CoroutineManager.StartCoroutine(Handle(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
+                    WorldEventManager.m_worldEventEventCoroutines.Add(coroutine);
                     //WardenObjectiveManager.m_wardenObjectiveEventCoroutines.Add(coroutine);
                     return false;
                 case eWardenObjectiveEventType.SpawnEnemyWave:
-                    bool use_vanilla_impl = ExtraEventsConfig_SpawnEnemyWave_Custom.SpawnWave(eventToTrigger, currentDuration);
+                    bool use_vanilla_impl = SpawnEnemyWave_Custom.SpawnWave(eventToTrigger, currentDuration);
                     return use_vanilla_impl;
                 case eWardenObjectiveEventType.StopEnemyWaves:
-                    ExtraEventsConfig_SpawnEnemyWave_Custom.OnStopAllWave();
+                    SpawnEnemyWave_Custom.OnStopAllWave();
                     return true;
-
+                case eWardenObjectiveEventType.ActivateChainedPuzzle:
+                    coroutine = CoroutineManager.StartCoroutine(ChainedPuzzle_Custom.ActivateChainedPuzzle(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
+                    WorldEventManager.m_worldEventEventCoroutines.Add(coroutine);
+                    return false;
                 default: return true;
             }
         }
@@ -385,7 +446,7 @@ namespace LEGACY.Patch.ExtraEventsConfig
                 }
             }
 
-            switch((int)e.Type)
+            switch ((int)e.Type)
             {
                 case (int)EventType.CloseSecurityDoor_Custom:
                     bool close_success = CloseSecurityDoor_Custom(e);
@@ -403,16 +464,20 @@ namespace LEGACY.Patch.ExtraEventsConfig
                     }
                     break;
                 case (int)EventType.KillEnemiesInDimension_Custom:
-                    KillEnemiesInDimension_Custom(e);   break;
+                    KillEnemiesInDimension_Custom(e); break;
                 case (int)EventType.ToggleEnableDisableAllTerminalsInZone_Custom:
-                    ToggleEnableDisableAllTerminalsInZone_Custom(e);  break;
+                    ToggleEnableDisableAllTerminalsInZone_Custom(e); break;
                 case (int)EventType.ToggleEnableDisableTerminalInZone_Custom:
                     ToggleEnableDisableTerminalInZone_Custom(e); break;
                 case (int)EventType.KillEnemiesInZone_Custom:
-                    KillEnemiesInZone_Custom(e);                break;
-                //case (int)EventType.AlertEnemiesInZone:
-                //    AlertEnemiesInZone(e); break;
-                case (int)EventType.SetTimerTitle_Custom: {
+                    KillEnemiesInZone_Custom(e); break;
+                case (int)EventType.AlertEnemiesInZone:
+                case (int)EventType.AlertEnemiesInArea:
+                    AlertEnemies(e, (uint)e.Type == (uint)EventType.AlertEnemiesInZone); break;
+                case (int)EventType.CompleteCurrentReactorWave:
+                    CompleteCurrentReactorWave(e); break;
+                case (int)EventType.SetTimerTitle_Custom:
+                    {
                         float duration = e.Duration;
 
                         // set title
@@ -464,13 +529,13 @@ namespace LEGACY.Patch.ExtraEventsConfig
 
                             break;
                         }
-                }
+                    }
             }
 
-            switch(e.Type)
+            switch (e.Type)
             {
                 case eWardenObjectiveEventType.SetTerminalCommand:
-                    SetTerminalCommand_Custom(e);       break;
+                    SetTerminalCommand_Custom(e); break;
             }
         }
     }

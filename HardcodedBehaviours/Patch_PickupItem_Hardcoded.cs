@@ -7,7 +7,7 @@ using ChainedPuzzles;
 using LevelGeneration;
 using Localization;
 
-namespace LEGACY.Hardcoded_Behaviour
+namespace LEGACY.HardcodedBehaviours
 {
     [HarmonyPatch]
     class Patch_PickupItem_Hardcoded
@@ -21,7 +21,7 @@ namespace LEGACY.Hardcoded_Behaviour
 
             //Logger.Debug("Overwriting Fog turbine distribution for L2E1. Zone: {0}", __instance.m_zone.AliasName);
 
-            switch (__instance.m_zone.LocalIndex) 
+            switch (__instance.m_zone.LocalIndex)
             {
                 case eLocalZoneIndex.Zone_10:
                     __instance.m_zonePlacementWeights.Start = 10000.0f;

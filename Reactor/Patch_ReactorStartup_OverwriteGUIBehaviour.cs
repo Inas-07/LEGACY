@@ -8,7 +8,7 @@ using UnityEngine;
 using LEGACY.Utilities;
 using GTFO.API;
 
-namespace LEGACY.Patch
+namespace LEGACY.Reactor
 {
     // won't work if there's multiple reactor
     [HarmonyPatch]
@@ -32,7 +32,7 @@ namespace LEGACY.Patch
         {
             WardenObjectiveDataBlock db = null;
 
-            if(WardenObjectiveManager.Current.TryGetActiveWardenObjectiveData(__instance.SpawnNode.LayerType, out db) == false 
+            if (WardenObjectiveManager.Current.TryGetActiveWardenObjectiveData(__instance.SpawnNode.LayerType, out db) == false
                 || db == null)
             {
                 Utilities.Logger.Error("Patch_ReactorStartup_OverwriteGUIBehaviour: ");
@@ -64,7 +64,7 @@ namespace LEGACY.Patch
         [HarmonyPatch(typeof(LG_WardenObjective_Reactor), nameof(LG_WardenObjective_Reactor.SetGUIMessage))]
         private static bool Pre_SetGUIMessage(LG_WardenObjective_Reactor __instance, bool visible, ref string msg, ePUIMessageStyle style, bool printTimerInText, string timerPrefix, string timerSuffix)
         {
-            if (!pReactorState.Equals(__instance.m_currentState.status, eReactorStatus.Startup_waitForVerify)) return true;
+            if (!Equals(__instance.m_currentState.status, eReactorStatus.Startup_waitForVerify)) return true;
 
             if (!visible && (visible || !__instance.m_reactorGuiVisible))
                 return false;
@@ -73,7 +73,7 @@ namespace LEGACY.Patch
                 if (printTimerInText)
                 {
                     int currentWaveIndex = __instance.m_currentWaveCount - 1;
-                    if(overrideHideGUITimer != null && overrideHideGUITimer[currentWaveIndex] == true) 
+                    if (overrideHideGUITimer != null && overrideHideGUITimer[currentWaveIndex] == true)
                     {   // hide reactor verification timer.
                         GuiManager.InteractionLayer.SetMessage(msg, style, -1);
                         GuiManager.InteractionLayer.SetMessageTimer(1.0f);
@@ -86,7 +86,7 @@ namespace LEGACY.Patch
                         }
                         double num1 = (1.0 - (double)__instance.m_currentWaveProgress) * (double)__instance.m_currentDuration;
                         int num2 = Mathf.FloorToInt((float)(num1 / 60.0));
-                        int num3 = Mathf.FloorToInt((float)(num1 - (double)num2 * 60.0));
+                        int num3 = Mathf.FloorToInt((float)(num1 - num2 * 60.0));
                         msg = msg + "\n<color=white>" + timerPrefix + " <color=orange>" + num2.ToString("D2") + ":" + num3.ToString("D2") + "</color>" + timerSuffix + "</color>";
                         GuiManager.InteractionLayer.SetMessage(msg, style, -1);
                         GuiManager.InteractionLayer.SetMessageTimer(__instance.m_currentWaveProgress);
@@ -156,12 +156,12 @@ namespace LEGACY.Patch
                 Utilities.Logger.Error("Did not found zone for verification!");
                 return false;
             }
-            
+
             if (ZoneForVerification.TerminalPlacements == null || ZoneForVerification.TerminalPlacements.Count != 1) return false;
 
             TerminalPlacementData TerminalData = ZoneForVerification.TerminalPlacements[0];
             TerminalStartStateData TerminalState = TerminalData.StartingStateData;
-            
+
             if (!TerminalState.PasswordProtected
                 || TerminalState.PasswordPartCount != 1
                 || TerminalState.TerminalZoneSelectionDatas == null
@@ -213,7 +213,7 @@ namespace LEGACY.Patch
                         }
                         __instance.m_lightCollection.SetMode(db.LightsOnDuringIntro);
                         // R7 migration End
-                        
+
                         // R6 impl.
                         //__instance.m_lightCollection.SetMode(WardenObjectiveManager.ActiveWardenObjective(__instance.SpawnNode.LayerType).LightsOnDuringIntro);
 

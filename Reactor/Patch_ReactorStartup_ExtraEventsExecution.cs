@@ -4,7 +4,7 @@ using GameData;
 using SNetwork;
 using LEGACY.Utilities;
 
-namespace LEGACY.Patch
+namespace LEGACY.Reactor
 {
     [HarmonyPatch]
     internal class Patch_ReactorStartup_ExtraEventsExecution
@@ -18,7 +18,6 @@ namespace LEGACY.Patch
 
             /* LG_WardenObjective_Reactor.OnTerminalStartupSequenceVerify is called on correct verification */
             WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(__instance.m_currentWaveData.Events, eWardenObjectiveEventTrigger.OnEnd, false);
-            //Utils.CheckAndExecuteEventsOnTrigger(__instance.m_currentWaveData.Events, eWardenObjectiveEventTrigger.OnEnd, false);
         }
 
         [HarmonyPostfix]
@@ -29,7 +28,6 @@ namespace LEGACY.Patch
             if (newState.status != eReactorStatus.Startup_intense) return;
 
             WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(__instance.m_currentWaveData.Events, eWardenObjectiveEventTrigger.None, false);
-            //Utils.CheckAndExecuteEventsOnTrigger(__instance.m_currentWaveData.Events, eWardenObjectiveEventTrigger.None, false);
         }
 
         [HarmonyPostfix]
@@ -40,16 +38,16 @@ namespace LEGACY.Patch
             if (WardenObjectiveManager.Current.TryGetActiveWardenObjectiveData(__instance.SpawnNode.LayerType, out db) == false
                 || db == null)
             {
-                Utilities.Logger.Error("Patch_ReactorStartup_ExtraEventsExecution: ");
-                Utilities.Logger.Error("Failed to get warden objective");
+                Logger.Error("Patch_ReactorStartup_ExtraEventsExecution: ");
+                Logger.Error("Failed to get warden objective");
                 return;
             }
 
             if (db.Type != eWardenObjectiveType.Reactor_Startup || db.OnActivateOnSolveItem == true) return;
 
-            __instance.m_chainedPuzzleToStartSequence.OnPuzzleSolved += new System.Action(() => {
+            __instance.m_chainedPuzzleToStartSequence.OnPuzzleSolved += new System.Action(() =>
+            {
                 WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(db.EventsOnActivate, eWardenObjectiveEventTrigger.None, true);
-                //Utils.CheckAndExecuteEventsOnTrigger(db.EventsOnActivate, eWardenObjectiveEventTrigger.None, true);
             });
         }
     }

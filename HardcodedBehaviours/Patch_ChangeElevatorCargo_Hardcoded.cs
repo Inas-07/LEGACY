@@ -4,16 +4,15 @@ using GameData;
 using LEGACY.Utilities;
 using UnityEngine;
 using LevelGeneration;
-namespace LEGACY.Hardcoded_Behaviour
+
+namespace LEGACY.HardcodedBehaviours
 {
     [HarmonyPatch]
     class Patch_ChangeElevatorCargo_Hardcoded
     {
-
         private static bool ForceDisable() => RundownManager.ActiveExpedition.LevelLayoutData == (uint)MainLayerID.L2E2
                 || RundownManager.ActiveExpedition.LevelLayoutData == (uint)MainLayerID.L2E3
                 || RundownManager.ActiveExpedition.LevelLayoutData == (uint)MainLayerID.L3E2;
-
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(ElevatorCargoCage), nameof(ElevatorCargoCage.SpawnObjectiveItemsInLandingArea))]
@@ -27,20 +26,5 @@ namespace LEGACY.Hardcoded_Behaviour
 
             return true;
         }
-
-        //[HarmonyPostfix]
-        //[HarmonyPatch(typeof(ElevatorCargoCage), nameof(ElevatorCargoCage.SpawnObjectiveItemsInLandingArea))]
-        //private static void Post_AddSpecificItemToElevatorCargo(ElevatorCargoCage __instance)
-        //{
-        //    if (RundownManager.ActiveExpedition.LevelLayoutData == (uint)MainLayerID.L3E2)
-        //    {
-        //        __instance.m_itemsToMoveToCargo = new List<Transform>();
-        //        LG_PickupItem lgPickupItem = LG_PickupItem.SpawnGenericPickupItem(ElevatorShaftLanding.CargoAlign);
-        //        lgPickupItem.SpawnNode = Builder.GetElevatorArea().m_courseNode;
-        //        lgPickupItem.SetupAsBigPickupItem(Random.Range(0, int.MaxValue), POWERCELL_ID, false, 0);
-        //        __instance.m_itemsToMoveToCargo.Add(lgPickupItem.transform);
-        //        ElevatorRide.Current.m_cargoCageInUse = true;
-        //    }
-        //}
     }
 }

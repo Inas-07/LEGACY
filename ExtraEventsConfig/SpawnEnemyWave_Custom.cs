@@ -9,79 +9,26 @@ using HarmonyLib;
 using SNetwork;
 using System.Collections;
 
-namespace LEGACY.Patch.ExtraEventsConfig.SpawnEnemyWave_Custom
+namespace LEGACY.ExtraEventsConfig
 {
 
-    sealed class ExtraEventsConfig_SpawnEnemyWave_Custom
+    internal static class SpawnEnemyWave_Custom
     {
         private static System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<ushort>> WaveEventsMap = new();
 
-        public static void StopSpecifiedWave(WardenObjectiveEventData eventToTrigger, float currentDuration)
+        internal static void StopSpecifiedWave(WardenObjectiveEventData eventToTrigger, float currentDuration)
         {
             UnityEngine.Coroutine coroutine = CoroutineManager.StartCoroutine(StopWave(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
+            WorldEventManager.m_worldEventEventCoroutines.Add(coroutine);
             //WardenObjectiveManager.m_wardenObjectiveEventCoroutines.Add(coroutine);
         }
 
-        private static IEnumerator StopWave(WardenObjectiveEventData eventToTrigger, float currentDuration)
-        {
-            WardenObjectiveEventData e = eventToTrigger;
-
-            float delay = UnityEngine.Mathf.Max(e.Delay - currentDuration, 0f);
-            if (delay > 0f)
-            {
-                yield return new UnityEngine.WaitForSeconds(delay);
-            }
-
-            WardenObjectiveManager.DisplayWardenIntel(e.Layer, e.WardenIntel);
-            if (e.DialogueID > 0u)
-            {
-                PlayerDialogManager.WantToStartDialog(e.DialogueID, -1, false, false);
-            }
-            if (e.SoundID > 0u)
-            {
-                WardenObjectiveManager.Current.m_sound.Post(e.SoundID, true);
-                var line = e.SoundSubtitle.ToString();
-                if (!string.IsNullOrWhiteSpace(line))
-                {
-                    GuiManager.PlayerLayer.ShowMultiLineSubtitle(line);
-                }
-            }
-
-            if (!SNet.IsMaster) yield break;
-
-            if (string.IsNullOrEmpty(e.WorldEventObjectFilter))
-            {
-                Logger.Error("WorldEventObjectFilter is empty. Aborted stop wave event.");
-                yield break;
-            }
-
-            if (!WaveEventsMap.ContainsKey(e.WorldEventObjectFilter))
-            {
-                Logger.Error("Wave Filter {0} is unregistered, cannot stop wave.", e.WorldEventObjectFilter);
-                yield break;
-            }
-
-            WaveEventsMap.TryGetValue(e.WorldEventObjectFilter, out var eventIDList);
-            WaveEventsMap.Remove(e.WorldEventObjectFilter);
-
-            Mastermind.MastermindEvent masterMindEvent_StopWave;
-            foreach (ushort eventID in eventIDList)
-            {
-                if (Mastermind.Current.TryGetEvent(eventID, out masterMindEvent_StopWave))
-                {
-                    masterMindEvent_StopWave.StopEvent();
-                }
-            }
-
-            Logger.Debug("Wave(s) with filter {0} stopped.", e.WorldEventObjectFilter);
-        }
-
-        public static void OnStopAllWave()
+        internal static void OnStopAllWave()
         {
             WaveEventsMap.Clear();
         }
 
-        public static bool SpawnWave(WardenObjectiveEventData eventToTrigger, float currentDuration)
+        internal static bool SpawnWave(WardenObjectiveEventData eventToTrigger, float currentDuration)
         {
             bool use_vanilla_impl = true;
 
@@ -102,7 +49,7 @@ namespace LEGACY.Patch.ExtraEventsConfig.SpawnEnemyWave_Custom
             if (use_vanilla_impl == true)
             {
                 SurvivalWaveSettingsDataBlock waveSettingDB = SurvivalWaveSettingsDataBlock.GetBlock(eventToTrigger.EnemyWaveData.WaveSettings);
-                if (waveSettingDB.m_overrideWaveSpawnType == true && 
+                if (waveSettingDB.m_overrideWaveSpawnType == true &&
                     (waveSettingDB.m_survivalWaveSpawnType == SurvivalWaveSpawnType.InSuppliedCourseNodeZone
                     || waveSettingDB.m_survivalWaveSpawnType == SurvivalWaveSpawnType.InSuppliedCourseNode))
                 {
@@ -110,9 +57,10 @@ namespace LEGACY.Patch.ExtraEventsConfig.SpawnEnemyWave_Custom
                 }
             }
 
-            if(!use_vanilla_impl)
+            if (!use_vanilla_impl)
             {
                 UnityEngine.Coroutine coroutine = CoroutineManager.StartCoroutine(SpawnWave(eventToTrigger, currentDuration, 0).WrapToIl2Cpp(), null);
+                WorldEventManager.m_worldEventEventCoroutines.Add(coroutine);
             }
             //WardenObjectiveManager.m_wardenObjectiveEventCoroutines.Add(coroutine);
 
@@ -174,20 +122,6 @@ namespace LEGACY.Patch.ExtraEventsConfig.SpawnEnemyWave_Custom
                         yield break;
                     }
 
-                    //LG_SecurityDoor door = null;
-                    //Utils.TryGetZoneEntranceSecDoor(specified_zone, out door);
-                    //if(door == null)
-                    //{
-                    //    Logger.Debug("Spawning in zone without sec-door (i.e. elevator zone)");
-                    //} 
-                    //else if (waveSettingDB.m_survivalWaveSpawnType == SurvivalWaveSpawnType.InSuppliedCourseNodeZone
-                    //    && door.m_sync.GetCurrentSyncState().status != eDoorStatus.Open && door.LinkedToZoneData.ActiveEnemyWave.HasActiveEnemyWave == false)
-                    //{
-                    //    Logger.Warning("Spawn InSuppliedCourseNodeZone: The LG_SecurityDoor to the supplied zone is inaccessible, and the door has no active enemy wave!");
-                    //    Logger.Warning("Aborted wave spawn.");
-                    //    abort_spawn = true;
-                    //}
-
                     spawnNode = specified_zone.m_courseNodes[0];
                     spawnType = SurvivalWaveSpawnType.InSuppliedCourseNodeZone;
 
@@ -200,7 +134,7 @@ namespace LEGACY.Patch.ExtraEventsConfig.SpawnEnemyWave_Custom
                         }
                         else
                         {
-                            Logger.Error("Spawn InSuppliedCourseNode but zone {0}-{1} does not exist! Falling back to InSuppliedCourseNodeZone", specified_zone.Alias, ('A' + e.Count));
+                            Logger.Error("Spawn InSuppliedCourseNode but zone {0}-{1} does not exist! Falling back to InSuppliedCourseNodeZone", specified_zone.Alias, 'A' + e.Count);
                         }
                     }
 
@@ -267,6 +201,60 @@ namespace LEGACY.Patch.ExtraEventsConfig.SpawnEnemyWave_Custom
             }
             else
                 UnityEngine.Debug.LogError("WardenobjectiveManager.TriggerEnemyWaveData got NO SPAWNNODE for the enemy wave!");
+        }
+
+        private static IEnumerator StopWave(WardenObjectiveEventData eventToTrigger, float currentDuration)
+        {
+            WardenObjectiveEventData e = eventToTrigger;
+
+            float delay = UnityEngine.Mathf.Max(e.Delay - currentDuration, 0f);
+            if (delay > 0f)
+            {
+                yield return new UnityEngine.WaitForSeconds(delay);
+            }
+
+            WardenObjectiveManager.DisplayWardenIntel(e.Layer, e.WardenIntel);
+            if (e.DialogueID > 0u)
+            {
+                PlayerDialogManager.WantToStartDialog(e.DialogueID, -1, false, false);
+            }
+            if (e.SoundID > 0u)
+            {
+                WardenObjectiveManager.Current.m_sound.Post(e.SoundID, true);
+                var line = e.SoundSubtitle.ToString();
+                if (!string.IsNullOrWhiteSpace(line))
+                {
+                    GuiManager.PlayerLayer.ShowMultiLineSubtitle(line);
+                }
+            }
+
+            if (!SNet.IsMaster) yield break;
+
+            if (string.IsNullOrEmpty(e.WorldEventObjectFilter))
+            {
+                Logger.Error("WorldEventObjectFilter is empty. Aborted stop wave event.");
+                yield break;
+            }
+
+            if (!WaveEventsMap.ContainsKey(e.WorldEventObjectFilter))
+            {
+                Logger.Error("Wave Filter {0} is unregistered, cannot stop wave.", e.WorldEventObjectFilter);
+                yield break;
+            }
+
+            WaveEventsMap.TryGetValue(e.WorldEventObjectFilter, out var eventIDList);
+            WaveEventsMap.Remove(e.WorldEventObjectFilter);
+
+            Mastermind.MastermindEvent masterMindEvent_StopWave;
+            foreach (ushort eventID in eventIDList)
+            {
+                if (Mastermind.Current.TryGetEvent(eventID, out masterMindEvent_StopWave))
+                {
+                    masterMindEvent_StopWave.StopEvent();
+                }
+            }
+
+            Logger.Debug("Wave(s) with filter {0} stopped.", e.WorldEventObjectFilter);
         }
 
         [HarmonyPostfix]

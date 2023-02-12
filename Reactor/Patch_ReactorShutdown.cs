@@ -4,7 +4,7 @@ using GameData;
 using Localization;
 using LEGACY.Utilities;
 
-namespace LEGACY.Patch
+namespace LEGACY.Reactor
 {
     [HarmonyPatch]
     internal class Patch_ReactorShutdown
@@ -21,11 +21,10 @@ namespace LEGACY.Patch
             if (WardenObjectiveManager.Current.TryGetActiveWardenObjectiveData(__instance.SpawnNode.LayerType, out db) == false
                 || db == null)
             {
-                Utilities.Logger.Error("Patch_ReactorShutdown: ");
-                Utilities.Logger.Error("Failed to get warden objective");
+                Logger.Error("Patch_ReactorShutdown: ");
+                Logger.Error("Failed to get warden objective");
                 return;
             }
-
 
             if (db.Type != eWardenObjectiveType.Reactor_Shutdown) return;
             if (db.OnActivateOnSolveItem == true) return;
@@ -43,21 +42,17 @@ namespace LEGACY.Patch
             LG_LayerType layer = __instance.SpawnNode.LayerType;
 
             WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(db.EventsOnActivate, trigger, false);
-            //Utils.CheckAndExecuteEventsOnTrigger(db.EventsOnActivate, trigger, false);
-            
         }
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(LG_WardenObjective_Reactor), nameof(LG_WardenObjective_Reactor.OnBuildDone))]
         private static void Pre_OnBuildDone_ChainedPuzzleMidObjectiveFix(LG_WardenObjective_Reactor __instance)
         {
-            //WardenObjectiveDataBlock objective = WardenObjectiveManager.ActiveWardenObjective(__instance.SpawnNode.LayerType);
             WardenObjectiveDataBlock objective = null;
             if (WardenObjectiveManager.Current.TryGetActiveWardenObjectiveData(__instance.SpawnNode.LayerType, out objective) == false
                 || objective == null)
             {
-                Utilities.Logger.Error("Patch_ReactorShutdown: ");
-                Utilities.Logger.Error("Failed to get warden objective");
+                Logger.Error("Patch_ReactorShutdown: Failed to get warden objective");
                 return;
             }
 
@@ -77,7 +72,7 @@ namespace LEGACY.Patch
             if (!__instance.m_currentWaveData.HasVerificationTerminal) return true;
 
             __instance.SetGUIMessage(true, Text.Format(3000U, (object)"<color=orange>" + __instance.m_currentWaveData.VerificationTerminalSerial + "</color>"), ePUIMessageStyle.Warning, false);
-            
+
             return false;
         }
     }

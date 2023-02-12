@@ -4,7 +4,7 @@ using GameData;
 using LEGACY.Utilities;
 
 
-namespace LEGACY.Patch
+namespace LEGACY.ExtraEventsConfig
 {
     [HarmonyPatch]
     internal class Patch_EventsOnUplinkCommence
@@ -19,7 +19,7 @@ namespace LEGACY.Patch
             WardenObjectiveDataBlock db = null;
             WardenObjectiveManager.Current.TryGetActiveWardenObjectiveData(layer, out db);
 
-            if (db == null || (db.Type != eWardenObjectiveType.TerminalUplink && db.Type != eWardenObjectiveType.CorruptedTerminalUplink))
+            if (db == null || db.Type != eWardenObjectiveType.TerminalUplink && db.Type != eWardenObjectiveType.CorruptedTerminalUplink)
                 return;
 
             // 当前已经完成了多少个uplink，就从第几个event break开始执行事件
@@ -28,7 +28,7 @@ namespace LEGACY.Patch
             var eventsOnActivate = db.EventsOnActivate;
 
             int start_index = 0;
-            while(start_index < eventsOnActivate.Count && current_step > 0)
+            while (start_index < eventsOnActivate.Count && current_step > 0)
             {
                 if (eventsOnActivate[start_index] == null)
                 {

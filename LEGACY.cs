@@ -1,15 +1,15 @@
 ﻿using BepInEx;
 using BepInEx.Unity.IL2CPP;
-//using BepInEx.IL2CPP;
-
 using HarmonyLib;
 
 
 namespace LEGACY
 {
     [BepInDependency("com.dak.MTFO")]
-    [BepInDependency("dev.gtfomodding.gtfo-api")]
-    [BepInPlugin("Inas07.LEGACY", "LEGACY", "1.0.0.1")]
+    [BepInDependency("dev.gtfomodding.gtfo-api", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("ScanPositionOverride", BepInDependency.DependencyFlags.HardDependency)]
+
+    [BepInPlugin("Inas07.LEGACY", "LEGACY", "3.1.3.2")]
     
     public class EntryPoint: BasePlugin
     {
