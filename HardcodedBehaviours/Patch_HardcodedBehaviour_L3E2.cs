@@ -1,7 +1,7 @@
 ﻿using Il2CppSystem.Collections.Generic;
 using HarmonyLib;
 using GameData;
-using LEGACY.Utilities;
+using LEGACY.Utils;
 using SNetwork;
 using ChainedPuzzles;
 using LevelGeneration;
@@ -216,9 +216,9 @@ namespace LEGACY.HardcodedBehaviours
             }
 
             DIMENSION_Z0_TERMINAL_CPS = new ChainedPuzzleInstance[3] { null, null, null };
-            DIMENSION_Z0_TERMINAL_CPS[0] = Utils.GetChainedPuzzleForCommandOnTerminal(dim_Z12.TerminalsSpawnedInZone[0], "RESTORE_MATTER_WAVE_PHASE_1");
-            DIMENSION_Z0_TERMINAL_CPS[1] = Utils.GetChainedPuzzleForCommandOnTerminal(dim_Z12.TerminalsSpawnedInZone[0], "RESTORE_MATTER_WAVE_PHASE_2");
-            DIMENSION_Z0_TERMINAL_CPS[2] = Utils.GetChainedPuzzleForCommandOnTerminal(dim_Z12.TerminalsSpawnedInZone[0], "RESTORE_MATTER_WAVE_PHASE_3");
+            DIMENSION_Z0_TERMINAL_CPS[0] = Utils.Helper.GetChainedPuzzleForCommandOnTerminal(dim_Z12.TerminalsSpawnedInZone[0], "RESTORE_MATTER_WAVE_PHASE_1");
+            DIMENSION_Z0_TERMINAL_CPS[1] = Utils.Helper.GetChainedPuzzleForCommandOnTerminal(dim_Z12.TerminalsSpawnedInZone[0], "RESTORE_MATTER_WAVE_PHASE_2");
+            DIMENSION_Z0_TERMINAL_CPS[2] = Utils.Helper.GetChainedPuzzleForCommandOnTerminal(dim_Z12.TerminalsSpawnedInZone[0], "RESTORE_MATTER_WAVE_PHASE_3");
 
             if (DIMENSION_Z0_TERMINAL_CPS[0] == null || DIMENSION_Z0_TERMINAL_CPS[1] == null || DIMENSION_Z0_TERMINAL_CPS[2] == null)
             {

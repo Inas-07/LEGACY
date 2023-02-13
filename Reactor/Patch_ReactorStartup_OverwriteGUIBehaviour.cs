@@ -5,7 +5,7 @@ using System;
 using AK;
 using Localization;
 using UnityEngine;
-using LEGACY.Utilities;
+using LEGACY.Utils;
 using GTFO.API;
 
 namespace LEGACY.Reactor
@@ -35,8 +35,8 @@ namespace LEGACY.Reactor
             if (WardenObjectiveManager.Current.TryGetActiveWardenObjectiveData(__instance.SpawnNode.LayerType, out db) == false
                 || db == null)
             {
-                Utilities.Logger.Error("Patch_ReactorStartup_OverwriteGUIBehaviour: ");
-                Utilities.Logger.Error("Failed to get warden objective datablock");
+                Utils.Logger.Error("Patch_ReactorStartup_OverwriteGUIBehaviour: ");
+                Utils.Logger.Error("Failed to get warden objective datablock");
                 return;
             }
 
@@ -124,7 +124,7 @@ namespace LEGACY.Reactor
                     case LG_LayerType.MainLayer: layoutID = RundownManager.ActiveExpedition.LevelLayoutData; break;
                     case LG_LayerType.SecondaryLayer: layoutID = RundownManager.ActiveExpedition.SecondaryLayout; break;
                     case LG_LayerType.ThirdLayer: layoutID = RundownManager.ActiveExpedition.ThirdLayout; break;
-                    default: Utilities.Logger.Error("Unimplemented layer type."); return false;
+                    default: Utils.Logger.Error("Unimplemented layer type."); return false;
                 }
             }
             else
@@ -153,7 +153,7 @@ namespace LEGACY.Reactor
 
             if (ZoneForVerification == null)
             {
-                Utilities.Logger.Error("Did not found zone for verification!");
+                Utils.Logger.Error("Did not found zone for verification!");
                 return false;
             }
 
@@ -207,8 +207,8 @@ namespace LEGACY.Reactor
                         if (WardenObjectiveManager.Current.TryGetActiveWardenObjectiveData(__instance.SpawnNode.LayerType, out db) == false
                             || db == null)
                         {
-                            Utilities.Logger.Error("Patch_ReactorStartup_OverwriteGUIBehaviour: ");
-                            Utilities.Logger.Error("Failed to get warden objective datablock");
+                            Utils.Logger.Error("Patch_ReactorStartup_OverwriteGUIBehaviour: ");
+                            Utils.Logger.Error("Failed to get warden objective datablock");
                             break;
                         }
                         __instance.m_lightCollection.SetMode(db.LightsOnDuringIntro);
@@ -289,7 +289,7 @@ namespace LEGACY.Reactor
 
         private static void CleanupAfterExpedition()
         {
-            Utilities.Logger.Warning("clean Patch_ReactorStartup_OverwriteGUIBehaviour");
+            Utils.Logger.Warning("clean Patch_ReactorStartup_OverwriteGUIBehaviour");
             overrideHideGUITimer = null;
         }
     }

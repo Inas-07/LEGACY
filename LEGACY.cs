@@ -1,7 +1,8 @@
 ﻿using BepInEx;
 using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
-
+using ScanPosOverride.JSON;
+using System.IO;
 
 namespace LEGACY
 {
@@ -14,7 +15,8 @@ namespace LEGACY
     public class EntryPoint: BasePlugin
     {
         private Harmony m_Harmony;
-
+        internal static readonly string LEGACY_CUSTOM_PATH = Path.Combine(MTFOUtil.CustomPath, "LEGACY");
+        
         public override void Load()
         {
             m_Harmony = new Harmony("LEGACY");

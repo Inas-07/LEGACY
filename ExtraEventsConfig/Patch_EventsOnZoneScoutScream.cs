@@ -3,7 +3,7 @@ using Enemies;
 using SNetwork;
 using LevelGeneration;
 using GameData;
-using LEGACY.Utilities;
+using LEGACY.Utils;
 
 namespace LEGACY.ExtraEventsConfig
 {

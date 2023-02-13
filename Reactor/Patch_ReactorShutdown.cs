@@ -2,7 +2,7 @@
 using LevelGeneration;
 using GameData;
 using Localization;
-using LEGACY.Utilities;
+using LEGACY.Utils;
 
 namespace LEGACY.Reactor
 {

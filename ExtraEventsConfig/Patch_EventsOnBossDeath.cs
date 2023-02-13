@@ -5,7 +5,7 @@ using GameData;
 using AIGraph;
 using Globals;
 using System.Collections.Generic;
-using LEGACY.Utilities;
+using LEGACY.Utils;
 using GTFO.API;
 
 namespace LEGACY.ExtraEventsConfig

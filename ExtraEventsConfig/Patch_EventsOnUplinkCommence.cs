@@ -1,7 +1,7 @@
 ﻿using HarmonyLib;
 using LevelGeneration;
 using GameData;
-using LEGACY.Utilities;
+using LEGACY.Utils;
 
 
 namespace LEGACY.ExtraEventsConfig

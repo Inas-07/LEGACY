@@ -1,7 +1,7 @@
 ﻿using Il2CppSystem.Collections.Generic;
 using HarmonyLib;
 using GameData;
-using LEGACY.Utilities;
+using LEGACY.Utils;
 using UnityEngine;
 using LevelGeneration;
 

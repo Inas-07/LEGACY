@@ -2,7 +2,7 @@
 using HarmonyLib;
 using LevelGeneration;
 using GameData;
-using LEGACY.Utilities;
+using LEGACY.Utils;
 using AIGraph;
 using Player;
 using GTFO.API;
@@ -31,7 +31,7 @@ namespace LEGACY.HardcodedBehaviours
 
             foreach (PlayerAgent player in PlayerManager.PlayerAgentsInLevel)
             {
-                if (!Utils.isPlayerInLevel(player)) continue;
+                if (!Utils.Helper.isPlayerInLevel(player)) continue;
 
                 //SNetwork.SNet_Player player2
                 if (MinLayer > player.m_courseNode.LayerType)
@@ -54,7 +54,7 @@ namespace LEGACY.HardcodedBehaviours
 
             foreach (PlayerAgent player in PlayerManager.PlayerAgentsInLevel)
             {
-                if (!Utils.isPlayerInLevel(player)) continue;
+                if (!Utils.Helper.isPlayerInLevel(player)) continue;
 
                 //SNetwork.SNet_Player player2
                 if (MaxLayer < player.m_courseNode.LayerType)
@@ -180,7 +180,7 @@ namespace LEGACY.HardcodedBehaviours
                     {
                         case eLocalZoneIndex.Zone_0:
                         case eLocalZoneIndex.Zone_1:
-                            if (Utils.isSecDoorToZoneOpened(zone14))
+                            if (Utils.Helper.isSecDoorToZoneOpened(zone14))
                             {
                                 Builder.CurrentFloor.TryGetZoneByLocalIndex(dimensionIndex, LG_LayerType.MainLayer, eLocalZoneIndex.Zone_0, out dm_zone);
                                 if (dm_zone == null) return null;

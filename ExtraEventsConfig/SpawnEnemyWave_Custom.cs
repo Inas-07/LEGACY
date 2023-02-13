@@ -2,7 +2,7 @@
 using AK;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
 using GameData;
-using LEGACY.Utilities;
+using LEGACY.Utils;
 using LevelGeneration;
 using Player;
 using HarmonyLib;

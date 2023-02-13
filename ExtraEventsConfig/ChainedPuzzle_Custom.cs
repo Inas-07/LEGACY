@@ -3,7 +3,7 @@ using System.Collections;
 using ChainedPuzzles;
 using Player;
 using ScanPosOverride.Managers;
-using LEGACY.Utilities;
+using LEGACY.Utils;
 
 namespace LEGACY.ExtraEventsConfig
 {

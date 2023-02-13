@@ -3,7 +3,7 @@ using Enemies;
 using LevelGeneration;
 using GameData;
 using System.Collections;
-using LEGACY.Utilities;
+using LEGACY.Utils;
 using Player;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
 using SNetwork;
@@ -23,8 +23,8 @@ namespace LEGACY.ExtraEventsConfig
         StopSpecifiedEnemyWave = 106,
         AlertEnemiesInZone = 107,
         AlertEnemiesInArea = 108,
-        CompleteCurrentReactorWave = 109,
-        Reactor_MoveCurrentWaveLog = 110, // unimplemented
+        Reactor_CompleteCurrentWave = 109,
+        Reactor_MoveWaveLog = 110, // unimplemented
         ChainedPuzzle_AddReqItem = 111,
         ChainedPuzzle_RemoveReqItem = 112
     }
@@ -32,45 +32,6 @@ namespace LEGACY.ExtraEventsConfig
     [HarmonyPatch]
     class Patch_ExtraEventsConfig
     {
-        private static void CompleteCurrentReactorWave(WardenObjectiveEventData e)
-        {
-            if (!SNet.IsMaster) return;
-
-            if (!ReactorConfigManager.Current.IsReactorStartup(e.Layer))
-            {
-                Logger.Error($"ExtraEventsConfig: {e.Layer} is not ReactorStartup. CompleteCurrentReactorWave is invalid.");
-                return;
-            }
-
-            LG_WardenObjective_Reactor reactor = ReactorConfigManager.Current.FindReactor(e.Layer);
-
-            if (reactor == null)
-            {
-                Logger.Error($"ExtraEventsConfig: Cannot find reactor in {e.Layer}.");
-                return;
-            }
-
-            switch (reactor.m_currentState.status)
-            {
-                case eReactorStatus.Inactive_Idle:
-                    reactor.AttemptInteract(eReactorInteraction.Initiate_startup);
-                    reactor.m_terminal.TrySyncSetCommandHidden(TERM_Command.ReactorStartup);
-                    break;
-                case eReactorStatus.Startup_complete:
-                    Logger.Error($"ExtraEventsConfig: Startup already completed for {e.Layer} reactor");
-                    break;
-                case eReactorStatus.Active_Idle:
-                case eReactorStatus.Startup_intro:
-                case eReactorStatus.Startup_intense:
-                case eReactorStatus.Startup_waitForVerify:
-                    if (reactor.m_currentWaveCount == reactor.m_waveCountMax)
-                        reactor.AttemptInteract(eReactorInteraction.Finish_startup);
-                    else
-                        reactor.AttemptInteract(eReactorInteraction.Verify_startup);
-                    break;
-            }
-        }
-
         private static void AlertEnemies(WardenObjectiveEventData e, bool AlertAllAreas = false)
         {
             LG_Zone zone = null;
@@ -180,7 +141,7 @@ namespace LEGACY.ExtraEventsConfig
             }
 
             LG_SecurityDoor door = null;
-            if (Utils.TryGetZoneEntranceSecDoor(zone, out door) == false || door == null)
+            if (Utils.Helper.TryGetZoneEntranceSecDoor(zone, out door) == false || door == null)
             {
                 Logger.Error("CloseSecurityDoor_Custom: failed to get LG_SecurityDoor!");
                 return false;
@@ -245,7 +206,7 @@ namespace LEGACY.ExtraEventsConfig
                     LG_Zone zone2 = layer.m_zones[index2];
                     LG_SecurityDoor door;
 
-                    Utils.TryGetZoneEntranceSecDoor(zone2, out door);
+                    Utils.Helper.TryGetZoneEntranceSecDoor(zone2, out door);
 
                     // limited kill
                     if (index2 == 0 || door != null && door.m_sync.GetCurrentSyncState().status == eDoorStatus.Open) // door opened, kill all
@@ -379,16 +340,14 @@ namespace LEGACY.ExtraEventsConfig
                 case (int)EventType.KillEnemiesInZone_Custom:
                 case (int)EventType.AlertEnemiesInZone:
                 case (int)EventType.AlertEnemiesInArea:
-                case (int)EventType.CompleteCurrentReactorWave:
+                case (int)EventType.Reactor_CompleteCurrentWave:
+                case (int)EventType.Reactor_MoveWaveLog:
                     coroutine = CoroutineManager.StartCoroutine(Handle(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
                     WorldEventManager.m_worldEventEventCoroutines.Add(coroutine);
                     return false;
                 case (int)EventType.StopSpecifiedEnemyWave:
                     SpawnEnemyWave_Custom.StopSpecifiedWave(eventToTrigger, currentDuration);
                     return false;
-                case (int)EventType.Reactor_MoveCurrentWaveLog:
-                    Logger.Error("Impl. unfinished.");
-                    return true;
                 case (int)EventType.ChainedPuzzle_AddReqItem:
                     coroutine = CoroutineManager.StartCoroutine(ChainedPuzzle_Custom.AddReqItem(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
                     WorldEventManager.m_worldEventEventCoroutines.Add(coroutine);
@@ -474,8 +433,13 @@ namespace LEGACY.ExtraEventsConfig
                 case (int)EventType.AlertEnemiesInZone:
                 case (int)EventType.AlertEnemiesInArea:
                     AlertEnemies(e, (uint)e.Type == (uint)EventType.AlertEnemiesInZone); break;
-                case (int)EventType.CompleteCurrentReactorWave:
-                    CompleteCurrentReactorWave(e); break;
+                case (int)EventType.Reactor_CompleteCurrentWave:
+                    ReactorConfigManager.Current.CompleteCurrentReactorWave(e); break;
+                case (int)EventType.Reactor_MoveWaveLog:
+                    Logger.Error("Moving wave log is not synced, which could lead to desync if any session-(re)join occurred.");
+                    Logger.Warning("TODO: Disallow log move and make Moing log an event OnEnterLevel.");
+                    //ReactorConfigManager.Current.MoveVerifyLog(e); 
+                    break;
                 case (int)EventType.SetTimerTitle_Custom:
                     {
                         float duration = e.Duration;

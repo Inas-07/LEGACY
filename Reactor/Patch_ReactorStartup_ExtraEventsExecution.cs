@@ -2,7 +2,7 @@
 using LevelGeneration;
 using GameData;
 using SNetwork;
-using LEGACY.Utilities;
+using LEGACY.Utils;
 
 namespace LEGACY.Reactor
 {
