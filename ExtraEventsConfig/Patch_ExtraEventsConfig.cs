@@ -8,7 +8,6 @@ using Player;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
 using SNetwork;
 using AK;
-using LEGACY.Reactor;
 
 namespace LEGACY.ExtraEventsConfig
 {
@@ -32,6 +31,53 @@ namespace LEGACY.ExtraEventsConfig
     [HarmonyPatch]
     class Patch_ExtraEventsConfig
     {
+        internal static void CompleteCurrentReactorWave(WardenObjectiveEventData e)
+        {
+            if (!SNet.IsMaster) return;
+
+            WardenObjectiveDataBlock data;
+            if (!WardenObjectiveManager.Current.TryGetActiveWardenObjectiveData(e.Layer, out data) || data == null)
+            {
+                Logger.Error("CompleteCurrentReactorWave: Cannot get WardenObjectiveDataBlock");
+                return;
+            }
+            if (data.Type != eWardenObjectiveType.Reactor_Startup)
+            {
+                Logger.Error($"CompleteCurrentReactorWave: {e.Layer} is not ReactorStartup. CompleteCurrentReactorWave is invalid.");
+                return;
+            }
+
+            LG_WardenObjective_Reactor reactor = Helper.FindReactor(e.Layer);
+
+            if (reactor == null)
+            {
+                Logger.Error($"CompleteCurrentReactorWave: Cannot find reactor in {e.Layer}.");
+                return;
+            }
+
+            switch (reactor.m_currentState.status)
+            {
+                case eReactorStatus.Inactive_Idle:
+                    reactor.AttemptInteract(eReactorInteraction.Initiate_startup);
+                    reactor.m_terminal.TrySyncSetCommandHidden(TERM_Command.ReactorStartup);
+                    break;
+                case eReactorStatus.Startup_complete:
+                    Logger.Error($"CompleteCurrentReactorWave: Startup already completed for {e.Layer} reactor");
+                    break;
+                case eReactorStatus.Active_Idle:
+                case eReactorStatus.Startup_intro:
+                case eReactorStatus.Startup_intense:
+                case eReactorStatus.Startup_waitForVerify:
+                    if (reactor.m_currentWaveCount == reactor.m_waveCountMax)
+                        reactor.AttemptInteract(eReactorInteraction.Finish_startup);
+                    else
+                        reactor.AttemptInteract(eReactorInteraction.Verify_startup);
+                    break;
+            }
+
+            Logger.Debug($"CompleteCurrentReactorWave: Current reactor wave for {e.Layer} completed");
+        }
+
         private static void AlertEnemies(WardenObjectiveEventData e, bool AlertAllAreas = false)
         {
             LG_Zone zone = null;
@@ -116,7 +162,7 @@ namespace LEGACY.ExtraEventsConfig
 
             if (eventToTrigger.Count >= terminalZone.TerminalsSpawnedInZone.Count)
             {
-                Logger.Error("ExtraEventsConfig: Invalid event.Count: 0 < event.Count < TerminalsSpawnedInZone.Count should suffice.");
+                Logger.Error("ExtraEventsConfig: Invalid event.Count: 0 <= event.Count < TerminalsSpawnedInZone.Count should suffice.");
                 return;
             }
 
@@ -434,7 +480,7 @@ namespace LEGACY.ExtraEventsConfig
                 case (int)EventType.AlertEnemiesInArea:
                     AlertEnemies(e, (uint)e.Type == (uint)EventType.AlertEnemiesInZone); break;
                 case (int)EventType.Reactor_CompleteCurrentWave:
-                    ReactorConfigManager.Current.CompleteCurrentReactorWave(e); break;
+                    CompleteCurrentReactorWave(e); break;
                 case (int)EventType.Reactor_MoveWaveLog:
                     Logger.Error("Moving wave log is not synced, which could lead to desync if any session-(re)join occurred.");
                     Logger.Warning("TODO: Disallow log move and make Moing log an event OnEnterLevel.");

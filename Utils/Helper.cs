@@ -9,6 +9,24 @@ namespace LEGACY.Utils
 {
     public static class Helper
     {
+        public static LG_WardenObjective_Reactor FindReactor(LG_LayerType layer)
+        {
+            LG_WardenObjective_Reactor reactor = null;
+            foreach (var keyvalue in WardenObjectiveManager.Current.m_wardenObjectiveItem)
+            {
+                if (keyvalue.Key.Layer != layer)
+                    continue;
+
+                reactor = keyvalue.Value.TryCast<LG_WardenObjective_Reactor>();
+                if (reactor == null)
+                    continue;
+
+                break;
+            }
+
+            return reactor;
+        }
+
         public static bool TryGetComponent<T>(this GameObject obj, out T comp)
         {
             comp = obj.GetComponent<T>();

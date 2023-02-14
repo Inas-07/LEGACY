@@ -192,9 +192,8 @@ namespace LEGACY.ExtraEventsConfig
             {
                 if (data.TriggerAlarm)
                 {
-                    // Not pretty sure if 'this' can be replaced by WardenObjectiveManager.Current
-                    int num1 = (int)WardenObjectiveManager.Current.m_sound.UpdatePosition(spawnNode.Position);
-                    int num2 = (int)WardenObjectiveManager.Current.m_sound.Post(EVENTS.APEX_PUZZLE_START_ALARM);
+                    WardenObjectiveManager.Current.m_sound.UpdatePosition(spawnNode.Position);
+                    WardenObjectiveManager.Current.m_sound.Post(EVENTS.APEX_PUZZLE_START_ALARM);
                     UnityEngine.Debug.Log("WardenObjectiveManager.TriggerEnemyWaveData - Alarm");
                 }
                 yield return new UnityEngine.WaitForSeconds(2f);
