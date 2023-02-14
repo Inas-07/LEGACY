@@ -216,9 +216,9 @@ namespace LEGACY.HardcodedBehaviours
             }
 
             DIMENSION_Z0_TERMINAL_CPS = new ChainedPuzzleInstance[3] { null, null, null };
-            DIMENSION_Z0_TERMINAL_CPS[0] = Utils.Helper.GetChainedPuzzleForCommandOnTerminal(dim_Z12.TerminalsSpawnedInZone[0], "RESTORE_MATTER_WAVE_PHASE_1");
-            DIMENSION_Z0_TERMINAL_CPS[1] = Utils.Helper.GetChainedPuzzleForCommandOnTerminal(dim_Z12.TerminalsSpawnedInZone[0], "RESTORE_MATTER_WAVE_PHASE_2");
-            DIMENSION_Z0_TERMINAL_CPS[2] = Utils.Helper.GetChainedPuzzleForCommandOnTerminal(dim_Z12.TerminalsSpawnedInZone[0], "RESTORE_MATTER_WAVE_PHASE_3");
+            DIMENSION_Z0_TERMINAL_CPS[0] = Helper.GetChainedPuzzleForCommandOnTerminal(dim_Z12.TerminalsSpawnedInZone[0], "RESTORE_MATTER_WAVE_PHASE_1");
+            DIMENSION_Z0_TERMINAL_CPS[1] = Helper.GetChainedPuzzleForCommandOnTerminal(dim_Z12.TerminalsSpawnedInZone[0], "RESTORE_MATTER_WAVE_PHASE_2");
+            DIMENSION_Z0_TERMINAL_CPS[2] = Helper.GetChainedPuzzleForCommandOnTerminal(dim_Z12.TerminalsSpawnedInZone[0], "RESTORE_MATTER_WAVE_PHASE_3");
 
             if (DIMENSION_Z0_TERMINAL_CPS[0] == null || DIMENSION_Z0_TERMINAL_CPS[1] == null || DIMENSION_Z0_TERMINAL_CPS[2] == null)
             {
@@ -252,14 +252,6 @@ namespace LEGACY.HardcodedBehaviours
             DIMENSION_Z0_TERMINAL_CPS[0].AddRequiredItems(new iWardenObjectiveItem[1] { new iWardenObjectiveItem(PowerCells_InDimension[0].Pointer) });
             DIMENSION_Z0_TERMINAL_CPS[1].AddRequiredItems(new iWardenObjectiveItem[1] { new iWardenObjectiveItem(PowerCells_InDimension[1].Pointer) });
             DIMENSION_Z0_TERMINAL_CPS[2].AddRequiredItems(new iWardenObjectiveItem[1] { new iWardenObjectiveItem(PowerCells_InDimension[2].Pointer) });
-            //DIMENSION_Z0_CP.OnPuzzleSolved += new System.Action(() => {
-            //    DimensionWarpCount++;
-            //    if (DimensionWarpCount < PowerCells_InDimension.Length)
-            //    {
-            //        ChainedPuzzleInstance CP = Utils.GetChainedPuzzleForCommandOnTerminal(dim_Z12.TerminalsSpawnedInZone[0], "RESTORE_MATTER_WAVE");
-            //        CP.AddRequiredItems(new iWardenObjectiveItem[1] { new iWardenObjectiveItem(PowerCells_InDimension[DimensionWarpCount].Pointer) });
-            //    }
-            //});
 
             return true;
         }
@@ -394,8 +386,6 @@ namespace LEGACY.HardcodedBehaviours
                 Logger.Log("Fog descending for Puzzle1 Trio");
 
                 WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(Colosseum1Events, eWardenObjectiveEventTrigger.OnStart, false);
-                //Utils.CheckAndExecuteEventsOnTrigger(Colosseum1Events, eWardenObjectiveEventTrigger.OnStart, false);
-
 
                 if (SNet.IsMaster)
                 {
@@ -614,7 +604,6 @@ namespace LEGACY.HardcodedBehaviours
             {
                 case (uint)PuzzleID.Colosseum1_1:
                     WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(Colosseum1Events, eWardenObjectiveEventTrigger.None, false);
-                    //Utils.CheckAndExecuteEventsOnTrigger(Colosseum1Events, eWardenObjectiveEventTrigger.None, false);
 
                     if (SNet.IsMaster)
                     {

@@ -29,11 +29,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ExtraEventsConfig\ChainedPuzzle_Custom.cs" />
+    <Compile Include="Reactor\ReactorConfigData.cs" />
     <Compile Include="Reactor\ReactorConfigManager.cs" />
     <Compile Include="LEGACY.cs" />
     <Compile Include="Utils\Helper.cs" />
     <Compile Include="ExtraEventsConfig\SpawnEnemyWave_Custom.cs" />
     <Compile Include="ExtraEventsConfig\Patch_EventsOnUplinkCommence.cs" />
+    <Compile Include="Utils\JSON.cs" />
     <Compile Include="Utils\Logger.cs" />
     <Compile Include="VanillaFix\Patch_FixHiddenCommandExecution.cs" />
     <Compile Include="VanillaFix\Patch_FixScoutFreeze.cs" />
