@@ -33,7 +33,7 @@ namespace LEGACY.Utils
             return comp != null;
         }
 
-        public static bool isPlayerInLevel(PlayerAgent player)
+        public static bool IsPlayerInLevel(PlayerAgent player)
         {
             return player.Owner.Load<pGameState>().gameState == eGameStateName.InLevel;
         }
@@ -177,6 +177,8 @@ namespace LEGACY.Utils
 
             return res;
         }
+
+
     }
 
 

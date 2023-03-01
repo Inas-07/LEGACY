@@ -31,7 +31,7 @@ namespace LEGACY.HardcodedBehaviours
 
             foreach (PlayerAgent player in PlayerManager.PlayerAgentsInLevel)
             {
-                if (!Utils.Helper.isPlayerInLevel(player)) continue;
+                if (!Utils.Helper.IsPlayerInLevel(player)) continue;
 
                 //SNetwork.SNet_Player player2
                 if (MinLayer > player.m_courseNode.LayerType)
@@ -54,7 +54,7 @@ namespace LEGACY.HardcodedBehaviours
 
             foreach (PlayerAgent player in PlayerManager.PlayerAgentsInLevel)
             {
-                if (!Utils.Helper.isPlayerInLevel(player)) continue;
+                if (!Utils.Helper.IsPlayerInLevel(player)) continue;
 
                 //SNetwork.SNet_Player player2
                 if (MaxLayer < player.m_courseNode.LayerType)

@@ -1,9 +1,7 @@
 ﻿using BepInEx;
 using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
-using LEGACY.Reactor;
-using ScanPosOverride.JSON;
-using System.IO;
+using Il2CppSystem;
 
 namespace LEGACY
 {
@@ -11,12 +9,15 @@ namespace LEGACY
     [BepInDependency("dev.gtfomodding.gtfo-api", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("ScanPositionOverride", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("MTFO.Extension.PartialBlocks", BepInDependency.DependencyFlags.HardDependency)]
-    [BepInPlugin("Inas07.LEGACY", "LEGACY", "3.1.3.2")]
+    [BepInPlugin(AUTHOR + "." + RUNDOWN_NAME, RUNDOWN_NAME, VERSION)]
     
     public class EntryPoint: BasePlugin
     {
+        public const string AUTHOR = "Inas07";
+        public const string RUNDOWN_NAME = "LEGACY";
+        public const string VERSION = "3.2.0";
+
         private Harmony m_Harmony;
-        internal static readonly string LEGACY_CUSTOM_PATH = Path.Combine(MTFOUtil.CustomPath, "LEGACY");
         
         public override void Load()
         {

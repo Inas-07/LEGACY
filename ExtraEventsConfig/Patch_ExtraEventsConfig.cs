@@ -8,29 +8,76 @@ using Player;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
 using SNetwork;
 using AK;
+using Agents;
 
 namespace LEGACY.ExtraEventsConfig
 {
     enum EventType
     {
         CloseSecurityDoor_Custom = 100,
-        KillEnemiesInDimension_Custom = 101,
-        SetTimerTitle_Custom = 102,
-        ToggleEnableDisableAllTerminalsInZone_Custom = 103,
-        ToggleEnableDisableTerminalInZone_Custom = 104,
-        KillEnemiesInZone_Custom = 105,
-        StopSpecifiedEnemyWave = 106,
-        AlertEnemiesInZone = 107,
-        AlertEnemiesInArea = 108,
-        Reactor_CompleteCurrentWave = 109,
-        Reactor_MoveWaveLog = 110, // unimplemented
-        ChainedPuzzle_AddReqItem = 111,
-        ChainedPuzzle_RemoveReqItem = 112
+        KillEnemiesInDimension_Custom,
+        SetTimerTitle_Custom,
+        ToggleEnableDisableAllTerminalsInZone_Custom,
+        ToggleEnableDisableTerminalInZone_Custom,
+        KillEnemiesInZone_Custom,
+        StopSpecifiedEnemyWave,
+        AlertEnemiesInZone,
+        AlertEnemiesInArea,
+
+        Reactor_CompleteCurrentWave = 150,
+        TP_WarpTeamsToArea = 160,
+
+        ChainedPuzzle_AddReqItem = 200,
+        ChainedPuzzle_RemoveReqItem 
     }
 
     [HarmonyPatch]
     class Patch_ExtraEventsConfig
     {
+        // specifying e.DimensionIndex is necessary!
+        private static void WarpTeamsToArea(WardenObjectiveEventData e)
+        {
+            if (GameStateManager.CurrentStateName != eGameStateName.InLevel) return;
+
+            // with area unspecified, warp players to random area in zone
+            PlayerAgent localPlayer = PlayerManager.GetLocalPlayerAgent();
+
+            if (localPlayer == null)
+            {
+                Logger.Error("WarpTeamsToArea: Cannot get local player agent!");
+                return;
+            }
+
+            eDimensionIndex flashFromDimensionIndex = localPlayer.DimensionIndex;
+            Dimension flashToDimension;
+            if (Dimension.GetDimension(e.DimensionIndex, out flashToDimension) == false || flashToDimension == null)
+            {
+                Logger.Error("WarpTeamsToArea: Cannot find dimension to warp to!");
+                return;
+            }
+
+            LG_Zone warpToZone;
+            if (!Builder.CurrentFloor.TryGetZoneByLocalIndex(e.DimensionIndex, e.Layer, e.LocalIndex, out warpToZone) || warpToZone == null)
+            {
+                Logger.Error($"WarpTeamsToArea: Cannot find target zone! {e.LocalIndex}, {e.Layer}, {e.DimensionIndex}");
+                return;
+            }
+
+            int areaIndex = e.Count;
+            if (areaIndex < 0 || areaIndex >= warpToZone.m_areas.Count)
+            {
+                Logger.Warning($"WarpTeamsToArea: invalid area index {areaIndex}, defaulting to first area");
+                areaIndex = 0;
+            }
+
+            LG_Area warpToArea = warpToZone.m_areas[areaIndex];
+
+            UnityEngine.Vector3 warpToPosition = warpToArea.m_courseNode.GetRandomPositionInside();
+
+            localPlayer.TryWarpTo(e.DimensionIndex, warpToPosition, UnityEngine.Random.onUnitSphere, true);
+            Logger.Debug($"WarpTeamsToArea: warpped to {e.LocalIndex}{'A' + areaIndex}, {e.Layer}, {e.DimensionIndex}");
+        }
+
         internal static void CompleteCurrentReactorWave(WardenObjectiveEventData e)
         {
             if (!SNet.IsMaster) return;
@@ -140,33 +187,63 @@ namespace LEGACY.ExtraEventsConfig
             LG_LayerType layer = eventToTrigger.Layer;
             eLocalZoneIndex localIndex = eventToTrigger.LocalIndex;
             eDimensionIndex dimensionIndex = eventToTrigger.DimensionIndex;
-            LG_Zone terminalZone = null;
-            Builder.CurrentFloor.TryGetZoneByLocalIndex(dimensionIndex, layer, localIndex, out terminalZone);
-            if (terminalZone == null)
+            LG_ComputerTerminal terminal;
+
+            switch (eventToTrigger.TerminalCommand)
             {
-                Logger.Error("Failed to get terminal in zone {0}, layer {1}, dimension {2}.", localIndex, layer, dimensionIndex);
+                case TERM_Command.ReactorStartup:
+                case TERM_Command.ReactorShutdown:
+                case TERM_Command.ReactorVerify:
+                    LG_WardenObjective_Reactor reactor = Helper.FindReactor(layer);
+                    if (reactor == null)
+                    {
+                        Logger.Error($"SetTerminalCommand_Custom: Cannot find reactor for {layer}, won't change {eventToTrigger.TerminalCommand} visibility");
+                        return;
+                    }
+
+                    terminal = reactor.m_terminal;
+                    break;
+
+                    // todo: add more warden objective command manipulation.
+
+                default:
+                    LG_Zone terminalZone = null;
+
+                    Builder.CurrentFloor.TryGetZoneByLocalIndex(dimensionIndex, layer, localIndex, out terminalZone);
+                    if (terminalZone == null)
+                    {
+                        Logger.Error("SetTerminalCommand_Custom: Failed to get terminal in zone {0}, layer {1}, dimension {2}.", localIndex, layer, dimensionIndex);
+                        return;
+                    }
+
+                    if (terminalZone.TerminalsSpawnedInZone == null)
+                    {
+                        Logger.Error("SetTerminalCommand_Custom: terminalZone.TerminalsSpawnedInZone == null");
+                        return;
+                    }
+
+                    if (terminalZone.TerminalsSpawnedInZone.Count < 1)
+                    {
+                        Logger.Error("SetTerminalCommand_Custom: No terminal spawns in the specified zone!");
+                        return;
+                    }
+
+                    if (eventToTrigger.Count >= terminalZone.TerminalsSpawnedInZone.Count)
+                    {
+                        Logger.Error("SetTerminalCommand_Custom: Invalid event.Count: 0 <= event.Count < TerminalsSpawnedInZone.Count should suffice.");
+                        return;
+                    }
+
+                    terminal = terminalZone.TerminalsSpawnedInZone[eventToTrigger.Count];
+                    break;
+            }
+
+            if(terminal == null)
+            {
+                Logger.Error("SetTerminalCommand_Custom: null temrinal");
                 return;
             }
 
-            if (terminalZone.TerminalsSpawnedInZone == null)
-            {
-                Logger.Error("ExtraEventsConfig: terminalZone.TerminalsSpawnedInZone == null");
-                return;
-            }
-
-            if (terminalZone.TerminalsSpawnedInZone.Count < 1)
-            {
-                Logger.Error("ExtraEventsConfig: No terminal spawns in the specified zone!");
-                return;
-            }
-
-            if (eventToTrigger.Count >= terminalZone.TerminalsSpawnedInZone.Count)
-            {
-                Logger.Error("ExtraEventsConfig: Invalid event.Count: 0 <= event.Count < TerminalsSpawnedInZone.Count should suffice.");
-                return;
-            }
-
-            LG_ComputerTerminal terminal = terminalZone.TerminalsSpawnedInZone[eventToTrigger.Count];
             if (eventToTrigger.Enabled == true)
             {
                 terminal.TrySyncSetCommandShow(eventToTrigger.TerminalCommand);
@@ -175,6 +252,8 @@ namespace LEGACY.ExtraEventsConfig
             {
                 terminal.TrySyncSetCommandHidden(eventToTrigger.TerminalCommand);
             }
+
+            Logger.Debug($"SetTerminalCommand_Custom: Terminal_{terminal.m_serialNumber}, Zone_{terminal.SpawnNode.m_zone.LocalIndex}, {terminal.SpawnNode.LayerType}, {terminal.SpawnNode.m_dimension.DimensionIndex}");
         }
 
         private static bool CloseSecurityDoor_Custom(WardenObjectiveEventData eventToTrigger)
@@ -386,8 +465,8 @@ namespace LEGACY.ExtraEventsConfig
                 case (int)EventType.KillEnemiesInZone_Custom:
                 case (int)EventType.AlertEnemiesInZone:
                 case (int)EventType.AlertEnemiesInArea:
+                case (int)EventType.TP_WarpTeamsToArea:
                 case (int)EventType.Reactor_CompleteCurrentWave:
-                case (int)EventType.Reactor_MoveWaveLog:
                     coroutine = CoroutineManager.StartCoroutine(Handle(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
                     WorldEventManager.m_worldEventEventCoroutines.Add(coroutine);
                     return false;
@@ -481,11 +560,8 @@ namespace LEGACY.ExtraEventsConfig
                     AlertEnemies(e, (uint)e.Type == (uint)EventType.AlertEnemiesInZone); break;
                 case (int)EventType.Reactor_CompleteCurrentWave:
                     CompleteCurrentReactorWave(e); break;
-                case (int)EventType.Reactor_MoveWaveLog:
-                    Logger.Error("Moving wave log is not synced, which could lead to desync if any session-(re)join occurred.");
-                    Logger.Warning("TODO: Disallow log move and make Moing log an event OnEnterLevel.");
-                    //ReactorConfigManager.Current.MoveVerifyLog(e); 
-                    break;
+                case (int)EventType.TP_WarpTeamsToArea:
+                    WarpTeamsToArea(e); break;
                 case (int)EventType.SetTimerTitle_Custom:
                     {
                         float duration = e.Duration;
