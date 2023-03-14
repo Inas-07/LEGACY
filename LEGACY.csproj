@@ -11,7 +11,7 @@
     -->
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Platforms>x64</Platforms>
-    <OutputPath>J:\SteamLibrary\steamapps\common\GTFO\BepInEx\plugins</OutputPath>
+    <OutputPath>I:\SteamLibrary\steamapps\common\GTFO\BepInEx\plugins</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
@@ -29,11 +29,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ExtraEventsConfig\ChainedPuzzle_Custom.cs" />
+    <Compile Include="HardcodedBehaviours\Patch_FogBeacon.cs" />
     <Compile Include="LEGACY.cs" />
     <Compile Include="PlayerPortal\PlayerPortalManager.cs" />
     <Compile Include="PlayerPortal\ZonePortal.cs" />
     <Compile Include="Utils\Helper.cs" />
-    <Compile Include="ExtraEventsConfig\SpawnEnemyWave_Custom.cs" />
+    <Compile Include="ExtraEventsConfig\SpawnSurvivalWave_Custom.cs" />
     <Compile Include="ExtraEventsConfig\Patch_EventsOnUplinkCommence.cs" />
     <Compile Include="Utils\Logger.cs" />
     <Compile Include="Utils\VersionWatermark.cs" />

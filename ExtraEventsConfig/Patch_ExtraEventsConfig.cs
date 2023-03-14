@@ -9,6 +9,7 @@ using BepInEx.Unity.IL2CPP.Utils.Collections;
 using SNetwork;
 using AK;
 using Agents;
+using AIGraph;
 
 namespace LEGACY.ExtraEventsConfig
 {
@@ -27,6 +28,8 @@ namespace LEGACY.ExtraEventsConfig
         Reactor_CompleteCurrentWave = 150,
         TP_WarpTeamsToArea = 160,
 
+        SpawnEnemy_Hibernate = 170,
+
         ChainedPuzzle_AddReqItem = 200,
         ChainedPuzzle_RemoveReqItem 
     }
@@ -34,6 +37,136 @@ namespace LEGACY.ExtraEventsConfig
     [HarmonyPatch]
     class Patch_ExtraEventsConfig
     {
+        private static void SpawnEnemy_Hibernate(WardenObjectiveEventData e)
+        {
+            if (!SNet.IsMaster) return;
+
+            AgentMode mode = AgentMode.Hibernate; 
+
+            switch(e.EnemyID)
+            {
+                case 20:
+                case 40:
+                case 41:
+                    mode = AgentMode.Scout; break;
+            }
+
+            LG_Zone zone;
+            AIG_CourseNode node = null;
+            bool usingOnPosition = false;
+            if (!Builder.CurrentFloor.TryGetZoneByLocalIndex(e.DimensionIndex, e.Layer, e.LocalIndex, out zone) || zone == null)
+            {
+                Logger.Error($"SpawnEnemy_Hibernate: cannot find zone {e.LocalIndex}, {e.Layer}, {e.DimensionIndex}");
+                return;
+            }
+
+            System.Collections.Generic.List<UnityEngine.Vector3> spawnPositions = new();
+            if (e.Position != UnityEngine.Vector3.zero && e.Count == 1)
+            {
+                usingOnPosition = true;
+                spawnPositions.Add(e.Position);
+            }
+            else
+            {
+                switch (e.WorldEventObjectFilter.ToUpperInvariant())
+                {
+                    case "RANDOM":
+                    case "RANDOM_AREA":
+                    case "":
+                        node = null;
+                        break;
+                    default:
+                        if (e.WorldEventObjectFilter.Contains("AREA_") && "AREA_".Length + 1 == e.WorldEventObjectFilter.Length)
+                        {
+                            int areaIndex = e.WorldEventObjectFilter["AREA_".Length] - 'A';
+                            if (areaIndex < 0 || areaIndex >= zone.m_areas.Count)
+                            {
+                                Logger.Error($"SpawnEnemy_Hibernate: invalid WorldEventObjectFilter - didn't find {e.WorldEventObjectFilter}");
+                                return;
+                            }
+
+                            node = zone.m_areas[areaIndex].m_courseNode;
+                        }
+                        else
+                        {
+                            Logger.Error("SpawnEnemy_Hibernate: invalid format for WorldEventObjectFilter, should be one of RANDOM, \"\", AREA_{area letter}");
+                            return;
+                        }
+                        break;
+                }
+
+                if(node == null)
+                {
+                    int areaIndex = Builder.SessionSeedRandom.Range(0, zone.m_areas.Count); 
+                    Logger.Debug($"areaIndex: {areaIndex}");
+
+                    // a single enemy group falls into one single zone.
+                    node = zone.m_areas[areaIndex].m_courseNode;
+                }
+
+                for (int c = 0; c < e.Count; c++)
+                {
+                    spawnPositions.Add(node.GetRandomPositionInside());
+                }
+            }
+
+            // scout:
+            if (mode == AgentMode.Scout)
+            {
+                eEnemyGroupType groupType = (eEnemyGroupType)3;
+                eEnemyRoleDifficulty difficulty = 0;
+
+                switch (e.EnemyID)
+                {
+                    case 20:
+                        difficulty = 0; break;
+                    case 40:
+                        difficulty = (eEnemyRoleDifficulty)14; break;
+                    case 41:
+                        difficulty = (eEnemyRoleDifficulty)3; break;
+                    case 23:
+                        difficulty = (eEnemyRoleDifficulty)6; break;
+                    case 48:
+                        difficulty = (eEnemyRoleDifficulty)13; break;
+                    default:
+                        Logger.Error($"Undefined scout, enemy ID {e.EnemyID}");
+                        break;
+                }
+
+                EnemyGroupRandomizer r = null;
+                if (!EnemySpawnManager.TryCreateEnemyGroupRandomizer(groupType, difficulty, out r) || r == null)
+                {
+                    Logger.Error("EnemySpawnManager.TryCreateEnemyGroupRandomizer false");
+                    return;
+                }
+
+                EnemyGroupDataBlock randomGroup = r.GetRandomGroup(Builder.SessionSeedRandom.Value());
+                float popPoints = randomGroup.MaxScore * Builder.SessionSeedRandom.Range(1f, 1.2f);
+
+                foreach (var position in spawnPositions)
+                {
+                    var scoutSpawnData = EnemyGroup.GetSpawnData(position, node, EnemyGroupType.Hibernating,
+                    eEnemyGroupSpawnType.RandomInArea, randomGroup.persistentID, popPoints) with
+                    {
+                        respawn = false
+                    };
+
+                    EnemyGroup.Spawn(scoutSpawnData);
+                }
+            }
+
+            else
+            {
+                foreach (var position in spawnPositions)
+                {
+                    UnityEngine.Quaternion rotation = UnityEngine.Quaternion.LookRotation(new UnityEngine.Vector3(EnemyGroup.s_randomRot2D.x, 0.0f, EnemyGroup.s_randomRot2D.y), UnityEngine.Vector3.up);
+                    EnemyAllocator.Current.SpawnEnemy(e.EnemyID, node, mode, position, rotation);
+                }
+            }
+
+            Logger.Debug($"SpawnEnemy_Hibernate: spawned {e.Count} enemy/enemies " + (usingOnPosition ? $"on position ({e.Position.x}, {e.Position.y}, {e.Position.z})" : $"in zone {e.LocalIndex}, {e.Layer}, {e.DimensionIndex}"));
+        }
+
         // specifying e.DimensionIndex is necessary!
         private static void WarpTeamsToArea(WardenObjectiveEventData e)
         {
@@ -466,12 +599,13 @@ namespace LEGACY.ExtraEventsConfig
                 case (int)EventType.AlertEnemiesInZone:
                 case (int)EventType.AlertEnemiesInArea:
                 case (int)EventType.TP_WarpTeamsToArea:
+                case (int)EventType.SpawnEnemy_Hibernate:
                 case (int)EventType.Reactor_CompleteCurrentWave:
                     coroutine = CoroutineManager.StartCoroutine(Handle(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
                     WorldEventManager.m_worldEventEventCoroutines.Add(coroutine);
                     return false;
                 case (int)EventType.StopSpecifiedEnemyWave:
-                    SpawnEnemyWave_Custom.StopSpecifiedWave(eventToTrigger, currentDuration);
+                    SpawnSurvivalWave_Custom.StopSpecifiedWave(eventToTrigger, currentDuration);
                     return false;
                 case (int)EventType.ChainedPuzzle_AddReqItem:
                     coroutine = CoroutineManager.StartCoroutine(ChainedPuzzle_Custom.AddReqItem(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
@@ -492,10 +626,10 @@ namespace LEGACY.ExtraEventsConfig
                     //WardenObjectiveManager.m_wardenObjectiveEventCoroutines.Add(coroutine);
                     return false;
                 case eWardenObjectiveEventType.SpawnEnemyWave:
-                    bool use_vanilla_impl = SpawnEnemyWave_Custom.SpawnWave(eventToTrigger, currentDuration);
+                    bool use_vanilla_impl = SpawnSurvivalWave_Custom.SpawnWave(eventToTrigger, currentDuration);
                     return use_vanilla_impl;
                 case eWardenObjectiveEventType.StopEnemyWaves:
-                    SpawnEnemyWave_Custom.OnStopAllWave();
+                    SpawnSurvivalWave_Custom.OnStopAllWave();
                     return true;
                 case eWardenObjectiveEventType.ActivateChainedPuzzle:
                     coroutine = CoroutineManager.StartCoroutine(ChainedPuzzle_Custom.ActivateChainedPuzzle(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
@@ -560,6 +694,8 @@ namespace LEGACY.ExtraEventsConfig
                     AlertEnemies(e, (uint)e.Type == (uint)EventType.AlertEnemiesInZone); break;
                 case (int)EventType.Reactor_CompleteCurrentWave:
                     CompleteCurrentReactorWave(e); break;
+                case (int)EventType.SpawnEnemy_Hibernate:
+                    SpawnEnemy_Hibernate(e); break;
                 case (int)EventType.TP_WarpTeamsToArea:
                     WarpTeamsToArea(e); break;
                 case (int)EventType.SetTimerTitle_Custom:

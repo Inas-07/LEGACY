@@ -12,7 +12,7 @@ using System.Collections;
 namespace LEGACY.ExtraEventsConfig
 {
 
-    internal static class SpawnEnemyWave_Custom
+    internal static class SpawnSurvivalWave_Custom
     {
         private static System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<ushort>> WaveEventsMap = new();
 

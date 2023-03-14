@@ -76,6 +76,11 @@ namespace LEGACY.ExtraEventsConfig
 
             checkInit();
 
+            //boss.add_OnDeadCallback(new System.Action(() => 
+            //{
+            //    WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(eventsOnBossDeath, eWardenObjectiveEventTrigger.None, true);
+            //}));
+
             bossesWithDeathEvents.Add(boss.GlobalID, eventsOnBossDeath);
         }
 
@@ -94,7 +99,6 @@ namespace LEGACY.ExtraEventsConfig
             if (bossesWithDeathEvents.TryGetValue(boss.GlobalID, out eventsOnBossDeath) == false || eventsOnBossDeath == null) return;
 
             WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(eventsOnBossDeath, eWardenObjectiveEventTrigger.None, true, 0.0f);
-            //Utils.CheckAndExecuteEventsOnTrigger(eventsOnBossDeath, eWardenObjectiveEventTrigger.None, true);
             bossesWithDeathEvents.Remove(boss.GlobalID);
         }
 
@@ -104,7 +108,6 @@ namespace LEGACY.ExtraEventsConfig
             {
                 bossesWithDeathEvents.Clear();
                 bossesWithDeathEvents = null;
-                Logger.Log("Clean EventsOnBossDeath.");
             }
         }
 

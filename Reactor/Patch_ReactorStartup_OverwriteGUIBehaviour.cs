@@ -212,7 +212,7 @@ namespace LEGACY.Reactor
                             break;
                         }
                         __instance.m_lightCollection.SetMode(db.LightsOnDuringIntro);
-                        // R7 migration End
+    
 
                         // R6 impl.
                         //__instance.m_lightCollection.SetMode(WardenObjectiveManager.ActiveWardenObjective(__instance.SpawnNode.LayerType).LightsOnDuringIntro);
@@ -229,14 +229,14 @@ namespace LEGACY.Reactor
                         if (__instance.m_currentWaveCount == 1)
                         {
                             Debug.LogError("Reactor IDLE START");
-                            int num1 = (int)__instance.m_sound.Post(EVENTS.REACTOR_POWER_LEVEL_1_LOOP);
-                            int num2 = (int)__instance.m_sound.SetRTPCValue(GAME_PARAMETERS.REACTOR_POWER, 0.0f);
+                            __instance.m_sound.Post(EVENTS.REACTOR_POWER_LEVEL_1_LOOP);
+                            __instance.m_sound.SetRTPCValue(GAME_PARAMETERS.REACTOR_POWER, 0.0f);
                         }
                         else
                         {
                             Debug.LogError("Reactor REACTOR_POWER_DOWN");
-                            int num3 = (int)__instance.m_sound.Post(EVENTS.REACTOR_POWER_LEVEL_2_TO_1_TRANSITION);
-                            int num4 = (int)__instance.m_sound.SetRTPCValue(GAME_PARAMETERS.REACTOR_POWER, 0.0f);
+                            __instance.m_sound.Post(EVENTS.REACTOR_POWER_LEVEL_2_TO_1_TRANSITION);
+                            __instance.m_sound.SetRTPCValue(GAME_PARAMETERS.REACTOR_POWER, 0.0f);
                         }
                         //if (newState.verifyFailed)
                         //{
