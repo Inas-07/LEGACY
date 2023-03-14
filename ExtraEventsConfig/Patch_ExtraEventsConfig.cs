@@ -61,10 +61,19 @@ namespace LEGACY.ExtraEventsConfig
             }
 
             System.Collections.Generic.List<UnityEngine.Vector3> spawnPositions = new();
-            if (e.Position != UnityEngine.Vector3.zero && e.Count == 1)
+            if (e.Position != UnityEngine.Vector3.zero)
             {
                 usingOnPosition = true;
                 spawnPositions.Add(e.Position);
+
+                Logger.Debug($"SpawnEnemy_Hibernate: using SpawnOnPosition, will only spawn 1 enemy.\nYou'll have to specify the correct area (using Count) as well");
+                if(e.Count < 0 || e.Count >= zone.m_areas.Count) 
+                {
+                    Logger.Error($"SpawnEnemy_Hibernate: invalid e.Count {e.Count}");
+                    return;
+                }
+
+                node = zone.m_areas[e.Count].m_courseNode;
             }
             else
             {
