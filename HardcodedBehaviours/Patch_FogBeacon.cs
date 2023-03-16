@@ -55,6 +55,10 @@ namespace LEGACY.HardcodedBehaviours
             fogRepBig.transform.SetParent(repellerGlobalState.transform, false);
             repellerGlobalState.m_repellerSphere = fogRepFake;
 
+            // eliminate null ref
+            fogRepSmall.m_sphereAllocator = new();
+            fogRepBig.m_sphereAllocator = new();
+
             Interact_Pickup_PickupItem interact = core.m_interact.Cast<Interact_Pickup_PickupItem>();
             interact.InteractDuration = 3.0f;
 
@@ -64,9 +68,10 @@ namespace LEGACY.HardcodedBehaviours
                 {
                     case eHeavyFogRepellerStatus.Activated:
                         fogRepSmall?.StartRepelling();
-                        if((eHeavyFogRepellerStatus)oldState.status != eHeavyFogRepellerStatus.NoStatus)
-                            fogRepBig?.StopRepelling();
 
+                        // eliminate StopRepelling() exception
+                        if ((eHeavyFogRepellerStatus)oldState.status != eHeavyFogRepellerStatus.NoStatus)
+                            fogRepBig?.StopRepelling();
                         interact.InteractDuration = 1.0f;
                         break;
                     case eHeavyFogRepellerStatus.Deactivated:

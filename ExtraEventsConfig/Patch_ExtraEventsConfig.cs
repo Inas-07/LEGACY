@@ -48,74 +48,88 @@ namespace LEGACY.ExtraEventsConfig
                 case 20:
                 case 40:
                 case 41:
+                case 23:
+                case 48:
                     mode = AgentMode.Scout; break;
             }
 
             LG_Zone zone;
-            AIG_CourseNode node = null;
-            bool usingOnPosition = false;
             if (!Builder.CurrentFloor.TryGetZoneByLocalIndex(e.DimensionIndex, e.Layer, e.LocalIndex, out zone) || zone == null)
             {
                 Logger.Error($"SpawnEnemy_Hibernate: cannot find zone {e.LocalIndex}, {e.Layer}, {e.DimensionIndex}");
                 return;
             }
 
+            bool usingOnPosition = false;
+            System.Collections.Generic.List<AIG_CourseNode> nodes = new();
             System.Collections.Generic.List<UnityEngine.Vector3> spawnPositions = new();
+
+            // if-else clause:
+            // fill nodes and spawnPositions
+            string worldEventObjectFilter = e.WorldEventObjectFilter.ToUpperInvariant();
             if (e.Position != UnityEngine.Vector3.zero)
             {
-                usingOnPosition = true;
-                spawnPositions.Add(e.Position);
+                Logger.Debug($"SpawnEnemy_Hibernate: using SpawnOnPosition, will only spawn 1 enemy.\nYou'll have to specify the correct area as well");
 
-                Logger.Debug($"SpawnEnemy_Hibernate: using SpawnOnPosition, will only spawn 1 enemy.\nYou'll have to specify the correct area (using Count) as well");
-                if(e.Count < 0 || e.Count >= zone.m_areas.Count) 
+                if(!worldEventObjectFilter.Contains("AREA_") || worldEventObjectFilter.Length != "AREA_".Length + 1)
                 {
-                    Logger.Error($"SpawnEnemy_Hibernate: invalid e.Count {e.Count}");
+                    Logger.Error($"SpawnEnemy_Hibernate: invalid WorldEventObjectFilter {e.WorldEventObjectFilter}");
                     return;
                 }
 
-                node = zone.m_areas[e.Count].m_courseNode;
+                int areaIndex = worldEventObjectFilter[worldEventObjectFilter.Length - 1] - 'A';
+                if(areaIndex < 0 || areaIndex >= zone.m_areas.Count)
+                {
+                    Logger.Error($"SpawnEnemy_Hibernate: invalid WorldEventObjectFilter - didn't find AREA_{worldEventObjectFilter[worldEventObjectFilter.Length - 1]}");
+                    return;
+                }
+
+                usingOnPosition = true;
+                nodes.Add(zone.m_areas[areaIndex].m_courseNode);
+                spawnPositions.Add(e.Position);
             }
             else
             {
-                switch (e.WorldEventObjectFilter.ToUpperInvariant())
+                switch (worldEventObjectFilter)
                 {
                     case "RANDOM":
                     case "RANDOM_AREA":
                     case "":
-                        node = null;
-                        break;
-                    default:
-                        if (e.WorldEventObjectFilter.Contains("AREA_") && "AREA_".Length + 1 == e.WorldEventObjectFilter.Length)
+                        for(int c = 0; c < e.Count; c++)
                         {
-                            int areaIndex = e.WorldEventObjectFilter["AREA_".Length] - 'A';
-                            if (areaIndex < 0 || areaIndex >= zone.m_areas.Count)
-                            {
-                                Logger.Error($"SpawnEnemy_Hibernate: invalid WorldEventObjectFilter - didn't find {e.WorldEventObjectFilter}");
-                                return;
-                            }
+                            var node = zone.m_areas[Builder.SessionSeedRandom.Range(0, zone.m_areas.Count)].m_courseNode;
+                            nodes.Add(node);
+                            spawnPositions.Add(node.GetRandomPositionInside());
+                        }
+                        break;
 
-                            node = zone.m_areas[areaIndex].m_courseNode;
+                    default:
+                        if (worldEventObjectFilter.Contains("AREA_") && worldEventObjectFilter.Length - "AREA_".Length > 0)
+                        {
+                            string candidateArea = worldEventObjectFilter.Substring("AREA_".Length);
+                                
+                            for(int c = 0; c < e.Count; c++)
+                            {
+                                char selectedArea = candidateArea[Builder.SessionSeedRandom.Range(0, candidateArea.Length)];
+                                int areaIndex = selectedArea - 'A';
+
+                                if (areaIndex < 0 || areaIndex >= zone.m_areas.Count)
+                                {
+                                    Logger.Error($"SpawnEnemy_Hibernate: invalid WorldEventObjectFilter - didn't find AREA_{selectedArea}");
+                                    continue;
+                                }
+
+                                var node = zone.m_areas[areaIndex].m_courseNode;
+                                nodes.Add(node);
+                                spawnPositions.Add(node.GetRandomPositionInside());
+                            }
                         }
                         else
                         {
-                            Logger.Error("SpawnEnemy_Hibernate: invalid format for WorldEventObjectFilter, should be one of RANDOM, \"\", AREA_{area letter}");
+                            Logger.Error("SpawnEnemy_Hibernate: invalid format for WorldEventObjectFilter, should be one of RANDOM, \"\", AREA_{area letters}");
                             return;
                         }
                         break;
-                }
-
-                if(node == null)
-                {
-                    int areaIndex = Builder.SessionSeedRandom.Range(0, zone.m_areas.Count); 
-                    Logger.Debug($"areaIndex: {areaIndex}");
-
-                    // a single enemy group falls into one single zone.
-                    node = zone.m_areas[areaIndex].m_courseNode;
-                }
-
-                for (int c = 0; c < e.Count; c++)
-                {
-                    spawnPositions.Add(node.GetRandomPositionInside());
                 }
             }
 
@@ -152,8 +166,10 @@ namespace LEGACY.ExtraEventsConfig
                 EnemyGroupDataBlock randomGroup = r.GetRandomGroup(Builder.SessionSeedRandom.Value());
                 float popPoints = randomGroup.MaxScore * Builder.SessionSeedRandom.Range(1f, 1.2f);
 
-                foreach (var position in spawnPositions)
+                for(int i = 0; i < spawnPositions.Count; i++)
                 {
+                    var position = spawnPositions[i];
+                    var node = nodes[i];
                     var scoutSpawnData = EnemyGroup.GetSpawnData(position, node, EnemyGroupType.Hibernating,
                     eEnemyGroupSpawnType.RandomInArea, randomGroup.persistentID, popPoints) with
                     {
@@ -166,10 +182,13 @@ namespace LEGACY.ExtraEventsConfig
 
             else
             {
-                foreach (var position in spawnPositions)
+                for (int i = 0; i < spawnPositions.Count; i++)
                 {
+                    var position = spawnPositions[i];
+                    var node = nodes[i];
                     UnityEngine.Quaternion rotation = UnityEngine.Quaternion.LookRotation(new UnityEngine.Vector3(EnemyGroup.s_randomRot2D.x, 0.0f, EnemyGroup.s_randomRot2D.y), UnityEngine.Vector3.up);
                     EnemyAllocator.Current.SpawnEnemy(e.EnemyID, node, mode, position, rotation);
+                    
                 }
             }
 

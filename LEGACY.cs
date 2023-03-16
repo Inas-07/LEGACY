@@ -1,8 +1,6 @@
 ﻿using BepInEx;
 using BepInEx.Unity.IL2CPP;
-using GTFO.API;
 using HarmonyLib;
-using Il2CppSystem;
 
 namespace LEGACY
 {
@@ -24,6 +22,8 @@ namespace LEGACY
         {
             m_Harmony = new Harmony("LEGACY");
             m_Harmony.PatchAll();
+
+            LegacyConfigManager.Current.Init();
         }
     }
 }

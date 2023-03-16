@@ -29,8 +29,14 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ExtraEventsConfig\ChainedPuzzle_Custom.cs" />
+    <Compile Include="HardcodedBehaviours\Patch_TerminalPositionOverride.cs" />
     <Compile Include="HardcodedBehaviours\Patch_FogBeacon.cs" />
     <Compile Include="LEGACY.cs" />
+    <Compile Include="LegacyConfig\LevelElevatorCargo.cs" />
+    <Compile Include="LegacyConfig\LevelTerminalPosition.cs" />
+    <Compile Include="LegacyConfig\Json.cs" />
+    <Compile Include="LegacyConfigManager.cs" />
+    <Compile Include="LegacyConfig\Vec3.cs" />
     <Compile Include="PlayerPortal\PlayerPortalManager.cs" />
     <Compile Include="PlayerPortal\ZonePortal.cs" />
     <Compile Include="Utils\Helper.cs" />
@@ -43,7 +49,7 @@
     <Compile Include="ExtraEventsConfig\Patch_EventsOnBossDeath.cs" />
     <Compile Include="ExtraEventsConfig\Patch_EventsOnZoneScoutScream.cs" />
     <Compile Include="ExtraEventsConfig\Patch_ExtraEventsConfig.cs" />
-    <Compile Include="HardcodedBehaviours\Patch_ChangeElevatorCargo_Hardcoded.cs" />
+    <Compile Include="HardcodedBehaviours\Patch_ElevatorCargoOverride.cs" />
     <Compile Include="VanillaFix\Patch_LG_SecurityDoor_Fix-EventsOnUnlockDoor_Powergenerator.cs" />
     <Compile Include="VanillaFix\Patch_LockSecurityDoor_FixCustomText.cs" />
     <Compile Include="HardcodedBehaviours\Patch_OverwriteSurvivalWaveSpawnPosition_Hardcoded.cs" />
