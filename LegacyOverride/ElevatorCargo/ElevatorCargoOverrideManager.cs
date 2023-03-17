@@ -1,32 +1,11 @@
-﻿using System.Collections.Generic;
-using GTFO.API.Utilities;
+﻿using GTFO.API.Utilities;
+using LEGACY.LegacyConfig;
+using System.Collections.Generic;
 using System.IO;
 using LEGACY.Utils;
 
-namespace LEGACY.LegacyConfig
+namespace LEGACY.LegacyOverride.ElevatorCargo
 {
-    public enum ItemType
-    {
-        Consumable,
-        BigPickup
-    }
-
-    public class ElevatorCargoItem
-    {
-        public uint ItemID { get; set; }
-
-        public ItemType ItemType { get; set; }
-    }
-
-    public class LevelElevatorCargo
-    {
-        public uint MainLevelLayout { set; get; }
-
-        public bool ForceDisable { get; set; } = false;
-
-        public List<ElevatorCargoItem> ElevatorCargoItems { get; set; } = new();
-    }
-
     internal class ElevatorCargoOverrideManager
     {
         public static ElevatorCargoOverrideManager Current;
@@ -35,7 +14,7 @@ namespace LEGACY.LegacyConfig
 
         private LiveEditListener liveEditListener;
 
-        private static readonly string CONFIG_PATH = Path.Combine(LegacyConfigManager.LEGACY_CONFIG_PATH, "ElevatorCargoOverride");
+        private static readonly string CONFIG_PATH = Path.Combine(LegacyOverrideManagers.LEGACY_CONFIG_PATH, "ElevatorCargoOverride");
 
         private void AddOverride(LevelElevatorCargo _override)
         {
@@ -54,7 +33,7 @@ namespace LEGACY.LegacyConfig
 
         public void Init()
         {
-            if(!Directory.Exists(CONFIG_PATH))
+            if (!Directory.Exists(CONFIG_PATH))
             {
                 Directory.CreateDirectory(CONFIG_PATH);
                 var file = File.CreateText(Path.Combine(CONFIG_PATH, "Template.json"));
@@ -96,4 +75,5 @@ namespace LEGACY.LegacyConfig
             Current = new();
         }
     }
+
 }

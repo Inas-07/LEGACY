@@ -8,10 +8,10 @@ using Player;
 using HarmonyLib;
 using SNetwork;
 using System.Collections;
+using GTFO.API;
 
 namespace LEGACY.ExtraEventsConfig
 {
-
     internal static class SpawnSurvivalWave_Custom
     {
         private static System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<ushort>> WaveEventsMap = new();
@@ -256,11 +256,9 @@ namespace LEGACY.ExtraEventsConfig
             Logger.Debug("Wave(s) with filter {0} stopped.", e.WorldEventObjectFilter);
         }
 
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(GS_AfterLevel), nameof(GS_AfterLevel.CleanupAfterExpedition))]
-        internal static void CleanupAfterExpedition()
+        static SpawnSurvivalWave_Custom()
         {
-            WaveEventsMap.Clear();
+            LevelAPI.OnLevelCleanup += WaveEventsMap.Clear;
         }
     }
 }

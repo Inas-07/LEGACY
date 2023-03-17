@@ -10,6 +10,7 @@ using SNetwork;
 using AK;
 using Agents;
 using AIGraph;
+using UnityEngine.EventSystems;
 
 namespace LEGACY.ExtraEventsConfig
 {
@@ -24,6 +25,8 @@ namespace LEGACY.ExtraEventsConfig
         StopSpecifiedEnemyWave,
         AlertEnemiesInZone,
         AlertEnemiesInArea,
+
+        KillEnemiesInArea = 140,
 
         Reactor_CompleteCurrentWave = 150,
         TP_WarpTeamsToArea = 160,
@@ -460,6 +463,31 @@ namespace LEGACY.ExtraEventsConfig
             return true;
         }
 
+        private static void KillEnemiesInArea(WardenObjectiveEventData e)
+        {
+            LG_Zone zone;
+            if(!Builder.CurrentFloor.TryGetZoneByLocalIndex(e.DimensionIndex, e.Layer, e.LocalIndex, out zone) || zone == null)
+            {
+                Logger.Error("KillEnemiesInArea - Failed to find LG_Zone.");
+                Logger.Error("DimensionIndex: {0}, Layer: {1}, LocalIndex: {2}", e.DimensionIndex, e.Layer, e.LocalIndex);
+                return;
+            }
+
+            if(e.Count < 0 || e.Count >= zone.m_areas.Count)
+            {
+                Logger.Error($"KillEnemiesInArea - Invalid e.Count: {e.Count}, must be valid area index");
+                return;
+            }
+
+            foreach(var enemy in zone.m_areas[e.Count].m_courseNode.m_enemiesInNode.ToArray())
+            {
+                if (enemy != null && enemy.Damage != null)
+                {
+                    enemy.Damage.MeleeDamage(float.MaxValue, null, UnityEngine.Vector3.zero, UnityEngine.Vector3.up, 0, 1f, 1f, 1f, 1f, false, DamageNoiseLevel.Normal);
+                }
+            }
+        }
+
         private static void KillEnemiesInZone(LG_Zone zone)
         {
             if (zone == null) return;
@@ -492,7 +520,7 @@ namespace LEGACY.ExtraEventsConfig
                     LG_Zone zone2 = layer.m_zones[index2];
                     LG_SecurityDoor door;
 
-                    Utils.Helper.TryGetZoneEntranceSecDoor(zone2, out door);
+                    Helper.TryGetZoneEntranceSecDoor(zone2, out door);
 
                     // limited kill
                     if (index2 == 0 || door != null && door.m_sync.GetCurrentSyncState().status == eDoorStatus.Open) // door opened, kill all
@@ -629,6 +657,7 @@ namespace LEGACY.ExtraEventsConfig
                 case (int)EventType.TP_WarpTeamsToArea:
                 case (int)EventType.SpawnEnemy_Hibernate:
                 case (int)EventType.Reactor_CompleteCurrentWave:
+                case (int)EventType.KillEnemiesInArea:
                     coroutine = CoroutineManager.StartCoroutine(Handle(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
                     WorldEventManager.m_worldEventEventCoroutines.Add(coroutine);
                     return false;
@@ -726,6 +755,8 @@ namespace LEGACY.ExtraEventsConfig
                     SpawnEnemy_Hibernate(e); break;
                 case (int)EventType.TP_WarpTeamsToArea:
                     WarpTeamsToArea(e); break;
+                case (int)EventType.KillEnemiesInArea:
+                    KillEnemiesInArea(e); break;
                 case (int)EventType.SetTimerTitle_Custom:
                     {
                         float duration = e.Duration;

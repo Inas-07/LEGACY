@@ -1,32 +1,13 @@
-﻿using GameData;
-using GTFO.API.Utilities;
-using LevelGeneration;
-using System.Collections.Generic;
+﻿using GTFO.API.Utilities;
+using LEGACY.LegacyConfig;
+using LEGACY.LegacyOverride.ElevatorCargo;
 using LEGACY.Utils;
 using System.IO;
+using System.Collections.Generic;
 
-namespace LEGACY.LegacyConfig
+
+namespace LEGACY.LegacyOverride.Terminal
 {
-    public class TerminalPosition
-    {
-        public eDimensionIndex DimensionIndex { get; set; }
-
-        public LG_LayerType LayerType { get; set; }
-
-        public eLocalZoneIndex LocalIndex { get; set; }
-
-        public uint TerminalIndex { get; set; }
-
-        public Vec3 Position { get; set; }
-    }
-
-    public class LevelTerminalPosition
-    {
-        public uint MainLevelLayout { set; get; }
-
-        public List<TerminalPosition> TerminalPositions { set; get; } = new();
-    }
-
     internal class TerminalPositionOverrideManager
     {
         public static TerminalPositionOverrideManager Current;
@@ -35,7 +16,7 @@ namespace LEGACY.LegacyConfig
 
         private LiveEditListener liveEditListener;
 
-        private static readonly string CONFIG_PATH = Path.Combine(LegacyConfigManager.LEGACY_CONFIG_PATH, "TerminalPositionOverride");
+        private static readonly string CONFIG_PATH = Path.Combine(LegacyOverrideManagers.LEGACY_CONFIG_PATH, "TerminalPositionOverride");
 
         private void AddOverride(LevelTerminalPosition _override)
         {
@@ -58,7 +39,7 @@ namespace LEGACY.LegacyConfig
             {
                 Directory.CreateDirectory(CONFIG_PATH);
                 var file = File.CreateText(Path.Combine(CONFIG_PATH, "Template.json"));
-                file.WriteLine(Json.Serialize(new LevelElevatorCargo()));
+                file.WriteLine(Json.Serialize(new LevelTerminalPosition()));
                 file.Flush();
                 file.Close();
 

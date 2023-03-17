@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using LevelGeneration;
-using GameData;
+using LEGACY.LegacyOverride.Terminal;
+using LEGACY.Utils;
 
 namespace LEGACY.HardcodedBehaviours
 {
@@ -11,20 +12,28 @@ namespace LEGACY.HardcodedBehaviours
         [HarmonyPatch(typeof(LG_ComputerTerminal), nameof(LG_ComputerTerminal.Setup))]
         private static void Post_ChangeTerminalPosition(LG_ComputerTerminal __instance)
         {
-            //if (RundownManager.ActiveExpedition.MainLayerData.ObjectiveData.DataBlockId != 30000u) return;
+            var terminalPositionOverride = TerminalPositionOverrideManager.Current.GetLevelTerminalPositionOverride(RundownManager.ActiveExpedition.LevelLayoutData);
+            if (terminalPositionOverride == null) return;
 
-            //switch (__instance.SpawnNode.m_zone.LocalIndex)
-            //{
-            //    case eLocalZoneIndex.Zone_17:
-            //        __instance.transform.position = new() { x = 337.4885f, y = -29.9895f, z = 191.8546f };
-            //        __instance.transform.Rotate(0f, -90f, 0f);
-            //        break;
+            int i = terminalPositionOverride.FindIndex((t) =>
+                t.DimensionIndex == __instance.SpawnNode.m_dimension.DimensionIndex
+                && t.LayerType == __instance.SpawnNode.LayerType
+                && t.LocalIndex == __instance.SpawnNode.m_zone.LocalIndex
+                // mono-code trick
+                && t.TerminalIndex == __instance.SpawnNode.m_zone.TerminalsSpawnedInZone.Count
+            );
 
-            //    case eLocalZoneIndex.Zone_13:
-            //        __instance.transform.position = new() { x = 559.4702f, y = -71.9855f, z = 192.0474f };
-            //        __instance.transform.Rotate(0f, -90f, 0f);
-            //        break;
-            //}
+            if( i == -1 ) return;
+
+            var _override = terminalPositionOverride[i];
+
+            if(_override.Position.ToVector3() != UnityEngine.Vector3.zeroVector)
+            {
+                __instance.transform.position = _override.Position.ToVector3();
+                __instance.transform.rotation = _override.Rotation.ToQuaternion();
+            }
+
+            Logger.Debug($"TerminalPositionOverride: {_override.LocalIndex}, {_override.LayerType}, {_override.DimensionIndex}, TerminalIndex {_override.TerminalIndex}");
         }
     }
 }

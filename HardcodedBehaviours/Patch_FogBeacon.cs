@@ -17,16 +17,16 @@ namespace LEGACY.HardcodedBehaviours
 
             FogRepeller_Sphere fogRepSmall = new GameObject("FogInstance_Beacon_SmallLayer").AddComponent<FogRepeller_Sphere>();
             fogRepSmall.InfiniteDuration = true;
-            fogRepSmall.GrowDuration = 5f;
-            fogRepSmall.ShrinkDuration = 5f;
-            fogRepSmall.Range = 4.5f;
+            fogRepSmall.GrowDuration = 7f;
+            fogRepSmall.ShrinkDuration = 7f;
+            fogRepSmall.Range = 6f;
             fogRepSmall.Offset = Vector3.zero;
 
             FogRepeller_Sphere fogRepBig = new GameObject("FogInstance_Beacon_BigLayer").AddComponent<FogRepeller_Sphere>();
             fogRepBig.InfiniteDuration = true;
             fogRepBig.GrowDuration = 3f;
             fogRepBig.ShrinkDuration = 3f;
-            fogRepBig.Range = 10f; // same as small fog reps
+            fogRepBig.Range = 11f; 
             fogRepBig.Offset = Vector3.zero;
 
             FogRepeller_Sphere fogRepFake = new GameObject("FogInstance_Beacon_Fake").AddComponent<FogRepeller_Sphere>();
@@ -60,7 +60,7 @@ namespace LEGACY.HardcodedBehaviours
             fogRepBig.m_sphereAllocator = new();
 
             Interact_Pickup_PickupItem interact = core.m_interact.Cast<Interact_Pickup_PickupItem>();
-            interact.InteractDuration = 3.0f;
+            interact.InteractDuration = 2.5f;
 
             repellerGlobalState.CallbackOnStateChange += new System.Action<pCarryItemWithGlobalState_State, pCarryItemWithGlobalState_State, bool>((oldState, newState, isRecall) =>
             {
@@ -77,7 +77,7 @@ namespace LEGACY.HardcodedBehaviours
                     case eHeavyFogRepellerStatus.Deactivated:
                         fogRepSmall?.StopRepelling();
                         fogRepBig?.StartRepelling();
-                        interact.InteractDuration = 3.0f;
+                        interact.InteractDuration = 2.5f;
                         break;
                 }
 
