@@ -5,7 +5,7 @@ using System.IO;
 using ScanPosOverride.JSON;
 using MTFO.API;
 
-namespace LEGACY.LegacyConfig
+namespace LEGACY.LegacyOverride
 {
     internal static class Json
     {

@@ -17,9 +17,8 @@ namespace LEGACY.HardcodedBehaviours
 
             if (levelElevatorCargos.ForceDisable)
             {
-                __instance.m_itemsToMoveToCargo.Clear();
-                __instance.m_itemsToMoveToCargo = null;
                 ElevatorRide.Current.m_cargoCageInUse = false;
+
                 return false;
             }
 
@@ -31,7 +30,7 @@ namespace LEGACY.HardcodedBehaviours
         private static void Post_ElevatorCargoOverride(ElevatorCargoCage __instance)
         {
             LevelElevatorCargo levelElevatorCargos = ElevatorCargoOverrideManager.Current.GetLevelElevatorCargoItems(RundownManager.ActiveExpedition.LevelLayoutData);
-            if (levelElevatorCargos == null || levelElevatorCargos.ElevatorCargoItems.Count < 1 || levelElevatorCargos.ForceDisable) return;
+            if (levelElevatorCargos == null || levelElevatorCargos.ElevatorCargoItems.Count < 1) return;
 
             foreach (var elevatorCargo in levelElevatorCargos.ElevatorCargoItems)
             {

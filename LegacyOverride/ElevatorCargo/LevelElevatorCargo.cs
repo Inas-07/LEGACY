@@ -2,7 +2,7 @@
 using GTFO.API.Utilities;
 using System.IO;
 using LEGACY.Utils;
-using LEGACY.LegacyConfig;
+using LEGACY.LegacyOverride;
 
 namespace LEGACY.LegacyOverride.ElevatorCargo
 {

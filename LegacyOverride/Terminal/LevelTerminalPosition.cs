@@ -4,7 +4,7 @@ using LevelGeneration;
 using System.Collections.Generic;
 using LEGACY.Utils;
 using System.IO;
-using LEGACY.LegacyConfig;
+using LEGACY.LegacyOverride;
 
 namespace LEGACY.LegacyOverride.Terminal
 {

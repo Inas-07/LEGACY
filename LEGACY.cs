@@ -1,7 +1,7 @@
 ﻿using BepInEx;
 using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
-using LEGACY.LegacyConfig;
+using LEGACY.LegacyOverride;
 
 namespace LEGACY
 {
@@ -15,7 +15,7 @@ namespace LEGACY
     {
         public const string AUTHOR = "Inas07";
         public const string RUNDOWN_NAME = "LEGACY";
-        public const string VERSION = "3.2.0";
+        public const string VERSION = "3.2.2";
 
         private Harmony m_Harmony;
         

@@ -33,6 +33,8 @@
     <Compile Include="HardcodedBehaviours\Patch_FogBeacon.cs" />
     <Compile Include="LEGACY.cs" />
     <Compile Include="LegacyOverride\ElevatorCargo\ElevatorCargoOverrideManager.cs" />
+    <Compile Include="LegacyOverride\FogBeacon\FogBeaconSetting.cs" />
+    <Compile Include="LegacyOverride\FogBeacon\FogBeaconSettingManager.cs" />
     <Compile Include="LegacyOverride\LegacyOverrideManagers.cs" />
     <Compile Include="LegacyOverride\ElevatorCargo\LevelElevatorCargo.cs" />
     <Compile Include="LegacyOverride\Json.cs" />

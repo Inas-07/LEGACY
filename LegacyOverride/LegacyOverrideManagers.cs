@@ -1,14 +1,10 @@
 ﻿using LEGACY.LegacyOverride.ElevatorCargo;
+using LEGACY.LegacyOverride.FogBeacon;
 using LEGACY.LegacyOverride.Terminal;
 using MTFO.API;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace LEGACY.LegacyConfig
+namespace LEGACY.LegacyOverride
 {
     internal static class LegacyOverrideManagers
     {
@@ -18,6 +14,7 @@ namespace LEGACY.LegacyConfig
         {
             ElevatorCargoOverrideManager.Current.Init();
             TerminalPositionOverrideManager.Current.Init();
+            FogBeaconSettingManager.Current.Init();
         }
     }
 }
