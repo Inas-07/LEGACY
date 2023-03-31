@@ -29,10 +29,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ExtraEventsConfig\ChainedPuzzle_Custom.cs" />
+    <Compile Include="Components\EnemyTagger.cs" />
     <Compile Include="HardcodedBehaviours\Patch_TerminalPositionOverride.cs" />
-    <Compile Include="HardcodedBehaviours\Patch_FogBeacon.cs" />
+    <Compile Include="HardcodedBehaviours\Patch_SetupBigPickupItemWithItemId.cs" />
     <Compile Include="LEGACY.cs" />
     <Compile Include="LegacyOverride\ElevatorCargo\ElevatorCargoOverrideManager.cs" />
+    <Compile Include="LegacyOverride\EnemyTagger\EnemyTaggerSetting.cs" />
+    <Compile Include="LegacyOverride\EnemyTagger\EnemyTaggerSettingManager.cs" />
     <Compile Include="LegacyOverride\FogBeacon\FogBeaconSetting.cs" />
     <Compile Include="LegacyOverride\FogBeacon\FogBeaconSettingManager.cs" />
     <Compile Include="LegacyOverride\LegacyOverrideManagers.cs" />
