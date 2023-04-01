@@ -3,7 +3,7 @@ using LevelGeneration;
 using LEGACY.LegacyOverride.Terminal;
 using LEGACY.Utils;
 
-namespace LEGACY.HardcodedBehaviours
+namespace LEGACY.LegacyOverride.Patches
 {
     [HarmonyPatch]
     class Patch_TerminalPositionOverride
@@ -23,11 +23,11 @@ namespace LEGACY.HardcodedBehaviours
                 && t.TerminalIndex == __instance.SpawnNode.m_zone.TerminalsSpawnedInZone.Count
             );
 
-            if( i == -1 ) return;
+            if (i == -1) return;
 
             var _override = terminalPositionOverride[i];
 
-            if(_override.Position.ToVector3() != UnityEngine.Vector3.zeroVector)
+            if (_override.Position.ToVector3() != UnityEngine.Vector3.zeroVector)
             {
                 __instance.transform.position = _override.Position.ToVector3();
                 __instance.transform.rotation = _override.Rotation.ToQuaternion();

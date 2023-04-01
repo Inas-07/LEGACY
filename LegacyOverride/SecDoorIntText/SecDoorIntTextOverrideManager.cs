@@ -1,38 +1,35 @@
 ﻿using GTFO.API.Utilities;
-using LEGACY.LegacyOverride;
-using LEGACY.LegacyOverride.ElevatorCargo;
 using System.IO;
 using System.Collections.Generic;
 using LEGACY.Utils;
 using GTFO.API;
-using Il2CppInterop.Runtime.Injection;
 
-namespace LEGACY.LegacyOverride.EnemyTagger
+namespace LEGACY.LegacyOverride.SecDoorIntText
 {
-    internal class EnemyTaggerSettingManager
+    internal class SecDoorIntTextOverrideManager
     {
-        public static EnemyTaggerSettingManager Current;
+        public static SecDoorIntTextOverrideManager Current;
 
-        private Dictionary<uint, EnemyTaggerSetting> enemyTaggerSettingSettings = new();
+        private Dictionary<uint, LevelSecDoorIntTextOverride> SecDoorIntTextOverrides = new();
 
         private LiveEditListener liveEditListener;
 
-        private static readonly string CONFIG_PATH = Path.Combine(LegacyOverrideManagers.LEGACY_CONFIG_PATH, "EnemyTaggerSetting");
+        private static readonly string CONFIG_PATH = Path.Combine(LegacyOverrideManagers.LEGACY_CONFIG_PATH, "SecDoorIntText");
 
-        internal EnemyTaggerSetting SettingForCurrentLevel { private set; get; } = default;
+        internal LevelSecDoorIntTextOverride SettingForCurrentLevel { private set; get; } = null;
 
-        private void AddOverride(EnemyTaggerSetting _override)
+        private void AddOverride(LevelSecDoorIntTextOverride _override)
         {
             if (_override == null) return;
 
-            if (enemyTaggerSettingSettings.ContainsKey(_override.MainLevelLayout))
+            if (SecDoorIntTextOverrides.ContainsKey(_override.MainLevelLayout))
             {
                 Logger.Warning("Replaced MainLevelLayout {0}", _override.MainLevelLayout);
-                enemyTaggerSettingSettings[_override.MainLevelLayout] = _override;
+                SecDoorIntTextOverrides[_override.MainLevelLayout] = _override;
             }
             else
             {
-                enemyTaggerSettingSettings.Add(_override.MainLevelLayout, _override);
+                SecDoorIntTextOverrides.Add(_override.MainLevelLayout, _override);
             }
         }
 
@@ -43,7 +40,7 @@ namespace LEGACY.LegacyOverride.EnemyTagger
             {
                 Directory.CreateDirectory(CONFIG_PATH);
                 var file = File.CreateText(Path.Combine(CONFIG_PATH, "Template.json"));
-                file.WriteLine(Json.Serialize(new EnemyTaggerSetting()));
+                file.WriteLine(Json.Serialize(new LevelSecDoorIntTextOverride()));
                 file.Flush();
                 file.Close();
 
@@ -52,14 +49,13 @@ namespace LEGACY.LegacyOverride.EnemyTagger
 
             foreach (string confFile in Directory.EnumerateFiles(CONFIG_PATH, "*.json", SearchOption.AllDirectories))
             {
-                EnemyTaggerSetting conf;
+                LevelSecDoorIntTextOverride conf;
                 Json.Load(confFile, out conf);
 
                 AddOverride(conf);
             }
 
             LevelAPI.OnBuildStart += UpdateSetting;
-            ClassInjector.RegisterTypeInIl2Cpp<EnemyTaggerComponent>();
 
             liveEditListener = LiveEdit.CreateListener(CONFIG_PATH, "*.json", true);
             liveEditListener.FileChanged += FileChanged;
@@ -70,7 +66,7 @@ namespace LEGACY.LegacyOverride.EnemyTagger
             Logger.Warning($"LiveEdit File Changed: {e.FullPath}");
             LiveEdit.TryReadFileContent(e.FullPath, (content) =>
             {
-                EnemyTaggerSetting conf = Json.Deserialize<EnemyTaggerSetting>(content);
+                LevelSecDoorIntTextOverride conf = Json.Deserialize<LevelSecDoorIntTextOverride>(content);
                 AddOverride(conf);
 
                 if(GameStateManager.IsInExpedition)
@@ -83,13 +79,12 @@ namespace LEGACY.LegacyOverride.EnemyTagger
         private void UpdateSetting()
         {
             uint mainLevelLayout = RundownManager.ActiveExpedition.LevelLayoutData;
-            SettingForCurrentLevel = enemyTaggerSettingSettings.ContainsKey(mainLevelLayout) ? enemyTaggerSettingSettings[mainLevelLayout] : default;
-            Logger.Debug($"EnemyTaggerSettingManager: updated setting for level with main level layout id {mainLevelLayout}");
+            SettingForCurrentLevel = SecDoorIntTextOverrides.ContainsKey(mainLevelLayout) ? SecDoorIntTextOverrides[mainLevelLayout] : null;
         }
 
-        private EnemyTaggerSettingManager() { }
+        private SecDoorIntTextOverrideManager() { }
 
-        static EnemyTaggerSettingManager()
+        static SecDoorIntTextOverrideManager()
         {
             Current = new();
         }

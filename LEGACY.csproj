@@ -29,9 +29,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ExtraEventsConfig\ChainedPuzzle_Custom.cs" />
-    <Compile Include="Components\EnemyTagger.cs" />
-    <Compile Include="HardcodedBehaviours\Patch_TerminalPositionOverride.cs" />
-    <Compile Include="HardcodedBehaviours\Patch_SetupBigPickupItemWithItemId.cs" />
+    <Compile Include="LegacyOverride\EnemyTagger\EnemyTaggerComponent.cs" />
+    <Compile Include="LegacyOverride\Patches\Patch_Customize_SecDoor_Interaction_Text.cs" />
+    <Compile Include="LegacyOverride\Patches\Patch_TerminalPositionOverride.cs" />
+    <Compile Include="LegacyOverride\Patches\Patch_SetupBigPickupItemWithItemId.cs" />
     <Compile Include="LEGACY.cs" />
     <Compile Include="LegacyOverride\ElevatorCargo\ElevatorCargoOverrideManager.cs" />
     <Compile Include="LegacyOverride\EnemyTagger\EnemyTaggerSetting.cs" />
@@ -41,6 +42,8 @@
     <Compile Include="LegacyOverride\LegacyOverrideManagers.cs" />
     <Compile Include="LegacyOverride\ElevatorCargo\LevelElevatorCargo.cs" />
     <Compile Include="LegacyOverride\Json.cs" />
+    <Compile Include="LegacyOverride\SecDoorIntText\LevelSecDoorIntTextOverride.cs" />
+    <Compile Include="LegacyOverride\SecDoorIntText\SecDoorIntTextOverrideManager.cs" />
     <Compile Include="LegacyOverride\Terminal\LevelTerminalPosition.cs" />
     <Compile Include="LegacyOverride\Terminal\TerminalPositionOverrideManager.cs" />
     <Compile Include="LegacyOverride\Vec3.cs" />
@@ -56,10 +59,9 @@
     <Compile Include="ExtraEventsConfig\Patch_EventsOnBossDeath.cs" />
     <Compile Include="ExtraEventsConfig\Patch_EventsOnZoneScoutScream.cs" />
     <Compile Include="ExtraEventsConfig\Patch_ExtraEventsConfig.cs" />
-    <Compile Include="HardcodedBehaviours\Patch_ElevatorCargoOverride.cs" />
+    <Compile Include="LegacyOverride\Patches\Patch_ElevatorCargoOverride.cs" />
     <Compile Include="VanillaFix\Patch_LG_SecurityDoor_Fix-EventsOnUnlockDoor_Powergenerator.cs" />
     <Compile Include="VanillaFix\Patch_LockSecurityDoor_FixCustomText.cs" />
-    <Compile Include="HardcodedBehaviours\Patch_OverwriteSurvivalWaveSpawnPosition_Hardcoded.cs" />
     <Compile Include="HardcodedBehaviours\Patch_HardcodedBehaviour_L3E2.cs" />
     <Compile Include="HardcodedBehaviours\Patch_PickupItem_Hardcoded.cs" />
     <Compile Include="Reactor\Patch_ReactorShutdown.cs" />

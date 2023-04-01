@@ -14,17 +14,14 @@ namespace LEGACY.Reactor
     [HarmonyPatch]
     internal class Patch_ReactorStartup_OverwriteGUIBehaviour
     {
-        private static bool[] overrideHideGUITimer = null;
+        //private static bool[] overrideHideGUITimer = null;
+        private static WardenObjectiveDataBlock[] dbs = new WardenObjectiveDataBlock[3] { null, null, null };
 
-        private static float hideTimeThreshold = 43200.0f;
+        private const float hideTimeThreshold = 43200.0f;
 
-        private static void checkInit(int waveCount)
-        {
-            if (overrideHideGUITimer != null) return;
-
-            overrideHideGUITimer = new bool[waveCount];
-            for (int i = 0; i < overrideHideGUITimer.Length; i++) overrideHideGUITimer[i] = false;
-        }
+        // Hide Warden Message for Infinite Wave
+        private static int CurrentWaveCount = 0;
+        private static bool CachedResult_IsInInfiniteWave = false;
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(LG_WardenObjective_Reactor), nameof(LG_WardenObjective_Reactor.OnBuildDone))]
@@ -42,21 +39,12 @@ namespace LEGACY.Reactor
 
             if (db.Type != eWardenObjectiveType.Reactor_Startup) return;
 
-            int waveIndex = 0;
-            while (waveIndex < __instance.m_waveCountMax)
+            if(dbs[(int)__instance.SpawnNode.LayerType] != null)
             {
-                ReactorWaveData currentWave = db.ReactorWaves[waveIndex];
-                if (Math.Abs(currentWave.Verify - hideTimeThreshold) < 1.0)
-                {
-                    checkInit(__instance.m_waveCountMax);
-                    overrideHideGUITimer[waveIndex] = true;
-                }
-
-                waveIndex++;
+                Utils.Logger.Error($"ReactorStartup_OverwriteGUIBehaviour: multiple reactor warden objective definition found for layer {__instance.SpawnNode.LayerType}. Nonsense!");
             }
 
-            CurrentWaveCount = 0;
-            CachedResult_IsInInfiniteWave = false;
+            dbs[(int)__instance.SpawnNode.LayerType] = db;
         }
 
         // rewrite the entire method
@@ -64,7 +52,7 @@ namespace LEGACY.Reactor
         [HarmonyPatch(typeof(LG_WardenObjective_Reactor), nameof(LG_WardenObjective_Reactor.SetGUIMessage))]
         private static bool Pre_SetGUIMessage(LG_WardenObjective_Reactor __instance, bool visible, ref string msg, ePUIMessageStyle style, bool printTimerInText, string timerPrefix, string timerSuffix)
         {
-            if (!Equals(__instance.m_currentState.status, eReactorStatus.Startup_waitForVerify)) return true;
+            if (dbs[(int)__instance.SpawnNode.LayerType] == null || !Equals(__instance.m_currentState.status, eReactorStatus.Startup_waitForVerify)) return true;
 
             if (!visible && (visible || !__instance.m_reactorGuiVisible))
                 return false;
@@ -73,17 +61,13 @@ namespace LEGACY.Reactor
                 if (printTimerInText)
                 {
                     int currentWaveIndex = __instance.m_currentWaveCount - 1;
-                    if (overrideHideGUITimer != null && overrideHideGUITimer[currentWaveIndex] == true)
+                    if (dbs[(int)__instance.SpawnNode.LayerType] != null && dbs[(int)__instance.SpawnNode.LayerType].ReactorWaves[currentWaveIndex].Verify >= hideTimeThreshold)
                     {   // hide reactor verification timer.
                         GuiManager.InteractionLayer.SetMessage(msg, style, -1);
                         GuiManager.InteractionLayer.SetMessageTimer(1.0f);
                     }
                     else // original impl.
                     {
-                        if (isInInfiniteWave(__instance))
-                        {   // hide verification terminal
-                            msg = string.Format(Text.Get(3002u), __instance.m_currentWaveCount, __instance.m_waveCountMax);
-                        }
                         double num1 = (1.0 - (double)__instance.m_currentWaveProgress) * (double)__instance.m_currentDuration;
                         int num2 = Mathf.FloorToInt((float)(num1 / 60.0));
                         int num3 = Mathf.FloorToInt((float)(num1 - num2 * 60.0));
@@ -100,86 +84,6 @@ namespace LEGACY.Reactor
             return false;
         }
 
-        // Hide Warden Message for Infinite Wave
-        private static int CurrentWaveCount = 0;
-        private static bool CachedResult_IsInInfiniteWave = false;
-
-        private static bool isInInfiniteWave(LG_WardenObjective_Reactor Reactor)
-        {
-            //Utilities.Logger.Warning("{0}, {1}", Reactor.m_currentWaveCount, CurrentWaveCount);
-            // still in the same wave, use the result lastly evaluated.
-            if (Reactor.m_currentWaveCount == CurrentWaveCount) return CachedResult_IsInInfiniteWave;
-            CurrentWaveCount = Reactor.m_currentWaveCount;
-            CachedResult_IsInInfiniteWave = false;
-
-            ReactorWaveData WaveData = Reactor.m_currentWaveData;
-            if (!WaveData.VerifyInOtherZone) return false;
-
-            uint layoutID = 0u;
-
-            if (Reactor.SpawnNode.m_zone.IsMainDimension)
-            {
-                switch (Reactor.SpawnNode.LayerType)
-                {
-                    case LG_LayerType.MainLayer: layoutID = RundownManager.ActiveExpedition.LevelLayoutData; break;
-                    case LG_LayerType.SecondaryLayer: layoutID = RundownManager.ActiveExpedition.SecondaryLayout; break;
-                    case LG_LayerType.ThirdLayer: layoutID = RundownManager.ActiveExpedition.ThirdLayout; break;
-                    default: Utils.Logger.Error("Unimplemented layer type."); return false;
-                }
-            }
-            else
-            {
-                layoutID = Reactor.SpawnNode.m_zone.Dimension.DimensionData.LevelLayoutData;
-            }
-
-            if (layoutID == 0u) return false;
-            //Utilities.Logger.Warning("{0}", Reactor.SpawnNode.LayerType);
-
-            LevelLayoutDataBlock layoutDB = null;
-            layoutDB = LevelLayoutDataBlock.GetBlock(layoutID);
-            if (layoutDB == null) return false;
-
-            eDimensionIndex dimensionIndex = Reactor.SpawnNode.m_zone.DimensionIndex;
-
-            ExpeditionZoneData ZoneForVerification = null;
-            foreach (ExpeditionZoneData Zone in layoutDB.Zones)
-            {
-                if (Zone.LocalIndex == WaveData.ZoneForVerification)
-                {
-                    ZoneForVerification = Zone;
-                    break;
-                }
-            }
-
-            if (ZoneForVerification == null)
-            {
-                Utils.Logger.Error("Did not found zone for verification!");
-                return false;
-            }
-
-            if (ZoneForVerification.TerminalPlacements == null || ZoneForVerification.TerminalPlacements.Count != 1) return false;
-
-            TerminalPlacementData TerminalData = ZoneForVerification.TerminalPlacements[0];
-            TerminalStartStateData TerminalState = TerminalData.StartingStateData;
-
-            if (!TerminalState.PasswordProtected
-                || TerminalState.PasswordPartCount != 1
-                || TerminalState.TerminalZoneSelectionDatas == null
-                || TerminalState.TerminalZoneSelectionDatas.Count != 1
-                || TerminalState.TerminalZoneSelectionDatas[0] == null
-                || TerminalState.TerminalZoneSelectionDatas[0].Count != 1
-                ) return false;
-
-            if (TerminalState.TerminalZoneSelectionDatas[0][0] != null &&
-                TerminalState.TerminalZoneSelectionDatas[0][0].LocalIndex == ZoneForVerification.LocalIndex)
-            {
-                CachedResult_IsInInfiniteWave = true;
-                return true;
-            }
-
-            return false;
-        }
-
         [HarmonyPrefix]
         [HarmonyPatch(typeof(LG_WardenObjective_Reactor), nameof(LG_WardenObjective_Reactor.OnStateChange))]
         private static bool Pre_HideReactorMessageForInfiniteWave(LG_WardenObjective_Reactor __instance, pReactorState oldState, pReactorState newState)
@@ -189,7 +93,7 @@ namespace LEGACY.Reactor
                 && newState.status != eReactorStatus.Startup_intense
                 && newState.status != eReactorStatus.Startup_waitForVerify) return true;
 
-            if (ForceDisable() || isInInfiniteWave(__instance))
+            if (ForceDisable())
             {
                 if (oldState.stateCount != newState.stateCount)
                     __instance.OnStateCountUpdate(newState.stateCount);
@@ -268,9 +172,9 @@ namespace LEGACY.Reactor
                         //Utils.CheckAndExecuteEventsOnTrigger(__instance.m_currentWaveData.Events, eWardenObjectiveEventTrigger.OnMid, false, 0.0f);
                         //GuiManager.PlayerLayer.m_wardenIntel.ShowSubObjectiveMessage("", Text.Get(1078U));
                         break;
+
                 }
                 __instance.m_currentState = newState;
-
                 return false;
             }
 
@@ -284,13 +188,12 @@ namespace LEGACY.Reactor
 
         static Patch_ReactorStartup_OverwriteGUIBehaviour()
         {
-            LevelAPI.OnLevelCleanup += CleanupAfterExpedition;
+            LevelAPI.OnLevelCleanup += Clear;
         }
 
-        private static void CleanupAfterExpedition()
+        private static void Clear()
         {
-            Utils.Logger.Warning("clean Patch_ReactorStartup_OverwriteGUIBehaviour");
-            overrideHideGUITimer = null;
+           for (int i = 0; i < 3; i++) dbs[i] = null;
         }
     }
 }

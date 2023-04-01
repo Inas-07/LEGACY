@@ -14,5 +14,7 @@ namespace LEGACY.LegacyOverride.EnemyTagger
         public int MaxTagPerScan { set; get; } = 12;
         public float UpdateInterval { set; get; } = 3.0f;
         public float TagRadius { set; get; } = 12f;
+        public bool TagWhenPlaced { set; get; } = true;
+        public bool TagWhenHold { set; get; } = false;
     }
 }

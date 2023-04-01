@@ -6,9 +6,8 @@ using SNetwork;
 using Player;
 using AK;
 using FX_EffectSystem;
-using LEGACY.LegacyOverride.EnemyTagger;
 
-namespace LEGACY.Components
+namespace LEGACY.LegacyOverride.EnemyTagger
 {
     // unsynced state
     public enum eEnemyTaggerState
@@ -18,20 +17,17 @@ namespace LEGACY.Components
         Active
     }
 
-    public class EnemyTagger : MonoBehaviour
+    public class EnemyTaggerComponent : MonoBehaviour
     {
-        
         private const float INACTIVE_SOUND_UPDATE_INTERVAL = 5f;
 
-        private int MaxTagPerScan = 12;
-        private float UpdateInterval = 3.0f;
-        private float TagRadius = 12f;
-        
+        internal int MaxTagPerScan = 12;
+        internal float UpdateInterval = 3.0f;
+        internal float TagRadius = 12f;
 
         private eEnemyTaggerState CurrentState = eEnemyTaggerState.Uninitialized;
 
         public string DebugName { set; get; } = "EnemyTagger";
-
 
         internal CarryItemPickup_Core Parent { set; get; } = null;
         internal PlayerAgent PickedByPlayer { set; get; } = null;
@@ -42,36 +38,35 @@ namespace LEGACY.Components
 
         private float UpdateTime = 0.0f;
 
-        internal Vector3 Position => Parent == null ? Vector3.zero : (PickedByPlayer == null ? Parent.transform.position : PickedByPlayer.transform.position);
-
-        internal void ApplySetting(EnemyTaggerSetting setting)
-        {
-            MaxTagPerScan = setting.MaxTagPerScan;
-            UpdateInterval = setting.UpdateInterval;
-            TagRadius = setting.TagRadius;
-        }
+        internal Vector3 Position => Parent == null ? Vector3.zero : PickedByPlayer == null ? Parent.transform.position : PickedByPlayer.transform.position;
 
         public void ChangeState(eEnemyTaggerState newState)
         {
-            CurrentState = newState;
-            switch (CurrentState) 
+            switch (newState)
             {
                 case eEnemyTaggerState.Uninitialized:
                     Utils.Logger.Error("Enemy Tagger changed to state 'uninitialized'?");
                     return;
                 case eEnemyTaggerState.Inactive:
-                    UpdateTime = 0.0f;
-                    TaggableEnemies.Clear();
-                    m_sound.Post(EVENTS.BUTTONGENERICDEACTIVATE);
+                    if (CurrentState != newState)
+                    {
+                        UpdateTime = 0.0f;
+                        TaggableEnemies.Clear();
+                        m_sound.Post(EVENTS.BUTTONGENERICDEACTIVATE);
+                    }
                     break;
-                case eEnemyTaggerState.Active: 
-                    UpdateTime = 0.0f;
-                    m_sound.Post(EVENTS.BULKHEAD_BUTTON_CLOSE);
+                case eEnemyTaggerState.Active:
+                    if (CurrentState != newState)
+                    {
+                        UpdateTime = 0.0f;
+                        m_sound.Post(EVENTS.BULKHEAD_BUTTON_CLOSE);
+                    }
                     break;
                 default:
                     Utils.Logger.Error($"Enemy Tagger: Undefined state {CurrentState}");
                     return;
             }
+            CurrentState = newState;
         }
 
         private bool UpdateTaggableEnemies()
@@ -83,11 +78,11 @@ namespace LEGACY.Components
             {
                 if (!enemy.Alive) continue;
 
-                float distance = (enemy.transform.position - this.Position).magnitude;
-                
-                if(distance > TagRadius) continue;
+                float distance = (enemy.transform.position - Position).magnitude;
+
+                if (distance > TagRadius) continue;
                 hasEnemyInProximity = true;
-                if(!enemy.IsTagged)
+                if (!enemy.IsTagged)
                     TaggableEnemies.Add(enemy);
 
                 if (TaggableEnemies.Count >= MaxTagPerScan) break;
@@ -126,7 +121,6 @@ namespace LEGACY.Components
                 m_sound.Post(EVENTS.BUTTONGENERICDEACTIVATE);
                 UpdateTime = 0f;
             }
-
         }
 
         void Update()

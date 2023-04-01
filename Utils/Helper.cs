@@ -177,6 +177,98 @@ namespace LEGACY.Utils
 
             return res;
         }
+
+        private static eDimensionIndex GetCurrentDimensionIndex()
+        {
+            if (PlayerManager.PlayerAgentsInLevel.Count <= 0)
+            {
+                throw new System.Exception("? You don't have any player agent in level? How could that happen?");
+            }
+
+            return PlayerManager.PlayerAgentsInLevel[0].DimensionIndex;
+        }
+
+        // what about dimension index?
+        // DimensionIndex is incomparable! Since all players must be in the same dimension
+        public static void GetMinLayerAndLocalIndex(out LG_LayerType MinLayer, out eLocalZoneIndex MinLocalIndex)
+        {
+            MinLayer = LG_LayerType.ThirdLayer;
+            MinLocalIndex = eLocalZoneIndex.Zone_20;
+
+            foreach (PlayerAgent player in PlayerManager.PlayerAgentsInLevel)
+            {
+                if (!Utils.Helper.IsPlayerInLevel(player)) continue;
+
+                //SNetwork.SNet_Player player2
+                if (MinLayer > player.m_courseNode.LayerType)
+                {
+                    MinLayer = player.m_courseNode.LayerType;
+                    MinLocalIndex = eLocalZoneIndex.Zone_20;
+                }
+
+                if (MinLocalIndex >= player.m_courseNode.m_zone.LocalIndex)
+                {
+                    MinLocalIndex = player.m_courseNode.m_zone.LocalIndex;
+                }
+            }
+        }
+
+        public static void GetMaxLayerAndLocalIndex(out LG_LayerType MaxLayer, out eLocalZoneIndex MaxLocalIndex)
+        {
+            MaxLayer = LG_LayerType.MainLayer;
+            MaxLocalIndex = eLocalZoneIndex.Zone_0;
+
+            foreach (PlayerAgent player in PlayerManager.PlayerAgentsInLevel)
+            {
+                if (!Utils.Helper.IsPlayerInLevel(player)) continue;
+
+                //SNetwork.SNet_Player player2
+                if (MaxLayer < player.m_courseNode.LayerType)
+                {
+                    MaxLayer = player.m_courseNode.LayerType;
+                    MaxLocalIndex = eLocalZoneIndex.Zone_0;
+                }
+
+                if (MaxLocalIndex < player.m_courseNode.m_zone.LocalIndex)
+                {
+                    MaxLocalIndex = player.m_courseNode.m_zone.LocalIndex;
+                }
+            }
+        }
+
+        // return negative value if error occurred.
+        // return LG_Zone.Count if there's no agent in the specified zone.
+        public static int GetMinAreaIndex(LG_Zone zone)
+        {
+            if (zone == null) return -1;
+
+            LG_LayerType Layer = zone.m_layer.m_type;
+            eLocalZoneIndex LocalIndex = zone.LocalIndex;
+
+            eDimensionIndex dimensionIndex = GetCurrentDimensionIndex();
+
+            int minAreaIndex = zone.m_areas.Count;
+
+            foreach (PlayerAgent player in PlayerManager.PlayerAgentsInLevel)
+            {
+                if (player.m_courseNode.LayerType == Layer && player.m_courseNode.m_zone.LocalIndex == LocalIndex)
+                {
+                    int areaIndex = 0;
+                    List<LG_Area> areas = zone.m_areas;
+                    while (areaIndex < areas.Count)
+                    {
+                        if (areas[areaIndex].gameObject.GetInstanceID() == player.m_courseNode.m_area.gameObject.GetInstanceID())
+                        {
+                            if (minAreaIndex > areaIndex) minAreaIndex = areaIndex;
+                            break;
+                        }
+                        areaIndex++;
+                    }
+                }
+            }
+
+            return minAreaIndex;
+        }
     }
 
     public enum MainLayerID 

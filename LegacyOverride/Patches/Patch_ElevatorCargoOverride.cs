@@ -3,7 +3,7 @@ using UnityEngine;
 using LevelGeneration;
 using LEGACY.LegacyOverride.ElevatorCargo;
 
-namespace LEGACY.HardcodedBehaviours
+namespace LEGACY.LegacyOverride.Patches
 {
     [HarmonyPatch]
     internal class Patch_ElevatorCargoOverride
@@ -37,7 +37,7 @@ namespace LEGACY.HardcodedBehaviours
                 LG_PickupItem item = LG_PickupItem.SpawnGenericPickupItem(ElevatorShaftLanding.CargoAlign);
                 item.SpawnNode = Builder.GetElevatorArea().m_courseNode;
 
-                switch(elevatorCargo.ItemType) 
+                switch (elevatorCargo.ItemType)
                 {
                     case ItemType.Consumable:
                         item.SetupAsConsumable(Random.Range(0, int.MaxValue), elevatorCargo.ItemID);

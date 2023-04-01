@@ -2,8 +2,8 @@
 using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
 using Il2CppInterop.Runtime.Injection;
-using LEGACY.Components;
 using LEGACY.LegacyOverride;
+using LEGACY.LegacyOverride.EnemyTagger;
 
 namespace LEGACY
 {
@@ -23,7 +23,6 @@ namespace LEGACY
         
         public override void Load()
         {
-            ClassInjector.RegisterTypeInIl2Cpp<EnemyTagger>();
 
             m_Harmony = new Harmony("LEGACY");
             m_Harmony.PatchAll();
