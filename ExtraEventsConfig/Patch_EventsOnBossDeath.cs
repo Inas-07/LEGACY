@@ -21,8 +21,6 @@ namespace LEGACY.ExtraEventsConfig
             if (bossesWithDeathEvents != null) return;
 
             bossesWithDeathEvents = new Dictionary<ushort, Il2CppSystem.Collections.Generic.List<WardenObjectiveEventData>>();
-
-            Logger.Debug("Patch_EventsOnBossDeath initialized");
         }
 
         private static bool hasDeathEvent(EnemyAgent enemyBoss)
@@ -104,11 +102,8 @@ namespace LEGACY.ExtraEventsConfig
 
         private static void CleanupAfterExpedition()
         {
-            if (bossesWithDeathEvents != null)
-            {
-                bossesWithDeathEvents.Clear();
-                bossesWithDeathEvents = null;
-            }
+            bossesWithDeathEvents?.Clear();
+            bossesWithDeathEvents = null;
         }
 
         static Patch_EventsOnBossDeath()

@@ -16,10 +16,8 @@ namespace LEGACY.HardcodedBehaviours
         [HarmonyPatch(typeof(LG_Distribute_PickupItemsPerZone), nameof(LG_Distribute_PickupItemsPerZone.Build))]
         private static void Pre_LG_Distribute_PickupItemsPerZone(LG_Distribute_PickupItemsPerZone __instance)
         {
-
-            if (RundownManager.ActiveExpedition.LevelLayoutData != (uint)MainLayerID.L2E1) return;
-
-            //Logger.Debug("Overwriting Fog turbine distribution for L2E1. Zone: {0}", __instance.m_zone.AliasName);
+            var block = LevelLayoutDataBlock.GetBlock("Legacy_L2E1_Gridlock");
+            if (block == null || RundownManager.ActiveExpedition.LevelLayoutData != block.persistentID) return;
 
             switch (__instance.m_zone.LocalIndex)
             {

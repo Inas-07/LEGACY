@@ -62,7 +62,6 @@
     <Compile Include="LegacyOverride\Patches\Patch_ElevatorCargoOverride.cs" />
     <Compile Include="VanillaFix\Patch_LG_SecurityDoor_Fix-EventsOnUnlockDoor_Powergenerator.cs" />
     <Compile Include="VanillaFix\Patch_LockSecurityDoor_FixCustomText.cs" />
-    <Compile Include="HardcodedBehaviours\Patch_HardcodedBehaviour_L3E2.cs" />
     <Compile Include="HardcodedBehaviours\Patch_PickupItem_Hardcoded.cs" />
     <Compile Include="Reactor\Patch_ReactorShutdown.cs" />
     <Compile Include="Reactor\Patch_ReactorStartup_ExtraEventsExecution.cs" />

@@ -11,6 +11,7 @@ using AK;
 using Agents;
 using AIGraph;
 using UnityEngine.EventSystems;
+using System.Collections.Generic;
 
 namespace LEGACY.ExtraEventsConfig
 {
@@ -34,12 +35,35 @@ namespace LEGACY.ExtraEventsConfig
         SpawnEnemy_Hibernate = 170,
 
         ChainedPuzzle_AddReqItem = 200,
-        ChainedPuzzle_RemoveReqItem 
+        ChainedPuzzle_RemoveReqItem,
+
+        DEBUG_ZoneEnemiesInfo = 250
     }
 
     [HarmonyPatch]
     class Patch_ExtraEventsConfig
     {
+        private static void Debug_ZoneEnemiesInfo(WardenObjectiveEventData e)
+        {
+            //LG_Zone zone;
+            //if (!Builder.CurrentFloor.TryGetZoneByLocalIndex(e.DimensionIndex, e.Layer, e.LocalIndex, out zone) || zone == null)
+            //{
+            //    Logger.Error($"Debug_ZoneEnemiesInfo: cannot find zone {e.LocalIndex}, {e.Layer}, {e.DimensionIndex}");
+            //    return;
+            //}
+
+            //Dictionary<string, uint> map = new();
+
+            //foreach(var node in zone.m_courseNodes)
+            //{
+            //    foreach(var enemy in node.m_enemiesInNode)
+            //    {
+                    
+            //        enemy.EnemyData
+            //    }
+            //}
+        }
+
         private static void SpawnEnemy_Hibernate(WardenObjectiveEventData e)
         {
             if (!SNet.IsMaster) return;

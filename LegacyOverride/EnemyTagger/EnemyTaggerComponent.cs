@@ -14,7 +14,8 @@ namespace LEGACY.LegacyOverride.EnemyTagger
     {
         Uninitialized,
         Inactive,
-        Active
+        Active_Warmup,
+        Active_Tagging
     }
 
     public class EnemyTaggerComponent : MonoBehaviour
@@ -22,9 +23,9 @@ namespace LEGACY.LegacyOverride.EnemyTagger
         private const float INACTIVE_SOUND_UPDATE_INTERVAL = 5f;
 
         internal int MaxTagPerScan = 12;
-        internal float UpdateInterval = 3.0f;
+        internal float TagInterval = 3.0f;
         internal float TagRadius = 12f;
-
+        internal float WarmupTime = 3f;
         private eEnemyTaggerState CurrentState = eEnemyTaggerState.Uninitialized;
 
         public string DebugName { set; get; } = "EnemyTagger";
@@ -42,25 +43,25 @@ namespace LEGACY.LegacyOverride.EnemyTagger
 
         public void ChangeState(eEnemyTaggerState newState)
         {
+            if(CurrentState == newState) return;
+
             switch (newState)
             {
                 case eEnemyTaggerState.Uninitialized:
                     Utils.Logger.Error("Enemy Tagger changed to state 'uninitialized'?");
                     return;
                 case eEnemyTaggerState.Inactive:
-                    if (CurrentState != newState)
-                    {
-                        UpdateTime = 0.0f;
-                        TaggableEnemies.Clear();
-                        m_sound.Post(EVENTS.BUTTONGENERICDEACTIVATE);
-                    }
+                    UpdateTime = 0.0f;
+                    TaggableEnemies.Clear();
+                    m_sound.Post(EVENTS.BULKHEAD_BUTTON_CLOSE);
                     break;
-                case eEnemyTaggerState.Active:
-                    if (CurrentState != newState)
-                    {
-                        UpdateTime = 0.0f;
-                        m_sound.Post(EVENTS.BULKHEAD_BUTTON_CLOSE);
-                    }
+                case eEnemyTaggerState.Active_Warmup:
+                    UpdateTime = 0.0f;
+                    m_sound.Post(EVENTS.BUTTONGENERICDEACTIVATE);
+                    break;
+                case eEnemyTaggerState.Active_Tagging:
+                    if (CurrentState == eEnemyTaggerState.Active_Warmup) break;
+                    UpdateTime = 0.0f;
                     break;
                 default:
                     Utils.Logger.Error($"Enemy Tagger: Undefined state {CurrentState}");
@@ -93,7 +94,7 @@ namespace LEGACY.LegacyOverride.EnemyTagger
 
         private void StartTagging()
         {
-            if (UpdateTime >= UpdateInterval)
+            if (UpdateTime >= TagInterval)
             {
                 if (SNet.IsMaster)
                 {
@@ -103,15 +104,10 @@ namespace LEGACY.LegacyOverride.EnemyTagger
                         ToolSyncManager.WantToTagEnemy(enemy);
                     }
                 }
-                // candidate sound 
-                /*
-                 * DECON_SYSTEM 
-                 * DECON_UNIT_DETACH
-                 * DECON_UNIT_EMITTER */
-                m_sound.Post(EVENTS.BULKHEAD_BUTTON_OPEN);
+
+                m_sound.Post(EVENTS.MARKERGUNACTIVATE);
                 UpdateTime = 0f;
             }
-
         }
 
         private void StopTagging()
@@ -120,6 +116,15 @@ namespace LEGACY.LegacyOverride.EnemyTagger
             {
                 m_sound.Post(EVENTS.BUTTONGENERICDEACTIVATE);
                 UpdateTime = 0f;
+            }
+        }
+
+        private void Warmup()
+        {
+            if (UpdateTime >= WarmupTime)
+            {
+                ChangeState(eEnemyTaggerState.Active_Tagging);
+                UpdateTime = TagInterval;
             }
         }
 
@@ -137,7 +142,11 @@ namespace LEGACY.LegacyOverride.EnemyTagger
             m_sound.UpdatePosition(Position);
             switch (CurrentState)
             {
-                case eEnemyTaggerState.Active:
+                case eEnemyTaggerState.Active_Warmup:
+                    Warmup(); 
+                    break;
+
+                case eEnemyTaggerState.Active_Tagging:
                     StartTagging();
                     break;
 

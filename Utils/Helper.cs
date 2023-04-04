@@ -270,11 +270,5 @@ namespace LEGACY.Utils
             return minAreaIndex;
         }
     }
-
-    public enum MainLayerID 
-    {
-        L2E1 = 60000,
-        L3E2 = 40000,
-    }
 }
 

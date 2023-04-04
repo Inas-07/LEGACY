@@ -17,7 +17,7 @@ namespace LEGACY
     {
         public const string AUTHOR = "Inas07";
         public const string RUNDOWN_NAME = "LEGACY";
-        public const string VERSION = "3.2.2";
+        public const string VERSION = "3.3.0";
 
         private Harmony m_Harmony;
         

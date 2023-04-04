@@ -19,16 +19,11 @@ namespace LEGACY.Reactor
 
         private const float hideTimeThreshold = 43200.0f;
 
-        // Hide Warden Message for Infinite Wave
-        private static int CurrentWaveCount = 0;
-        private static bool CachedResult_IsInInfiniteWave = false;
-
         [HarmonyPostfix]
         [HarmonyPatch(typeof(LG_WardenObjective_Reactor), nameof(LG_WardenObjective_Reactor.OnBuildDone))]
         private static void Post_OnBuildDone(LG_WardenObjective_Reactor __instance)
         {
             WardenObjectiveDataBlock db = null;
-
             if (WardenObjectiveManager.Current.TryGetActiveWardenObjectiveData(__instance.SpawnNode.LayerType, out db) == false
                 || db == null)
             {
@@ -41,7 +36,7 @@ namespace LEGACY.Reactor
 
             if(dbs[(int)__instance.SpawnNode.LayerType] != null)
             {
-                Utils.Logger.Error($"ReactorStartup_OverwriteGUIBehaviour: multiple reactor warden objective definition found for layer {__instance.SpawnNode.LayerType}. Nonsense!");
+                Utils.Logger.Error($"ReactorStartup_OverwriteGUIBehaviour: multiple reactor startup objective definition found for layer {__instance.SpawnNode.LayerType}. Nonsense!");
             }
 
             dbs[(int)__instance.SpawnNode.LayerType] = db;
@@ -61,7 +56,7 @@ namespace LEGACY.Reactor
                 if (printTimerInText)
                 {
                     int currentWaveIndex = __instance.m_currentWaveCount - 1;
-                    if (dbs[(int)__instance.SpawnNode.LayerType] != null && dbs[(int)__instance.SpawnNode.LayerType].ReactorWaves[currentWaveIndex].Verify >= hideTimeThreshold)
+                    if (dbs[(int)__instance.SpawnNode.LayerType].ReactorWaves[currentWaveIndex].Verify >= hideTimeThreshold)
                     {   // hide reactor verification timer.
                         GuiManager.InteractionLayer.SetMessage(msg, style, -1);
                         GuiManager.InteractionLayer.SetMessageTimer(1.0f);
@@ -116,7 +111,7 @@ namespace LEGACY.Reactor
                             break;
                         }
                         __instance.m_lightCollection.SetMode(db.LightsOnDuringIntro);
-    
+
 
                         // R6 impl.
                         //__instance.m_lightCollection.SetMode(WardenObjectiveManager.ActiveWardenObjective(__instance.SpawnNode.LayerType).LightsOnDuringIntro);
@@ -183,7 +178,8 @@ namespace LEGACY.Reactor
 
         private static bool ForceDisable()
         {
-            return RundownManager.ActiveExpedition.LevelLayoutData == (uint)MainLayerID.L3E2;
+            LevelLayoutDataBlock block = LevelLayoutDataBlock.GetBlock("Legacy_L3E2_L1");
+            return RundownManager.ActiveExpedition.LevelLayoutData == block.persistentID;
         }
 
         static Patch_ReactorStartup_OverwriteGUIBehaviour()

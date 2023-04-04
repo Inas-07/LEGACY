@@ -15,11 +15,6 @@ namespace LEGACY.LegacyOverride.Patches
         private static void SetupAsObserver(LG_PickupItem __instance)
         {
             var setting = EnemyTaggerSettingManager.Current.SettingForCurrentLevel;
-            if (!setting.TagWhenHold && !setting.TagWhenPlaced)
-            {
-                Utils.Logger.Error("SetupAsObserver: nonsense - TagWhenHold and TagWhenPlaced are both false, will not set up");
-                return;
-            }
 
             CarryItemPickup_Core core = __instance.m_root.GetComponentInChildren<CarryItemPickup_Core>();
             Interact_Pickup_PickupItem interact = core.m_interact.Cast<Interact_Pickup_PickupItem>();
@@ -31,8 +26,9 @@ namespace LEGACY.LegacyOverride.Patches
 
             interact.InteractDuration = setting.TimeToPickup;
             tagger.MaxTagPerScan = setting.MaxTagPerScan;
-            tagger.UpdateInterval = setting.UpdateInterval;
+            tagger.TagInterval = setting.TagInterval;
             tagger.TagRadius = setting.TagRadius;
+            tagger.WarmupTime = setting.WarmupTime;
 
             sync.OnSyncStateChange += new System.Action<ePickupItemStatus, pPickupPlacement, PlayerAgent, bool>((status, placement, playerAgent, isRecall) =>
             {
@@ -40,14 +36,14 @@ namespace LEGACY.LegacyOverride.Patches
                 {
                     case ePickupItemStatus.PlacedInLevel:
                         tagger.PickedByPlayer = null;
-                        tagger.ChangeState(setting.TagWhenPlaced ? eEnemyTaggerState.Active : eEnemyTaggerState.Inactive);
+                        tagger.ChangeState(setting.TagWhenPlaced ? eEnemyTaggerState.Active_Warmup : eEnemyTaggerState.Inactive);
                         interact.InteractDuration = setting.TimeToPickup;
                         break;
 
                     case ePickupItemStatus.PickedUp:
                         tagger.gameObject.SetActive(true);
                         tagger.PickedByPlayer = playerAgent;
-                        tagger.ChangeState(setting.TagWhenHold ? eEnemyTaggerState.Active : eEnemyTaggerState.Inactive);
+                        tagger.ChangeState(setting.TagWhenHold ? eEnemyTaggerState.Active_Warmup : eEnemyTaggerState.Inactive);
                         interact.InteractDuration = setting.TimeToPlace;
 
                         break;
