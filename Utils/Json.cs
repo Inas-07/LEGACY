@@ -3,9 +3,8 @@ using System.Text.Json.Serialization;
 using System.Text.Json;
 using System.IO;
 using ScanPosOverride.JSON;
-using MTFO.API;
 
-namespace LEGACY.LegacyOverride
+namespace LEGACY.Utils
 {
     internal static class Json
     {

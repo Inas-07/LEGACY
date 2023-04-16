@@ -8,10 +8,6 @@ using Player;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
 using SNetwork;
 using AK;
-using Agents;
-using AIGraph;
-using UnityEngine.EventSystems;
-using System.Collections.Generic;
 
 namespace LEGACY.ExtraEventsConfig
 {
@@ -22,12 +18,13 @@ namespace LEGACY.ExtraEventsConfig
         SetTimerTitle_Custom,
         ToggleEnableDisableAllTerminalsInZone_Custom,
         ToggleEnableDisableTerminalInZone_Custom,
-        KillEnemiesInZone_Custom,
+        KillEnemiesInZone_Custom, // remove this in the future
         StopSpecifiedEnemyWave,
         AlertEnemiesInZone,
         AlertEnemiesInArea,
 
         KillEnemiesInArea = 140,
+        KillEnemiesInZone = 141,
 
         Reactor_CompleteCurrentWave = 150,
         TP_WarpTeamsToArea = 160,
@@ -37,190 +34,14 @@ namespace LEGACY.ExtraEventsConfig
         ChainedPuzzle_AddReqItem = 200,
         ChainedPuzzle_RemoveReqItem,
 
-        DEBUG_ZoneEnemiesInfo = 250
+        DEBUG_ZoneHibernateInfo = 250,
+        DEBUG_LevelHibernateInfo = 251,
+        DEBUG_OutputLevelHibernateSpawnEvent = 252
     }
 
     [HarmonyPatch]
     class Patch_ExtraEventsConfig
     {
-        private static void Debug_ZoneEnemiesInfo(WardenObjectiveEventData e)
-        {
-            //LG_Zone zone;
-            //if (!Builder.CurrentFloor.TryGetZoneByLocalIndex(e.DimensionIndex, e.Layer, e.LocalIndex, out zone) || zone == null)
-            //{
-            //    Logger.Error($"Debug_ZoneEnemiesInfo: cannot find zone {e.LocalIndex}, {e.Layer}, {e.DimensionIndex}");
-            //    return;
-            //}
-
-            //Dictionary<string, uint> map = new();
-
-            //foreach(var node in zone.m_courseNodes)
-            //{
-            //    foreach(var enemy in node.m_enemiesInNode)
-            //    {
-                    
-            //        enemy.EnemyData
-            //    }
-            //}
-        }
-
-        private static void SpawnEnemy_Hibernate(WardenObjectiveEventData e)
-        {
-            if (!SNet.IsMaster) return;
-
-            AgentMode mode = AgentMode.Hibernate; 
-
-            switch(e.EnemyID)
-            {
-                case 20:
-                case 40:
-                case 41:
-                case 23:
-                case 48:
-                    mode = AgentMode.Scout; break;
-            }
-
-            LG_Zone zone;
-            if (!Builder.CurrentFloor.TryGetZoneByLocalIndex(e.DimensionIndex, e.Layer, e.LocalIndex, out zone) || zone == null)
-            {
-                Logger.Error($"SpawnEnemy_Hibernate: cannot find zone {e.LocalIndex}, {e.Layer}, {e.DimensionIndex}");
-                return;
-            }
-
-            bool usingOnPosition = false;
-            System.Collections.Generic.List<AIG_CourseNode> nodes = new();
-            System.Collections.Generic.List<UnityEngine.Vector3> spawnPositions = new();
-
-            // if-else clause:
-            // fill nodes and spawnPositions
-            string worldEventObjectFilter = e.WorldEventObjectFilter.ToUpperInvariant();
-            if (e.Position != UnityEngine.Vector3.zero)
-            {
-                Logger.Debug($"SpawnEnemy_Hibernate: using SpawnOnPosition, will only spawn 1 enemy.\nYou'll have to specify the correct area as well");
-
-                if(!worldEventObjectFilter.Contains("AREA_") || worldEventObjectFilter.Length != "AREA_".Length + 1)
-                {
-                    Logger.Error($"SpawnEnemy_Hibernate: invalid WorldEventObjectFilter {e.WorldEventObjectFilter}");
-                    return;
-                }
-
-                int areaIndex = worldEventObjectFilter[worldEventObjectFilter.Length - 1] - 'A';
-                if(areaIndex < 0 || areaIndex >= zone.m_areas.Count)
-                {
-                    Logger.Error($"SpawnEnemy_Hibernate: invalid WorldEventObjectFilter - didn't find AREA_{worldEventObjectFilter[worldEventObjectFilter.Length - 1]}");
-                    return;
-                }
-
-                usingOnPosition = true;
-                nodes.Add(zone.m_areas[areaIndex].m_courseNode);
-                spawnPositions.Add(e.Position);
-            }
-            else
-            {
-                switch (worldEventObjectFilter)
-                {
-                    case "RANDOM":
-                    case "RANDOM_AREA":
-                    case "":
-                        for(int c = 0; c < e.Count; c++)
-                        {
-                            var node = zone.m_areas[Builder.SessionSeedRandom.Range(0, zone.m_areas.Count)].m_courseNode;
-                            nodes.Add(node);
-                            spawnPositions.Add(node.GetRandomPositionInside());
-                        }
-                        break;
-
-                    default:
-                        if (worldEventObjectFilter.Contains("AREA_") && worldEventObjectFilter.Length - "AREA_".Length > 0)
-                        {
-                            string candidateArea = worldEventObjectFilter.Substring("AREA_".Length);
-                                
-                            for(int c = 0; c < e.Count; c++)
-                            {
-                                char selectedArea = candidateArea[Builder.SessionSeedRandom.Range(0, candidateArea.Length)];
-                                int areaIndex = selectedArea - 'A';
-
-                                if (areaIndex < 0 || areaIndex >= zone.m_areas.Count)
-                                {
-                                    Logger.Error($"SpawnEnemy_Hibernate: invalid WorldEventObjectFilter - didn't find AREA_{selectedArea}");
-                                    continue;
-                                }
-
-                                var node = zone.m_areas[areaIndex].m_courseNode;
-                                nodes.Add(node);
-                                spawnPositions.Add(node.GetRandomPositionInside());
-                            }
-                        }
-                        else
-                        {
-                            Logger.Error("SpawnEnemy_Hibernate: invalid format for WorldEventObjectFilter, should be one of RANDOM, \"\", AREA_{area letters}");
-                            return;
-                        }
-                        break;
-                }
-            }
-
-            // scout:
-            if (mode == AgentMode.Scout)
-            {
-                eEnemyGroupType groupType = (eEnemyGroupType)3;
-                eEnemyRoleDifficulty difficulty = 0;
-
-                switch (e.EnemyID)
-                {
-                    case 20:
-                        difficulty = 0; break;
-                    case 40:
-                        difficulty = (eEnemyRoleDifficulty)14; break;
-                    case 41:
-                        difficulty = (eEnemyRoleDifficulty)3; break;
-                    case 23:
-                        difficulty = (eEnemyRoleDifficulty)6; break;
-                    case 48:
-                        difficulty = (eEnemyRoleDifficulty)13; break;
-                    default:
-                        Logger.Error($"Undefined scout, enemy ID {e.EnemyID}");
-                        break;
-                }
-
-                EnemyGroupRandomizer r = null;
-                if (!EnemySpawnManager.TryCreateEnemyGroupRandomizer(groupType, difficulty, out r) || r == null)
-                {
-                    Logger.Error("EnemySpawnManager.TryCreateEnemyGroupRandomizer false");
-                    return;
-                }
-
-                EnemyGroupDataBlock randomGroup = r.GetRandomGroup(Builder.SessionSeedRandom.Value());
-                float popPoints = randomGroup.MaxScore * Builder.SessionSeedRandom.Range(1f, 1.2f);
-
-                for(int i = 0; i < spawnPositions.Count; i++)
-                {
-                    var position = spawnPositions[i];
-                    var node = nodes[i];
-                    var scoutSpawnData = EnemyGroup.GetSpawnData(position, node, EnemyGroupType.Hibernating,
-                    eEnemyGroupSpawnType.RandomInArea, randomGroup.persistentID, popPoints) with
-                    {
-                        respawn = false
-                    };
-
-                    EnemyGroup.Spawn(scoutSpawnData);
-                }
-            }
-
-            else
-            {
-                for (int i = 0; i < spawnPositions.Count; i++)
-                {
-                    var position = spawnPositions[i];
-                    var node = nodes[i];
-                    UnityEngine.Quaternion rotation = UnityEngine.Quaternion.LookRotation(new UnityEngine.Vector3(EnemyGroup.s_randomRot2D.x, 0.0f, EnemyGroup.s_randomRot2D.y), UnityEngine.Vector3.up);
-                    EnemyAllocator.Current.SpawnEnemy(e.EnemyID, node, mode, position, rotation);
-                    
-                }
-            }
-
-            Logger.Debug($"SpawnEnemy_Hibernate: spawned {e.Count} enemy/enemies " + (usingOnPosition ? $"on position ({e.Position.x}, {e.Position.y}, {e.Position.z})" : $"in zone {e.LocalIndex}, {e.Layer}, {e.DimensionIndex}"));
-        }
 
         // specifying e.DimensionIndex is necessary!
         private static void WarpTeamsToArea(WardenObjectiveEventData e)
@@ -676,17 +497,21 @@ namespace LEGACY.ExtraEventsConfig
                 case (int)EventType.ToggleEnableDisableAllTerminalsInZone_Custom:
                 case (int)EventType.ToggleEnableDisableTerminalInZone_Custom:
                 case (int)EventType.KillEnemiesInZone_Custom:
+                case (int)EventType.KillEnemiesInZone:
                 case (int)EventType.AlertEnemiesInZone:
                 case (int)EventType.AlertEnemiesInArea:
                 case (int)EventType.TP_WarpTeamsToArea:
                 case (int)EventType.SpawnEnemy_Hibernate:
                 case (int)EventType.Reactor_CompleteCurrentWave:
                 case (int)EventType.KillEnemiesInArea:
+                case (int)EventType.DEBUG_ZoneHibernateInfo:
+                case (int)EventType.DEBUG_LevelHibernateInfo:
+                case (int)EventType.DEBUG_OutputLevelHibernateSpawnEvent:
                     coroutine = CoroutineManager.StartCoroutine(Handle(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
                     WorldEventManager.m_worldEventEventCoroutines.Add(coroutine);
                     return false;
                 case (int)EventType.StopSpecifiedEnemyWave:
-                    SpawnSurvivalWave_Custom.StopSpecifiedWave(eventToTrigger, currentDuration);
+                    SurvivalWave_Custom.StopSpecifiedWave(eventToTrigger, currentDuration);
                     return false;
                 case (int)EventType.ChainedPuzzle_AddReqItem:
                     coroutine = CoroutineManager.StartCoroutine(ChainedPuzzle_Custom.AddReqItem(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
@@ -707,10 +532,10 @@ namespace LEGACY.ExtraEventsConfig
                     //WardenObjectiveManager.m_wardenObjectiveEventCoroutines.Add(coroutine);
                     return false;
                 case eWardenObjectiveEventType.SpawnEnemyWave:
-                    bool use_vanilla_impl = SpawnSurvivalWave_Custom.SpawnWave(eventToTrigger, currentDuration);
+                    bool use_vanilla_impl = SurvivalWave_Custom.SpawnWave(eventToTrigger, currentDuration);
                     return use_vanilla_impl;
                 case eWardenObjectiveEventType.StopEnemyWaves:
-                    SpawnSurvivalWave_Custom.OnStopAllWave();
+                    SurvivalWave_Custom.OnStopAllWave();
                     return true;
                 case eWardenObjectiveEventType.ActivateChainedPuzzle:
                     coroutine = CoroutineManager.StartCoroutine(ChainedPuzzle_Custom.ActivateChainedPuzzle(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
@@ -769,18 +594,25 @@ namespace LEGACY.ExtraEventsConfig
                 case (int)EventType.ToggleEnableDisableTerminalInZone_Custom:
                     ToggleEnableDisableTerminalInZone_Custom(e); break;
                 case (int)EventType.KillEnemiesInZone_Custom:
+                case (int)EventType.KillEnemiesInZone:
                     KillEnemiesInZone_Custom(e); break;
                 case (int)EventType.AlertEnemiesInZone:
                 case (int)EventType.AlertEnemiesInArea:
                     AlertEnemies(e, (uint)e.Type == (uint)EventType.AlertEnemiesInZone); break;
                 case (int)EventType.Reactor_CompleteCurrentWave:
                     CompleteCurrentReactorWave(e); break;
-                case (int)EventType.SpawnEnemy_Hibernate:
-                    SpawnEnemy_Hibernate(e); break;
                 case (int)EventType.TP_WarpTeamsToArea:
                     WarpTeamsToArea(e); break;
                 case (int)EventType.KillEnemiesInArea:
                     KillEnemiesInArea(e); break;
+                case (int)EventType.SpawnEnemy_Hibernate:
+                    SpawnHibernate.SpawnEnemy_Hibernate(e); break;
+                case (int)EventType.DEBUG_ZoneHibernateInfo:
+                    SpawnHibernate.Debug_ZoneEnemiesInfo(e); break;
+                case (int)EventType.DEBUG_LevelHibernateInfo:
+                    SpawnHibernate.Debug_LevelEnemiesInfo(e); break;
+                case (int)EventType.DEBUG_OutputLevelHibernateSpawnEvent:
+                    SpawnHibernate.Debug_OutputLevelHibernateSpawnEvent(e); break;
                 case (int)EventType.SetTimerTitle_Custom:
                     {
                         float duration = e.Duration;

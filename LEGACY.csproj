@@ -29,6 +29,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ExtraEventsConfig\ChainedPuzzle_Custom.cs" />
+    <Compile Include="ExtraEventsConfig\SpawnHibernate.cs" />
     <Compile Include="LegacyOverride\EnemyTagger\EnemyTaggerComponent.cs" />
     <Compile Include="LegacyOverride\Patches\Patch_Customize_SecDoor_Interaction_Text.cs" />
     <Compile Include="LegacyOverride\Patches\Patch_TerminalPositionOverride.cs" />
@@ -41,19 +42,22 @@
     <Compile Include="LegacyOverride\FogBeacon\FogBeaconSettingManager.cs" />
     <Compile Include="LegacyOverride\LegacyOverrideManagers.cs" />
     <Compile Include="LegacyOverride\ElevatorCargo\LevelElevatorCargo.cs" />
-    <Compile Include="LegacyOverride\Json.cs" />
+    <Compile Include="Utils\Json.cs" />
     <Compile Include="LegacyOverride\SecDoorIntText\LevelSecDoorIntTextOverride.cs" />
     <Compile Include="LegacyOverride\SecDoorIntText\SecDoorIntTextOverrideManager.cs" />
     <Compile Include="LegacyOverride\Terminal\LevelTerminalPosition.cs" />
     <Compile Include="LegacyOverride\Terminal\TerminalPositionOverrideManager.cs" />
-    <Compile Include="LegacyOverride\Vec3.cs" />
+    <Compile Include="Utils\Vec3.cs" />
     <Compile Include="PlayerPortal\PlayerPortalManager.cs" />
     <Compile Include="PlayerPortal\ZonePortal.cs" />
     <Compile Include="Utils\Helper.cs" />
-    <Compile Include="ExtraEventsConfig\SpawnSurvivalWave_Custom.cs" />
+    <Compile Include="ExtraEventsConfig\SurvivalWave_Custom.cs" />
     <Compile Include="ExtraEventsConfig\Patch_EventsOnUplinkCommence.cs" />
     <Compile Include="Utils\Logger.cs" />
+    <Compile Include="Utils\SpawnHibernateEnemiesEvent.cs" />
     <Compile Include="Utils\VersionWatermark.cs" />
+    <Compile Include="Utils\WeightedAreaSelector.cs" />
+    <Compile Include="Utils\WeightedRandomBag.cs" />
     <Compile Include="VanillaFix\Patch_FixHiddenCommandExecution.cs" />
     <Compile Include="VanillaFix\Patch_FixScoutFreeze.cs" />
     <Compile Include="ExtraEventsConfig\Patch_EventsOnBossDeath.cs" />

@@ -13,7 +13,7 @@ namespace LEGACY.LegacyOverride.Patches
         private static void Post_ChangeTerminalPosition(LG_ComputerTerminal __instance)
         {
             var terminalPositionOverride = TerminalPositionOverrideManager.Current.GetLevelTerminalPositionOverride(RundownManager.ActiveExpedition.LevelLayoutData);
-            if (terminalPositionOverride == null) return;
+            if (terminalPositionOverride == null || __instance.SpawnNode == null) return;
 
             int i = terminalPositionOverride.FindIndex((t) =>
                 t.DimensionIndex == __instance.SpawnNode.m_dimension.DimensionIndex

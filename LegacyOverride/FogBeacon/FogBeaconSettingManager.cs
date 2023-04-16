@@ -1,5 +1,4 @@
 ﻿using GTFO.API.Utilities;
-using LEGACY.LegacyOverride;
 using LEGACY.LegacyOverride.ElevatorCargo;
 using System.IO;
 using System.Collections.Generic;

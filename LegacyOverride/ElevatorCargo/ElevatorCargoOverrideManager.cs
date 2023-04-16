@@ -1,5 +1,4 @@
 ﻿using GTFO.API.Utilities;
-using LEGACY.LegacyOverride;
 using System.Collections.Generic;
 using System.IO;
 using LEGACY.Utils;

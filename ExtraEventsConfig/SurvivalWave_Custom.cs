@@ -12,7 +12,7 @@ using GTFO.API;
 
 namespace LEGACY.ExtraEventsConfig
 {
-    internal static class SpawnSurvivalWave_Custom
+    internal static class SurvivalWave_Custom
     {
         private static System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<ushort>> WaveEventsMap = new();
 
@@ -256,7 +256,7 @@ namespace LEGACY.ExtraEventsConfig
             Logger.Debug("Wave(s) with filter {0} stopped.", e.WorldEventObjectFilter);
         }
 
-        static SpawnSurvivalWave_Custom()
+        static SurvivalWave_Custom()
         {
             LevelAPI.OnLevelCleanup += WaveEventsMap.Clear;
         }

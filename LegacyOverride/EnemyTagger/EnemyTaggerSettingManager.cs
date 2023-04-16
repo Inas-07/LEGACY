@@ -1,5 +1,4 @@
 ﻿using GTFO.API.Utilities;
-using LEGACY.LegacyOverride;
 using LEGACY.LegacyOverride.ElevatorCargo;
 using System.IO;
 using System.Collections.Generic;
@@ -19,7 +18,9 @@ namespace LEGACY.LegacyOverride.EnemyTagger
 
         private static readonly string CONFIG_PATH = Path.Combine(LegacyOverrideManagers.LEGACY_CONFIG_PATH, "EnemyTaggerSetting");
 
-        internal EnemyTaggerSetting SettingForCurrentLevel { private set; get; } = default;
+        private static readonly EnemyTaggerSetting DEFAULT = new();
+
+        internal EnemyTaggerSetting SettingForCurrentLevel { private set; get; } = DEFAULT;
 
         private void AddOverride(EnemyTaggerSetting _override)
         {
@@ -83,7 +84,7 @@ namespace LEGACY.LegacyOverride.EnemyTagger
         private void UpdateSetting()
         {
             uint mainLevelLayout = RundownManager.ActiveExpedition.LevelLayoutData;
-            SettingForCurrentLevel = enemyTaggerSettingSettings.ContainsKey(mainLevelLayout) ? enemyTaggerSettingSettings[mainLevelLayout] : default;
+            SettingForCurrentLevel = enemyTaggerSettingSettings.ContainsKey(mainLevelLayout) ? enemyTaggerSettingSettings[mainLevelLayout] : DEFAULT;
             Logger.Debug($"EnemyTaggerSettingManager: updated setting for level with main level layout id {mainLevelLayout}");
         }
 
