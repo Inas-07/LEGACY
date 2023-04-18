@@ -22,5 +22,7 @@ namespace LEGACY.Utils
         public int Count { set; get; } = 1;
 
         public float Delay { set; get; } = 0.0f;
+
+        public float Duration { set; get; } = 2.0f;
     }
 }

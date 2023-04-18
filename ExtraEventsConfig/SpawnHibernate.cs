@@ -264,7 +264,7 @@ namespace LEGACY.ExtraEventsConfig
                     yield return new UnityEngine.WaitForSeconds(SpawnInterval);
                 }
 
-                Logger.Debug($"SpawnEnemy_Hibernate: spawned {e.Count} enemy/enemies with interval {SpawnInterval} in zone {e.LocalIndex}, {e.Layer}, {e.DimensionIndex}");
+                Logger.Debug($"SpawnEnemy_Hibernate: spawned {e.Count} enemy/enemies in {CompleteSpawnInSeconds}s in zone {e.LocalIndex}, {e.Layer}, {e.DimensionIndex}");
                 yield break;
             }
         }
