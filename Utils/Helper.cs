@@ -51,7 +51,7 @@ namespace LEGACY.Utils
                     case LG_LayerType.MainLayer: layoutID = RundownManager.ActiveExpedition.LevelLayoutData; break;
                     case LG_LayerType.SecondaryLayer: layoutID = RundownManager.ActiveExpedition.SecondaryLayout; break;
                     case LG_LayerType.ThirdLayer: layoutID = RundownManager.ActiveExpedition.ThirdLayout; break;
-                    default: Logger.Error("Unimplemented layer type."); return null;
+                    default: LegacyLogger.Error("Unimplemented layer type."); return null;
                 }
             }
             else
@@ -79,13 +79,13 @@ namespace LEGACY.Utils
 
             if (TargetZoneData == null)
             {
-                Logger.Error("Cannot find target zone data.");
+                LegacyLogger.Error("Cannot find target zone data.");
                 return null;
             }
 
             if (TargetZoneData.TerminalPlacements.Count != TerminalsInZone.Count)
             {
-                Logger.Error("The numbers of terminal placement and spawn, skipped for the zone terminal.");
+                LegacyLogger.Error("The numbers of terminal placement and spawn, skipped for the zone terminal.");
                 return null;
             }
 
@@ -103,7 +103,7 @@ namespace LEGACY.Utils
                     string param1, param2; // unused
                     if (terminal.m_command.TryGetCommand(UniqueCommand.Command, out CMD, out param1, out param2) == false)
                     {
-                        Logger.Error("Cannot get TERM_COMMAND for command {0} on the specified terminal.");
+                        LegacyLogger.Error("Cannot get TERM_COMMAND for command {0} on the specified terminal.");
                     }
 
                     break;

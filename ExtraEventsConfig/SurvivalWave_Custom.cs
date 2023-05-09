@@ -38,7 +38,7 @@ namespace LEGACY.ExtraEventsConfig
                 {
                     System.Collections.Generic.List<ushort> eventIDList = new();
                     WaveEventsMap.Add(eventToTrigger.WorldEventObjectFilter, eventIDList);
-                    Logger.Debug("Registering Wave(s) with filter {0}", eventToTrigger.WorldEventObjectFilter);
+                    LegacyLogger.Debug("Registering Wave(s) with filter {0}", eventToTrigger.WorldEventObjectFilter);
 
                     // added list here instead of in coroutine to get around with issue caused by concurrency.
                     // the WaveEventsMap will be cleaned OnApplicationQuit and AfterLevel
@@ -117,8 +117,8 @@ namespace LEGACY.ExtraEventsConfig
                     Builder.CurrentFloor.TryGetZoneByLocalIndex(eventToTrigger.DimensionIndex, eventToTrigger.Layer, eventToTrigger.LocalIndex, out specified_zone);
                     if (specified_zone == null)
                     {
-                        Logger.Error("SpawnSurvialWave_InSuppliedCourseNodeZone - Failed to find LG_Zone.");
-                        Logger.Error("DimensionIndex: {0}, Layer: {1}, LocalIndex: {2}", eventToTrigger.DimensionIndex, eventToTrigger.Layer, eventToTrigger.LocalIndex);
+                        LegacyLogger.Error("SpawnSurvialWave_InSuppliedCourseNodeZone - Failed to find LG_Zone.");
+                        LegacyLogger.Error("DimensionIndex: {0}, Layer: {1}, LocalIndex: {2}", eventToTrigger.DimensionIndex, eventToTrigger.Layer, eventToTrigger.LocalIndex);
                         yield break;
                     }
 
@@ -134,12 +134,12 @@ namespace LEGACY.ExtraEventsConfig
                         }
                         else
                         {
-                            Logger.Error("Spawn InSuppliedCourseNode but zone {0}-{1} does not exist! Falling back to InSuppliedCourseNodeZone", specified_zone.Alias, 'A' + e.Count);
+                            LegacyLogger.Error("Spawn InSuppliedCourseNode but zone {0}-{1} does not exist! Falling back to InSuppliedCourseNodeZone", specified_zone.Alias, 'A' + e.Count);
                         }
                     }
 
-                    Logger.Debug("Starting wave with spawn type InSuppliedCourseNodeZone / InSuppliedCourseNode!");
-                    Logger.Debug("DimensionIndex: {0}, Layer: {1}, LocalIndex: {2}", eventToTrigger.DimensionIndex, eventToTrigger.Layer, eventToTrigger.LocalIndex);
+                    LegacyLogger.Debug("Starting wave with spawn type InSuppliedCourseNodeZone / InSuppliedCourseNode!");
+                    LegacyLogger.Debug("DimensionIndex: {0}, Layer: {1}, LocalIndex: {2}", eventToTrigger.DimensionIndex, eventToTrigger.Layer, eventToTrigger.LocalIndex);
                 }
             }
 
@@ -174,11 +174,11 @@ namespace LEGACY.ExtraEventsConfig
                         }
                         else
                         {
-                            Logger.Error("We should have instanitiated a List before call to coroutine, WTF???");
+                            LegacyLogger.Error("We should have instanitiated a List before call to coroutine, WTF???");
                             yield break;
                         }
 
-                        Logger.Debug("Registered wave with filter {0}", worldEventObjectFilter);
+                        LegacyLogger.Debug("Registered wave with filter {0}", worldEventObjectFilter);
                     }
                 }
                 else
@@ -231,13 +231,13 @@ namespace LEGACY.ExtraEventsConfig
 
             if (string.IsNullOrEmpty(e.WorldEventObjectFilter))
             {
-                Logger.Error("WorldEventObjectFilter is empty. Aborted stop wave event.");
+                LegacyLogger.Error("WorldEventObjectFilter is empty. Aborted stop wave event.");
                 yield break;
             }
 
             if (!WaveEventsMap.ContainsKey(e.WorldEventObjectFilter))
             {
-                Logger.Error("Wave Filter {0} is unregistered, cannot stop wave.", e.WorldEventObjectFilter);
+                LegacyLogger.Error("Wave Filter {0} is unregistered, cannot stop wave.", e.WorldEventObjectFilter);
                 yield break;
             }
 
@@ -253,7 +253,7 @@ namespace LEGACY.ExtraEventsConfig
                 }
             }
 
-            Logger.Debug("Wave(s) with filter {0} stopped.", e.WorldEventObjectFilter);
+            LegacyLogger.Debug("Wave(s) with filter {0} stopped.", e.WorldEventObjectFilter);
         }
 
         static SurvivalWave_Custom()

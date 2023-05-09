@@ -8,7 +8,7 @@ namespace LEGACY.LegacyOverride.SecDoorIntText
 {
     internal class SecDoorIntTextOverrideManager
     {
-        public static SecDoorIntTextOverrideManager Current;
+        public static readonly SecDoorIntTextOverrideManager Current;
 
         private Dictionary<uint, LevelSecDoorIntTextOverride> SecDoorIntTextOverrides = new();
 
@@ -24,7 +24,7 @@ namespace LEGACY.LegacyOverride.SecDoorIntText
 
             if (SecDoorIntTextOverrides.ContainsKey(_override.MainLevelLayout))
             {
-                Logger.Warning("Replaced MainLevelLayout {0}", _override.MainLevelLayout);
+                LegacyLogger.Warning("Replaced MainLevelLayout {0}", _override.MainLevelLayout);
                 SecDoorIntTextOverrides[_override.MainLevelLayout] = _override;
             }
             else
@@ -63,7 +63,7 @@ namespace LEGACY.LegacyOverride.SecDoorIntText
 
         private void FileChanged(LiveEditEventArgs e)
         {
-            Logger.Warning($"LiveEdit File Changed: {e.FullPath}");
+            LegacyLogger.Warning($"LiveEdit File Changed: {e.FullPath}");
             LiveEdit.TryReadFileContent(e.FullPath, (content) =>
             {
                 LevelSecDoorIntTextOverride conf = Json.Deserialize<LevelSecDoorIntTextOverride>(content);

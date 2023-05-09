@@ -17,6 +17,8 @@ namespace LEGACY.LegacyOverride.Terminal
 
         public int TerminalIndex { get; set; } = -1;
 
+        public string Area { get; set; } = string.Empty;
+
         public Vec3 Position { get; set; } = new();
 
         public Vec3 Rotation { get; set; } = new();

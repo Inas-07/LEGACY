@@ -32,7 +32,7 @@ namespace LEGACY.ExtraEventsConfig
             {
                 if (eventsOnActivate[start_index] == null)
                 {
-                    Logger.Error("There's a null eventsOnActivate");
+                    LegacyLogger.Error("There's a null eventsOnActivate");
                     return;
                 }
 

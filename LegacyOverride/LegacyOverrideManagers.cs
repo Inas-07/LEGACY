@@ -2,9 +2,10 @@
 using LEGACY.LegacyOverride.FogBeacon;
 using LEGACY.LegacyOverride.Terminal;
 using LEGACY.LegacyOverride.EnemyTagger;
+using LEGACY.LegacyOverride.SecDoorIntText;
+using LEGACY.LegacyOverride.PowerGenerator;
 using MTFO.API;
 using System.IO;
-using LEGACY.LegacyOverride.SecDoorIntText;
 
 namespace LEGACY.LegacyOverride
 {
@@ -19,6 +20,7 @@ namespace LEGACY.LegacyOverride
             FogBeaconSettingManager.Current.Init();
             EnemyTaggerSettingManager.Current.Init();
             SecDoorIntTextOverrideManager.Current.Init();
+            PowerGeneratorOverrideManager.Init();
         }
     }
 }

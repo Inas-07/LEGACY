@@ -18,7 +18,7 @@ namespace LEGACY.ExtraEventsConfig
     {
         internal static void Debug_OutputLevelHibernateSpawnEvent(WardenObjectiveEventData e)
         {
-            Logger.Warning("Debug_OutputLevelHibernateSpawnEvent: This event involves IO operation. Do not use this event on released rundown!");
+            LegacyLogger.Warning("Debug_OutputLevelHibernateSpawnEvent: This event involves IO operation. Do not use this event on released rundown!");
 
             string dirPath = Path.Combine(LegacyOverrideManagers.LEGACY_CONFIG_PATH, "LevelHibernateSpawnEvents");
 
@@ -81,7 +81,7 @@ namespace LEGACY.ExtraEventsConfig
                 s.AppendLine();
             }
 
-            Logger.Debug(s.ToString());
+            LegacyLogger.Debug(s.ToString());
         }
 
         internal static void Debug_ZoneEnemiesInfo(WardenObjectiveEventData e)
@@ -89,7 +89,7 @@ namespace LEGACY.ExtraEventsConfig
             LG_Zone zone;
             if (!Builder.CurrentFloor.TryGetZoneByLocalIndex(e.DimensionIndex, e.Layer, e.LocalIndex, out zone) || zone == null)
             {
-                Logger.Error($"Debug_ZoneEnemiesInfo: cannot find zone {e.LocalIndex}, {e.Layer}, {e.DimensionIndex}");
+                LegacyLogger.Error($"Debug_ZoneEnemiesInfo: cannot find zone {e.LocalIndex}, {e.Layer}, {e.DimensionIndex}");
                 return;
             }
 
@@ -102,7 +102,7 @@ namespace LEGACY.ExtraEventsConfig
                 s.AppendLine($"{db.name}, Num: {map[enemyID]}, ID: {enemyID}");
             }
 
-            Logger.Debug(s.ToString());
+            LegacyLogger.Debug(s.ToString());
         }
 
         public static Dictionary<uint, uint> ZoneEnemiesInfo(LG_Zone zone)
@@ -132,7 +132,7 @@ namespace LEGACY.ExtraEventsConfig
             LG_Zone zone;
             if (!Builder.CurrentFloor.TryGetZoneByLocalIndex(e.DimensionIndex, e.Layer, e.LocalIndex, out zone) || zone == null)
             {
-                Logger.Error($"SpawnEnemy_Hibernate: cannot find zone {e.LocalIndex}, {e.Layer}, {e.DimensionIndex}");
+                LegacyLogger.Error($"SpawnEnemy_Hibernate: cannot find zone {e.LocalIndex}, {e.Layer}, {e.DimensionIndex}");
                 yield break;
             }
 
@@ -141,25 +141,25 @@ namespace LEGACY.ExtraEventsConfig
             // SPAWN ON POSITION
             if (e.Position != UnityEngine.Vector3.zero)
             {
-                Logger.Debug($"SpawnEnemy_Hibernate: using SpawnOnPosition, will only spawn 1 enemy (spawning scout is not supported).\nYou'll have to specify the correct area as well");
+                LegacyLogger.Debug($"SpawnEnemy_Hibernate: using SpawnOnPosition, will only spawn 1 enemy (spawning scout is not supported).\nYou'll have to specify the correct area as well");
 
                 if (!worldEventObjectFilter.Contains("AREA_") || worldEventObjectFilter.Length != "AREA_".Length + 1)
                 {
-                    Logger.Error($"SpawnEnemy_Hibernate: invalid WorldEventObjectFilter {e.WorldEventObjectFilter}");
+                    LegacyLogger.Error($"SpawnEnemy_Hibernate: invalid WorldEventObjectFilter {e.WorldEventObjectFilter}");
                     yield break;
                 }
 
                 int areaIndex = worldEventObjectFilter[worldEventObjectFilter.Length - 1] - 'A';
                 if (areaIndex < 0 || areaIndex >= zone.m_areas.Count)
                 {
-                    Logger.Error($"SpawnEnemy_Hibernate: invalid WorldEventObjectFilter - didn't find AREA_{worldEventObjectFilter[worldEventObjectFilter.Length - 1]}");
+                    LegacyLogger.Error($"SpawnEnemy_Hibernate: invalid WorldEventObjectFilter - didn't find AREA_{worldEventObjectFilter[worldEventObjectFilter.Length - 1]}");
                     yield break;
                 }
 
                 UnityEngine.Quaternion rotation = UnityEngine.Quaternion.LookRotation(new UnityEngine.Vector3(EnemyGroup.s_randomRot2D.x, 0.0f, EnemyGroup.s_randomRot2D.y), UnityEngine.Vector3.up);
                 EnemyAllocator.Current.SpawnEnemy(e.EnemyID, zone.m_areas[areaIndex].m_courseNode, AgentMode.Hibernate, e.Position, rotation);
             
-                Logger.Debug($"SpawnEnemy_Hibernate: spawned {e.Count} enemy/enemies on position ({e.Position.x}, {e.Position.y}, {e.Position.z}), in zone_{e.LocalIndex}, {e.Layer}, {e.DimensionIndex}");
+                LegacyLogger.Debug($"SpawnEnemy_Hibernate: spawned {e.Count} enemy/enemies on position ({e.Position.x}, {e.Position.y}, {e.Position.z}), in zone_{e.LocalIndex}, {e.Layer}, {e.DimensionIndex}");
 
                 yield break;
             }
@@ -223,14 +223,14 @@ namespace LEGACY.ExtraEventsConfig
                                         int _areaIndex = c - 'A';
                                         if (_areaIndex < 0 || _areaIndex >= zone.m_areas.Count)
                                         {
-                                            Logger.Error($"SpawnEnemy_Hibernate: invalid WorldEventObjectFilter - didn't find AREA_{_areaIndex}");
+                                            LegacyLogger.Error($"SpawnEnemy_Hibernate: invalid WorldEventObjectFilter - didn't find AREA_{_areaIndex}");
                                             yield break;
                                         }
                                     }
                                 }
                                 else
                                 {
-                                    Logger.Error("SpawnEnemy_Hibernate: invalid format for WorldEventObjectFilter, should be one of RANDOM, \"\", AREA_{area letters}");
+                                    LegacyLogger.Error("SpawnEnemy_Hibernate: invalid format for WorldEventObjectFilter, should be one of RANDOM, \"\", AREA_{area letters}");
                                     yield break;
                                 }
                             }
@@ -245,7 +245,7 @@ namespace LEGACY.ExtraEventsConfig
 
                     if(UnityEngine.Vector3.Equals(position, UnityEngine.Vector3.zero))
                     {
-                        Logger.Error("SpawnEnemy_Hibernate: got zero position vector, aborting all spawn!");
+                        LegacyLogger.Error("SpawnEnemy_Hibernate: got zero position vector, aborting all spawn!");
                         yield break;
                     }
 
@@ -264,7 +264,7 @@ namespace LEGACY.ExtraEventsConfig
                     yield return new UnityEngine.WaitForSeconds(SpawnInterval);
                 }
 
-                Logger.Debug($"SpawnEnemy_Hibernate: spawned {e.Count} enemy/enemies in {CompleteSpawnInSeconds}s in zone {e.LocalIndex}, {e.Layer}, {e.DimensionIndex}");
+                LegacyLogger.Debug($"SpawnEnemy_Hibernate: spawned {e.Count} enemy/enemies in {CompleteSpawnInSeconds}s in zone {e.LocalIndex}, {e.Layer}, {e.DimensionIndex}");
                 yield break;
             }
         }
@@ -295,14 +295,14 @@ namespace LEGACY.ExtraEventsConfig
                 case 48:
                     difficulty = (eEnemyRoleDifficulty)13; break;
                 default:
-                    Logger.Error($"Undefined scout, enemy ID {scoutID}");
+                    LegacyLogger.Error($"Undefined scout, enemy ID {scoutID}");
                     break;
             }
 
             EnemyGroupRandomizer r = null;
             if (!EnemySpawnManager.TryCreateEnemyGroupRandomizer(groupType, difficulty, out r) || r == null)
             {
-                Logger.Error("EnemySpawnManager.TryCreateEnemyGroupRandomizer false");
+                LegacyLogger.Error("EnemySpawnManager.TryCreateEnemyGroupRandomizer false");
                 return;
             }
 

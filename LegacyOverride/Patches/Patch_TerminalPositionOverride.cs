@@ -13,7 +13,7 @@ namespace LEGACY.LegacyOverride.Patches
         private static void Post_ChangeTerminalPosition(LG_ComputerTerminal __instance)
         {
             var terminalPositionOverride = TerminalPositionOverrideManager.Current.GetLevelTerminalPositionOverride(RundownManager.ActiveExpedition.LevelLayoutData);
-            if (terminalPositionOverride == null || __instance.SpawnNode == null) return;
+            if (terminalPositionOverride == null || __instance.SpawnNode == null /* skip reactor terminal */) return;
 
             int i = terminalPositionOverride.FindIndex((t) =>
                 t.DimensionIndex == __instance.SpawnNode.m_dimension.DimensionIndex
@@ -33,7 +33,28 @@ namespace LEGACY.LegacyOverride.Patches
                 __instance.transform.rotation = _override.Rotation.ToQuaternion();
             }
 
-            Logger.Debug($"TerminalPositionOverride: {_override.LocalIndex}, {_override.LayerType}, {_override.DimensionIndex}, TerminalIndex {_override.TerminalIndex}");
+            if (_override.Area.Length >= 1)
+            {
+                if(_override.Area.Length == 1)
+                {
+                    char area = _override.Area.ToUpperInvariant()[0];
+                    int areaIndex = area - 'A';
+                    if (areaIndex < 0 || areaIndex >= __instance.SpawnNode.m_zone.m_areas.Count)
+                    {
+                        LegacyLogger.Error($"Invalid area '{_override.Area}', will not change area.");
+                    }
+                    else
+                    {
+                        __instance.m_terminalItem.SpawnNode = __instance.SpawnNode.m_zone.m_areas[areaIndex].m_courseNode;
+                    }
+                }
+                else
+                {
+                    LegacyLogger.Error($"Invalid area '{_override.Area}', must be 1 single character. Will not change area.");
+                }
+            }
+
+            LegacyLogger.Debug($"TerminalPositionOverride: {_override.LocalIndex}, {_override.LayerType}, {_override.DimensionIndex}, TerminalIndex {_override.TerminalIndex}");
         }
     }
 }

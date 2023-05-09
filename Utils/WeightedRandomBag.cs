@@ -19,7 +19,7 @@ namespace LEGACY.Utils
         {
             if(weight <= 0.0)
             {
-                Logger.Error("AddEntry: no non-positive weight pls.");
+                LegacyLogger.Error("AddEntry: no non-positive weight pls.");
                 return;
             }
 

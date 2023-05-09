@@ -45,7 +45,7 @@ namespace LEGACY.LegacyOverride.Patches
                     case ItemType.BigPickup:
                         item.SetupAsBigPickupItem(Random.Range(0, int.MaxValue), elevatorCargo.ItemID, false, 0);
                         break;
-                    default: Utils.Logger.Error($"Undefined Item Type {elevatorCargo.ItemType}"); continue;
+                    default: Utils.LegacyLogger.Error($"Undefined Item Type {elevatorCargo.ItemType}"); continue;
                 }
 
                 __instance.m_itemsToMoveToCargo.Add(item.transform);

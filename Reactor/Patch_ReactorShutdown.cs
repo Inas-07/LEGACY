@@ -21,8 +21,8 @@ namespace LEGACY.Reactor
             if (WardenObjectiveManager.Current.TryGetActiveWardenObjectiveData(__instance.SpawnNode.LayerType, out db) == false
                 || db == null)
             {
-                Logger.Error("Patch_ReactorShutdown: ");
-                Logger.Error("Failed to get warden objective");
+                LegacyLogger.Error("Patch_ReactorShutdown: ");
+                LegacyLogger.Error("Failed to get warden objective");
                 return;
             }
 
@@ -52,7 +52,7 @@ namespace LEGACY.Reactor
             if (WardenObjectiveManager.Current.TryGetActiveWardenObjectiveData(__instance.SpawnNode.LayerType, out objective) == false
                 || objective == null)
             {
-                Logger.Error("Patch_ReactorShutdown: Failed to get warden objective");
+                LegacyLogger.Error("Patch_ReactorShutdown: Failed to get warden objective");
                 return;
             }
 

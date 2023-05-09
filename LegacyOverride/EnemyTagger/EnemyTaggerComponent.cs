@@ -48,7 +48,7 @@ namespace LEGACY.LegacyOverride.EnemyTagger
             switch (newState)
             {
                 case eEnemyTaggerState.Uninitialized:
-                    Utils.Logger.Error("Enemy Tagger changed to state 'uninitialized'?");
+                    Utils.LegacyLogger.Error("Enemy Tagger changed to state 'uninitialized'?");
                     return;
                 case eEnemyTaggerState.Inactive:
                     UpdateTime = 0.0f;
@@ -64,7 +64,7 @@ namespace LEGACY.LegacyOverride.EnemyTagger
                     UpdateTime = 0.0f;
                     break;
                 default:
-                    Utils.Logger.Error($"Enemy Tagger: Undefined state {CurrentState}");
+                    Utils.LegacyLogger.Error($"Enemy Tagger: Undefined state {CurrentState}");
                     return;
             }
             CurrentState = newState;
@@ -134,7 +134,7 @@ namespace LEGACY.LegacyOverride.EnemyTagger
 
             if (Parent == null)
             {
-                Utils.Logger.Error("EnemyTagger: null parent");
+                Utils.LegacyLogger.Error("EnemyTagger: null parent");
                 return;
             }
 

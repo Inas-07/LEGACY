@@ -38,8 +38,8 @@ namespace LEGACY.Reactor
             if (WardenObjectiveManager.Current.TryGetActiveWardenObjectiveData(__instance.SpawnNode.LayerType, out db) == false
                 || db == null)
             {
-                Logger.Error("Patch_ReactorStartup_ExtraEventsExecution: ");
-                Logger.Error("Failed to get warden objective");
+                LegacyLogger.Error("Patch_ReactorStartup_ExtraEventsExecution: ");
+                LegacyLogger.Error("Failed to get warden objective");
                 return;
             }
 

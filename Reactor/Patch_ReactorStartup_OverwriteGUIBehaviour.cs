@@ -7,6 +7,7 @@ using Localization;
 using UnityEngine;
 using LEGACY.Utils;
 using GTFO.API;
+using System.Collections.Generic;
 
 namespace LEGACY.Reactor
 {
@@ -19,6 +20,8 @@ namespace LEGACY.Reactor
 
         private const float hideTimeThreshold = 43200.0f;
 
+        private static HashSet<uint> ForceDisableLevels = new();
+
         [HarmonyPostfix]
         [HarmonyPatch(typeof(LG_WardenObjective_Reactor), nameof(LG_WardenObjective_Reactor.OnBuildDone))]
         private static void Post_OnBuildDone(LG_WardenObjective_Reactor __instance)
@@ -27,8 +30,8 @@ namespace LEGACY.Reactor
             if (WardenObjectiveManager.Current.TryGetActiveWardenObjectiveData(__instance.SpawnNode.LayerType, out db) == false
                 || db == null)
             {
-                Utils.Logger.Error("Patch_ReactorStartup_OverwriteGUIBehaviour: ");
-                Utils.Logger.Error("Failed to get warden objective datablock");
+                LegacyLogger.Error("Patch_ReactorStartup_OverwriteGUIBehaviour: ");
+                LegacyLogger.Error("Failed to get warden objective datablock");
                 return;
             }
 
@@ -36,48 +39,48 @@ namespace LEGACY.Reactor
 
             if(dbs[(int)__instance.SpawnNode.LayerType] != null)
             {
-                Utils.Logger.Error($"ReactorStartup_OverwriteGUIBehaviour: multiple reactor startup objective definition found for layer {__instance.SpawnNode.LayerType}. Nonsense!");
+                LegacyLogger.Error($"ReactorStartup_OverwriteGUIBehaviour: multiple reactor startup objective definition found for layer {__instance.SpawnNode.LayerType}. Nonsense!");
             }
 
             dbs[(int)__instance.SpawnNode.LayerType] = db;
         }
 
-        // rewrite the entire method
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(LG_WardenObjective_Reactor), nameof(LG_WardenObjective_Reactor.SetGUIMessage))]
-        private static bool Pre_SetGUIMessage(LG_WardenObjective_Reactor __instance, bool visible, ref string msg, ePUIMessageStyle style, bool printTimerInText, string timerPrefix, string timerSuffix)
-        {
-            if (dbs[(int)__instance.SpawnNode.LayerType] == null || !Equals(__instance.m_currentState.status, eReactorStatus.Startup_waitForVerify)) return true;
+        //// rewrite the entire method
+        //[HarmonyPrefix]
+        //[HarmonyPatch(typeof(LG_WardenObjective_Reactor), nameof(LG_WardenObjective_Reactor.SetGUIMessage))]
+        //private static bool Pre_SetGUIMessage(LG_WardenObjective_Reactor __instance, bool visible, ref string msg, ePUIMessageStyle style, bool printTimerInText, string timerPrefix, string timerSuffix)
+        //{
+        //    if (dbs[(int)__instance.SpawnNode.LayerType] == null || !Equals(__instance.m_currentState.status, eReactorStatus.Startup_waitForVerify)) return true;
 
-            if (!visible && (visible || !__instance.m_reactorGuiVisible))
-                return false;
-            if (visible)
-            {
-                if (printTimerInText)
-                {
-                    int currentWaveIndex = __instance.m_currentWaveCount - 1;
-                    if (dbs[(int)__instance.SpawnNode.LayerType].ReactorWaves[currentWaveIndex].Verify >= hideTimeThreshold)
-                    {   // hide reactor verification timer.
-                        GuiManager.InteractionLayer.SetMessage(msg, style, -1);
-                        GuiManager.InteractionLayer.SetMessageTimer(1.0f);
-                    }
-                    else // original impl.
-                    {
-                        double num1 = (1.0 - (double)__instance.m_currentWaveProgress) * (double)__instance.m_currentDuration;
-                        int num2 = Mathf.FloorToInt((float)(num1 / 60.0));
-                        int num3 = Mathf.FloorToInt((float)(num1 - num2 * 60.0));
-                        msg = msg + "\n<color=white>" + timerPrefix + " <color=orange>" + num2.ToString("D2") + ":" + num3.ToString("D2") + "</color>" + timerSuffix + "</color>";
-                        GuiManager.InteractionLayer.SetMessage(msg, style, -1);
-                        GuiManager.InteractionLayer.SetMessageTimer(__instance.m_currentWaveProgress);
-                    }
-                }
-            }
-            GuiManager.InteractionLayer.MessageVisible = visible;
-            GuiManager.InteractionLayer.MessageTimerVisible = visible;
-            __instance.m_reactorGuiVisible = visible;
+        //    if (!visible && (visible || !__instance.m_reactorGuiVisible))
+        //        return false;
+        //    if (visible)
+        //    {
+        //        if (printTimerInText)
+        //        {
+        //            int currentWaveIndex = __instance.m_currentWaveCount - 1;
+        //            if (dbs[(int)__instance.SpawnNode.LayerType].ReactorWaves[currentWaveIndex].Verify >= hideTimeThreshold)
+        //            {   // hide reactor verification timer.
+        //                GuiManager.InteractionLayer.SetMessage(msg, style, -1);
+        //                GuiManager.InteractionLayer.SetMessageTimer(1.0f);
+        //            }
+        //            else // original impl.
+        //            {
+        //                double num1 = (1.0 - (double)__instance.m_currentWaveProgress) * (double)__instance.m_currentDuration;
+        //                int num2 = Mathf.FloorToInt((float)(num1 / 60.0));
+        //                int num3 = Mathf.FloorToInt((float)(num1 - num2 * 60.0));
+        //                msg = msg + "\n<color=white>" + timerPrefix + " <color=orange>" + num2.ToString("D2") + ":" + num3.ToString("D2") + "</color>" + timerSuffix + "</color>";
+        //                GuiManager.InteractionLayer.SetMessage(msg, style, -1);
+        //                GuiManager.InteractionLayer.SetMessageTimer(__instance.m_currentWaveProgress);
+        //            }
+        //        }
+        //    }
+        //    GuiManager.InteractionLayer.MessageVisible = visible;
+        //    GuiManager.InteractionLayer.MessageTimerVisible = visible;
+        //    __instance.m_reactorGuiVisible = visible;
 
-            return false;
-        }
+        //    return false;
+        //}
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(LG_WardenObjective_Reactor), nameof(LG_WardenObjective_Reactor.OnStateChange))]
@@ -106,8 +109,8 @@ namespace LEGACY.Reactor
                         if (WardenObjectiveManager.Current.TryGetActiveWardenObjectiveData(__instance.SpawnNode.LayerType, out db) == false
                             || db == null)
                         {
-                            Utils.Logger.Error("Patch_ReactorStartup_OverwriteGUIBehaviour: ");
-                            Utils.Logger.Error("Failed to get warden objective datablock");
+                            Utils.LegacyLogger.Error("Patch_ReactorStartup_OverwriteGUIBehaviour: ");
+                            Utils.LegacyLogger.Error("Failed to get warden objective datablock");
                             break;
                         }
                         __instance.m_lightCollection.SetMode(db.LightsOnDuringIntro);
@@ -178,13 +181,17 @@ namespace LEGACY.Reactor
 
         private static bool ForceDisable()
         {
-            LevelLayoutDataBlock block = LevelLayoutDataBlock.GetBlock("Legacy_L3E2_L1");
-            return RundownManager.ActiveExpedition.LevelLayoutData == block.persistentID;
+            return ForceDisableLevels.Contains(RundownManager.ActiveExpedition.LevelLayoutData);
         }
 
         static Patch_ReactorStartup_OverwriteGUIBehaviour()
         {
             LevelAPI.OnLevelCleanup += Clear;
+            LevelLayoutDataBlock block = LevelLayoutDataBlock.GetBlock("Legacy_L3E2_L1");
+            ForceDisableLevels.Add(block.persistentID);
+
+            block = LevelLayoutDataBlock.GetBlock("Legacy_L1E1_L1");
+            ForceDisableLevels.Add(block.persistentID);
         }
 
         private static void Clear()

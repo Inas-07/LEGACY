@@ -24,14 +24,14 @@ namespace LEGACY.ExtraEventsConfig
                 owner = clusterCore.m_owner;
             else
             {
-                Logger.Error($"ActivateChainedPuzzle: Cannot find puzzle with puzzle override index {puzzleOverrideIndex}!");
+                LegacyLogger.Error($"ActivateChainedPuzzle: Cannot find puzzle with puzzle override index {puzzleOverrideIndex}!");
                 yield break;
             }
             
             ChainedPuzzleInstance CPInstance = owner.TryCast<ChainedPuzzleInstance>();
             if (CPInstance == null)
             {
-                Logger.Error("ActivateChainedPuzzle: Cannot find ChainedPuzzleInstance!");
+                LegacyLogger.Error("ActivateChainedPuzzle: Cannot find ChainedPuzzleInstance!");
                 yield break;
             }
 
@@ -58,9 +58,9 @@ namespace LEGACY.ExtraEventsConfig
 
             CPInstance.AttemptInteract(eChainedPuzzleInteraction.Activate);
 
-            Logger.Debug($"ActivateChainedPuzzle: puzzle override index: {puzzleOverrideIndex}");
-            Logger.Debug($"ChainedPuzzleZone: Dim {CPInstance.m_sourceArea.m_zone.DimensionIndex}, {CPInstance.m_sourceArea.m_zone.m_layer.m_type}, Zone {CPInstance.m_sourceArea.m_zone.Alias}");
-            Logger.Debug($"ChainedPuzzle Alarm name: {CPInstance.Data.PublicAlarmName}");
+            LegacyLogger.Debug($"ActivateChainedPuzzle: puzzle override index: {puzzleOverrideIndex}");
+            LegacyLogger.Debug($"ChainedPuzzleZone: Dim {CPInstance.m_sourceArea.m_zone.DimensionIndex}, {CPInstance.m_sourceArea.m_zone.m_layer.m_type}, Zone {CPInstance.m_sourceArea.m_zone.Alias}");
+            LegacyLogger.Debug($"ChainedPuzzle Alarm name: {CPInstance.Data.PublicAlarmName}");
         }
     
         internal static IEnumerator AddReqItem(WardenObjectiveEventData e, float currentDuration)
@@ -71,7 +71,7 @@ namespace LEGACY.ExtraEventsConfig
             CarryItemPickup_Core itemToAdd = PuzzleReqItemManager.Current.GetBigPickupItem(reqItemIndex);
             if (itemToAdd == null)
             {
-                Logger.Error($"AddReqItem: Cannot find BigPickup Item with index {reqItemIndex}");
+                LegacyLogger.Error($"AddReqItem: Cannot find BigPickup Item with index {reqItemIndex}");
                 yield break;
             }
 
@@ -108,7 +108,7 @@ namespace LEGACY.ExtraEventsConfig
                     if(scanner != null)
                     {
                         float CheckInterval = e.FogTransitionDuration > 0.0 ? e.FogTransitionDuration : 0.5f;
-                        Logger.Debug($"AddReqItem: item would be added on scan progression: {addThreshold}, progression check interval: {CheckInterval} (seconds)");
+                        LegacyLogger.Debug($"AddReqItem: item would be added on scan progression: {addThreshold}, progression check interval: {CheckInterval} (seconds)");
                         while (scanner.m_scanProgression < e.Duration)
                         {
                             yield return new UnityEngine.WaitForSeconds(CheckInterval);
@@ -116,12 +116,12 @@ namespace LEGACY.ExtraEventsConfig
                     }
                     else
                     {
-                        Logger.Error("AddReqItem: Failed to get scanner for the CP_Bioscan_Core");
+                        LegacyLogger.Error("AddReqItem: Failed to get scanner for the CP_Bioscan_Core");
                     }
                 }
                 bioscanCore.AddRequiredItems(new iWardenObjectiveItem[1] { new iWardenObjectiveItem(itemToAdd.Pointer) });
-                Logger.Debug($"AddReqItem: puzzle override index: {puzzleOverrideIndex}");
-                Logger.Debug($"Item name: {itemToAdd.ItemDataBlock.publicName}");
+                LegacyLogger.Debug($"AddReqItem: puzzle override index: {puzzleOverrideIndex}");
+                LegacyLogger.Debug($"Item name: {itemToAdd.ItemDataBlock.publicName}");
             }
             else if(clusterCore != null)
             {
@@ -152,12 +152,12 @@ namespace LEGACY.ExtraEventsConfig
                     childCore.AddRequiredItems(item);
                 }
 
-                Logger.Debug($"AddReqItem: puzzle override index: {puzzleOverrideIndex}");
-                Logger.Debug($"Item name: {itemToAdd.ItemDataBlock.publicName}");
+                LegacyLogger.Debug($"AddReqItem: puzzle override index: {puzzleOverrideIndex}");
+                LegacyLogger.Debug($"Item name: {itemToAdd.ItemDataBlock.publicName}");
             }
             else
             {
-                Logger.Error($"AddReqItem: cannot find puzzle core with index {puzzleOverrideIndex}");
+                LegacyLogger.Error($"AddReqItem: cannot find puzzle core with index {puzzleOverrideIndex}");
                 yield break;
             }
         }
@@ -170,7 +170,7 @@ namespace LEGACY.ExtraEventsConfig
             CarryItemPickup_Core itemToRemove = PuzzleReqItemManager.Current.GetBigPickupItem(reqItemIndex);
             if (itemToRemove == null)
             {
-                Logger.Error($"RemoveReqItem: Cannot find BigPickup Item with index {reqItemIndex}");
+                LegacyLogger.Error($"RemoveReqItem: Cannot find BigPickup Item with index {reqItemIndex}");
                 yield break;
             }
 
@@ -208,7 +208,7 @@ namespace LEGACY.ExtraEventsConfig
                     if (scanner != null)
                     {
                         float CheckInterval = e.FogTransitionDuration > 0.0 ? e.FogTransitionDuration : 0.5f;
-                        Logger.Debug($"RemoveReqItem: item would be added on scan progression: {removeThreshold}, progression check interval: {CheckInterval} (seconds)");
+                        LegacyLogger.Debug($"RemoveReqItem: item would be added on scan progression: {removeThreshold}, progression check interval: {CheckInterval} (seconds)");
                         while (scanner.m_scanProgression < e.Duration)
                         {
                             yield return new UnityEngine.WaitForSeconds(CheckInterval);
@@ -216,13 +216,13 @@ namespace LEGACY.ExtraEventsConfig
                     }
                     else
                     {
-                        Logger.Error("RemoveReqItem: Failed to get scanner for the CP_Bioscan_Core");
+                        LegacyLogger.Error("RemoveReqItem: Failed to get scanner for the CP_Bioscan_Core");
                     }
                 }
 
                 bioscanCore.RemoveRequiredItems(new iWardenObjectiveItem[1] { new iWardenObjectiveItem(itemToRemove.Pointer) });
-                Logger.Debug($"RemoveReqItem: puzzle override index: {puzzleOverrideIndex}");
-                Logger.Debug($"Removed Item name: {itemToRemove.ItemDataBlock.publicName}");
+                LegacyLogger.Debug($"RemoveReqItem: puzzle override index: {puzzleOverrideIndex}");
+                LegacyLogger.Debug($"Removed Item name: {itemToRemove.ItemDataBlock.publicName}");
             }
             else if (clusterCore != null)
             {
@@ -254,12 +254,12 @@ namespace LEGACY.ExtraEventsConfig
                     childCore.RemoveRequiredItems(item);
                 }
 
-                Logger.Debug($"RemoveReqItem: puzzle override index: {puzzleOverrideIndex}");
-                Logger.Debug($"Removed Item name: {itemToRemove.ItemDataBlock.publicName}");
+                LegacyLogger.Debug($"RemoveReqItem: puzzle override index: {puzzleOverrideIndex}");
+                LegacyLogger.Debug($"Removed Item name: {itemToRemove.ItemDataBlock.publicName}");
             }
             else
             {
-                Logger.Error($"RemoveReqItem: cannot find puzzle core with index {puzzleOverrideIndex}");
+                LegacyLogger.Error($"RemoveReqItem: cannot find puzzle core with index {puzzleOverrideIndex}");
                 yield break;
             }
         }

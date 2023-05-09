@@ -4,12 +4,13 @@ using System.IO;
 using System.Collections.Generic;
 using LEGACY.Utils;
 using GTFO.API;
+using LEGACY.LegacyOverride.PowerGenerator;
 
 namespace LEGACY.LegacyOverride.FogBeacon
 {
     internal class FogBeaconSettingManager
     {
-        public static FogBeaconSettingManager Current;
+        public static readonly FogBeaconSettingManager Current;
 
         private Dictionary<uint, FogBeaconSetting> fogBeaconSettings = new();
 
@@ -25,7 +26,7 @@ namespace LEGACY.LegacyOverride.FogBeacon
 
             if (fogBeaconSettings.ContainsKey(_override.MainLevelLayout))
             {
-                Logger.Warning("Replaced MainLevelLayout {0}", _override.MainLevelLayout);
+                LegacyLogger.Warning("Replaced MainLevelLayout {0}", _override.MainLevelLayout);
                 fogBeaconSettings[_override.MainLevelLayout] = _override;
             }
             else
@@ -63,7 +64,7 @@ namespace LEGACY.LegacyOverride.FogBeacon
 
         private void FileChanged(LiveEditEventArgs e)
         {
-            Logger.Warning($"LiveEdit File Changed: {e.FullPath}");
+            LegacyLogger.Warning($"LiveEdit File Changed: {e.FullPath}");
             LiveEdit.TryReadFileContent(e.FullPath, (content) =>
             {
                 FogBeaconSetting conf = Json.Deserialize<FogBeaconSetting>(content);
@@ -80,7 +81,7 @@ namespace LEGACY.LegacyOverride.FogBeacon
         {
             uint mainLevelLayout = RundownManager.ActiveExpedition.LevelLayoutData;
             SettingForCurrentLevel = fogBeaconSettings.ContainsKey(mainLevelLayout) ? fogBeaconSettings[mainLevelLayout] : default(FogBeaconSetting);
-            Logger.Debug($"FogBeaconSettingManager: updated setting for level with main level layout id {mainLevelLayout}");
+            LegacyLogger.Debug($"FogBeaconSettingManager: updated setting for level with main level layout id {mainLevelLayout}");
         }
 
         private FogBeaconSettingManager() { }

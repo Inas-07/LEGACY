@@ -41,7 +41,7 @@ namespace LEGACY.LegacyOverride.Patches
 
             intOpenDoor.InteractionMessage = Prefix + "\n" + TextToReplace + "\n" + Postfix;
 
-            Logger.Debug($"SecDoorIntTextOverride: Override IntText. {setting.LocalIndex}, {setting.LayerType}, {setting.DimensionIndex}");
+            LegacyLogger.Debug($"SecDoorIntTextOverride: Override IntText. {setting.LocalIndex}, {setting.LayerType}, {setting.DimensionIndex}");
         }
     }
 }

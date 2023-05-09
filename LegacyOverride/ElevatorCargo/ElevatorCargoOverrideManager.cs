@@ -7,7 +7,7 @@ namespace LEGACY.LegacyOverride.ElevatorCargo
 {
     internal class ElevatorCargoOverrideManager
     {
-        public static ElevatorCargoOverrideManager Current;
+        public static readonly ElevatorCargoOverrideManager Current;
 
         private Dictionary<uint, LevelElevatorCargo> elevatorCargos = new();
 
@@ -21,7 +21,7 @@ namespace LEGACY.LegacyOverride.ElevatorCargo
 
             if (elevatorCargos.ContainsKey(_override.MainLevelLayout))
             {
-                Logger.Warning("Replaced MainLevelLayout {0}", _override.MainLevelLayout);
+                LegacyLogger.Warning("Replaced MainLevelLayout {0}", _override.MainLevelLayout);
                 elevatorCargos[_override.MainLevelLayout] = _override;
             }
             else
@@ -57,7 +57,7 @@ namespace LEGACY.LegacyOverride.ElevatorCargo
 
         private void FileChanged(LiveEditEventArgs e)
         {
-            Logger.Warning($"LiveEdit File Changed: {e.FullPath}");
+            LegacyLogger.Warning($"LiveEdit File Changed: {e.FullPath}");
             LiveEdit.TryReadFileContent(e.FullPath, (content) =>
             {
                 LevelElevatorCargo conf = Json.Deserialize<LevelElevatorCargo>(content);

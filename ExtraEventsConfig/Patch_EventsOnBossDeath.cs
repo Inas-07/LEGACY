@@ -37,7 +37,7 @@ namespace LEGACY.ExtraEventsConfig
         {
             if (zone == null)
             {
-                Logger.Error("WTF why are you passing in a null LG_Zone?");
+                LegacyLogger.Error("WTF why are you passing in a null LG_Zone?");
                 return null;
             }
 
@@ -54,7 +54,7 @@ namespace LEGACY.ExtraEventsConfig
 
             if (spawnData.courseNode.TryGet(out node) == false || node == null)
             {
-                Logger.Error("Failed to get spawnnode for a boss! Skipped EventsOnBossDeath for it");
+                LegacyLogger.Error("Failed to get spawnnode for a boss! Skipped EventsOnBossDeath for it");
             }
 
             if (!isBoss(__instance.m_agent.EnemyData.persistentID)) return;

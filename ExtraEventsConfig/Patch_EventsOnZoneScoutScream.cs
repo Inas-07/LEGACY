@@ -25,7 +25,7 @@ namespace LEGACY.ExtraEventsConfig
 
             if (EventsOnPortalWarp != null && EventsOnPortalWarp.Count > 0)
             {
-                Logger.Warning("EventsOnZoneScoutScream: executing events in EventsOnPortalWarp (would skip level scout wave)!");
+                LegacyLogger.Warning("EventsOnZoneScoutScream: executing events in EventsOnPortalWarp (would skip level scout wave)!");
                 WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(EventsOnPortalWarp, eWardenObjectiveEventTrigger.None, true);
             }
 

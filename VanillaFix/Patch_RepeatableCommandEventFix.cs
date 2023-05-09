@@ -25,7 +25,7 @@ namespace LEGACY.VanillaFix
                     case LG_LayerType.MainLayer: layoutID = RundownManager.ActiveExpedition.LevelLayoutData; break;
                     case LG_LayerType.SecondaryLayer: layoutID = RundownManager.ActiveExpedition.SecondaryLayout; break;
                     case LG_LayerType.ThirdLayer: layoutID = RundownManager.ActiveExpedition.ThirdLayout; break;
-                    default: Logger.Error("Unimplemented layer type."); return;
+                    default: LegacyLogger.Error("Unimplemented layer type."); return;
                 }
             }
             else
@@ -53,13 +53,13 @@ namespace LEGACY.VanillaFix
 
             if (TargetZoneData == null)
             {
-                Logger.Error("Cannot find target zone data.");
+                LegacyLogger.Error("Cannot find target zone data.");
                 return;
             }
 
             if (TargetZoneData.TerminalPlacements.Count != TerminalsInZone.Count)
             {
-                Logger.Error("The numbers of terminal placement and spawn, skipped for the zone terminal.");
+                LegacyLogger.Error("The numbers of terminal placement and spawn, skipped for the zone terminal.");
                 return;
             }
 
@@ -121,7 +121,7 @@ namespace LEGACY.VanillaFix
                     }
                     else
                     {
-                        Logger.Error("value tuple is null!");
+                        LegacyLogger.Error("value tuple is null!");
                     }
                 });
             }

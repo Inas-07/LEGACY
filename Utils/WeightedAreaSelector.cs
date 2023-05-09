@@ -30,7 +30,7 @@ namespace LEGACY.Utils
                         case LG_AreaSize.Medium: weight = 30f; break;
                         case LG_AreaSize.Large: weight = 35f; break;
                         case LG_AreaSize.Huge: weight = 45f; break;
-                        default: Logger.Error($"Unhandled LG_AreaSize: {area.m_size}. Won't build."); return null;
+                        default: LegacyLogger.Error($"Unhandled LG_AreaSize: {area.m_size}. Won't build."); return null;
                     }
 
                     result.AddEntry(area, weight);

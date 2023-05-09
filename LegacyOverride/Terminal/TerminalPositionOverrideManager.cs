@@ -23,7 +23,7 @@ namespace LEGACY.LegacyOverride.Terminal
 
             if (terminalPositions.ContainsKey(_override.MainLevelLayout))
             {
-                Logger.Warning("Replaced MainLevelLayout {0}", _override.MainLevelLayout);
+                LegacyLogger.Warning("Replaced MainLevelLayout {0}", _override.MainLevelLayout);
                 terminalPositions[_override.MainLevelLayout] = _override;
             }
             else
@@ -59,7 +59,7 @@ namespace LEGACY.LegacyOverride.Terminal
 
         private void FileChanged(LiveEditEventArgs e)
         {
-            Logger.Warning($"LiveEdit File Changed: {e.FullPath}");
+            LegacyLogger.Warning($"LiveEdit File Changed: {e.FullPath}");
             LiveEdit.TryReadFileContent(e.FullPath, (content) =>
             {
                 LevelTerminalPosition conf = Json.Deserialize<LevelTerminalPosition>(content);

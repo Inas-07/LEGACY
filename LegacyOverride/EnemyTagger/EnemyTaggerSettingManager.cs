@@ -10,7 +10,7 @@ namespace LEGACY.LegacyOverride.EnemyTagger
 {
     internal class EnemyTaggerSettingManager
     {
-        public static EnemyTaggerSettingManager Current;
+        public static readonly EnemyTaggerSettingManager Current;
 
         private Dictionary<uint, EnemyTaggerSetting> enemyTaggerSettingSettings = new();
 
@@ -28,7 +28,7 @@ namespace LEGACY.LegacyOverride.EnemyTagger
 
             if (enemyTaggerSettingSettings.ContainsKey(_override.MainLevelLayout))
             {
-                Logger.Warning("Replaced MainLevelLayout {0}", _override.MainLevelLayout);
+                LegacyLogger.Warning("Replaced MainLevelLayout {0}", _override.MainLevelLayout);
                 enemyTaggerSettingSettings[_override.MainLevelLayout] = _override;
             }
             else
@@ -68,7 +68,7 @@ namespace LEGACY.LegacyOverride.EnemyTagger
 
         private void FileChanged(LiveEditEventArgs e)
         {
-            Logger.Warning($"LiveEdit File Changed: {e.FullPath}");
+            LegacyLogger.Warning($"LiveEdit File Changed: {e.FullPath}");
             LiveEdit.TryReadFileContent(e.FullPath, (content) =>
             {
                 EnemyTaggerSetting conf = Json.Deserialize<EnemyTaggerSetting>(content);
@@ -85,7 +85,7 @@ namespace LEGACY.LegacyOverride.EnemyTagger
         {
             uint mainLevelLayout = RundownManager.ActiveExpedition.LevelLayoutData;
             SettingForCurrentLevel = enemyTaggerSettingSettings.ContainsKey(mainLevelLayout) ? enemyTaggerSettingSettings[mainLevelLayout] : DEFAULT;
-            Logger.Debug($"EnemyTaggerSettingManager: updated setting for level with main level layout id {mainLevelLayout}");
+            LegacyLogger.Debug($"EnemyTaggerSettingManager: updated setting for level with main level layout id {mainLevelLayout}");
         }
 
         private EnemyTaggerSettingManager() { }
