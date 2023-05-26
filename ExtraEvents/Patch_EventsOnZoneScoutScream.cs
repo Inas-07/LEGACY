@@ -5,7 +5,7 @@ using LevelGeneration;
 using GameData;
 using LEGACY.Utils;
 
-namespace LEGACY.ExtraEventsConfig
+namespace LEGACY.ExtraEvents
 {
     [HarmonyPatch]
     class Patch_EventsOnZoneScoutScream
@@ -18,11 +18,7 @@ namespace LEGACY.ExtraEventsConfig
 
             if (__instance.m_stateDoneTimer >= Clock.Time) return true;
 
-            LG_Zone zone = __instance.m_enemyAgent.CourseNode.m_zone;
-
-
             var EventsOnPortalWarp = __instance.m_enemyAgent.m_courseNode.m_zone.m_settings.m_zoneData.EventsOnPortalWarp;
-
             if (EventsOnPortalWarp != null && EventsOnPortalWarp.Count > 0)
             {
                 LegacyLogger.Warning("EventsOnZoneScoutScream: executing events in EventsOnPortalWarp (would skip level scout wave)!");

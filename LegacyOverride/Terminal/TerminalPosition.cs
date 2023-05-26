@@ -1,9 +1,8 @@
 ﻿using GameData;
-using GTFO.API.Utilities;
 using LevelGeneration;
 using System.Collections.Generic;
 using LEGACY.Utils;
-using System.IO;
+
 
 namespace LEGACY.LegacyOverride.Terminal
 {

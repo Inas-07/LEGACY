@@ -6,8 +6,6 @@ using GameData;
 using LEGACY.LegacyOverride.PowerGenerator.GeneratorCluster;
 using UnityEngine;
 using LEGACY.LegacyOverride.PowerGenerator.IndividualGenerator;
-using System;
-using ChainedPuzzles;
 
 namespace LEGACY.LegacyOverride.Patches
 {

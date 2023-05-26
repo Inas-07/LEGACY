@@ -269,6 +269,24 @@ namespace LEGACY.Utils
 
             return minAreaIndex;
         }
+    
+        public static LG_ComputerTerminal FindTerminal(eDimensionIndex dimensionIndex, LG_LayerType layerType, eLocalZoneIndex localIndex, int terminalIndex)
+        {
+            LG_Zone zone = null;
+            if (!Builder.CurrentFloor.TryGetZoneByLocalIndex(dimensionIndex, layerType, localIndex, out zone) || zone == null)
+            {
+                LegacyLogger.Error($"FindTerminal: Didn't find LG_Zone {dimensionIndex}, {layerType}, {localIndex}");
+                return null;
+            }
+
+            if (zone.TerminalsSpawnedInZone == null || terminalIndex >= zone.TerminalsSpawnedInZone.Count)
+            {
+                LegacyLogger.Error($"FindTerminal: Invalid terminal index {terminalIndex} - {(zone.TerminalsSpawnedInZone == null ? 0 : zone.TerminalsSpawnedInZone.Count)} terminals are spawned in {dimensionIndex}, {layerType}, {localIndex}");
+                return null;
+            }
+
+            return terminalIndex < 0 ? null : zone.TerminalsSpawnedInZone[terminalIndex];
+        }
     }
 }
 

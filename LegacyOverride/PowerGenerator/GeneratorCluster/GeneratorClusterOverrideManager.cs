@@ -28,6 +28,17 @@ namespace LEGACY.LegacyOverride.PowerGenerator.GeneratorCluster
         {
             if (_override == null) return;
 
+            // because we have chained puzzles, sorting is necessary to preserve chained puzzle instance order.
+            _override.GeneratorClustersInLevel.Sort((u1, u2) =>
+            {
+                if (u1.DimensionIndex != u2.DimensionIndex) return (int)u1.DimensionIndex < (int)u2.DimensionIndex ? -1 : 1;
+                if (u1.LayerType != u2.LayerType) return (int)u1.LayerType < (int)u2.LayerType ? -1 : 1;
+                if (u1.LocalIndex != u2.LocalIndex) return (int)u1.LocalIndex < (int)u2.LocalIndex ? -1 : 1;
+                return 0;
+            });
+
+            _override.GeneratorClustersInLevel.ForEach(u => u.GeneratorClustersInZone.Sort((r1, r2) => r1.GeneratorClusterIndex != r2.GeneratorClusterIndex ? (r1.GeneratorClusterIndex < r2.GeneratorClusterIndex ? -1 : 1) : 0));
+
             if (levelPowerGeneratorClusters.ContainsKey(_override.MainLevelLayout))
             {
                 LegacyLogger.Warning("Replaced MainLevelLayout {0}", _override.MainLevelLayout);

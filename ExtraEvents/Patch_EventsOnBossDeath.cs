@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using LEGACY.Utils;
 using GTFO.API;
 
-namespace LEGACY.ExtraEventsConfig
+namespace LEGACY.ExtraEvents
 {
     [HarmonyPatch]
     internal class Patch_EventsOnBossDeath

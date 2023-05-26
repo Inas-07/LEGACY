@@ -38,4 +38,10 @@
     <Reference Include="$(PluginsFolder)/MTFO.dll" Private="false" />
     <Reference Include="$(PluginsFolder)/net6/ScanPosOverride.dll" Private="false" />
   </ItemGroup>
+
+  <!-- soft dependency -->
+  <ItemGroup>
+    <Reference Include="$(PluginsFolder)/Hikaria.MapperTracker.dll" Private="false" />
+  </ItemGroup>
+
 </Project>

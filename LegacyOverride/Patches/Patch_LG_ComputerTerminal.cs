@@ -6,11 +6,11 @@ using LEGACY.Utils;
 namespace LEGACY.LegacyOverride.Patches
 {
     [HarmonyPatch]
-    class Patch_TerminalPositionOverride
+    class Patch_LG_ComputerTerminal
     {
         [HarmonyPostfix]
         [HarmonyPatch(typeof(LG_ComputerTerminal), nameof(LG_ComputerTerminal.Setup))]
-        private static void Post_ChangeTerminalPosition(LG_ComputerTerminal __instance)
+        private static void Post_LG_ComputerTerminal_Setup(LG_ComputerTerminal __instance)
         {
             var terminalPositionOverride = TerminalPositionOverrideManager.Current.GetLevelTerminalPositionOverride(RundownManager.ActiveExpedition.LevelLayoutData);
             if (terminalPositionOverride == null || __instance.SpawnNode == null /* skip reactor terminal */) return;
@@ -31,27 +31,6 @@ namespace LEGACY.LegacyOverride.Patches
             {
                 __instance.transform.position = _override.Position.ToVector3();
                 __instance.transform.rotation = _override.Rotation.ToQuaternion();
-            }
-
-            if (_override.Area.Length >= 1)
-            {
-                if(_override.Area.Length == 1)
-                {
-                    char area = _override.Area.ToUpperInvariant()[0];
-                    int areaIndex = area - 'A';
-                    if (areaIndex < 0 || areaIndex >= __instance.SpawnNode.m_zone.m_areas.Count)
-                    {
-                        LegacyLogger.Error($"Invalid area '{_override.Area}', will not change area.");
-                    }
-                    else
-                    {
-                        __instance.m_terminalItem.SpawnNode = __instance.SpawnNode.m_zone.m_areas[areaIndex].m_courseNode;
-                    }
-                }
-                else
-                {
-                    LegacyLogger.Error($"Invalid area '{_override.Area}', must be 1 single character. Will not change area.");
-                }
             }
 
             LegacyLogger.Debug($"TerminalPositionOverride: {_override.LocalIndex}, {_override.LayerType}, {_override.DimensionIndex}, TerminalIndex {_override.TerminalIndex}");

@@ -30,7 +30,7 @@ namespace LEGACY.LegacyOverride.Patches
         private static void Post_ElevatorCargoOverride(ElevatorCargoCage __instance)
         {
             LevelElevatorCargo levelElevatorCargos = ElevatorCargoOverrideManager.Current.GetLevelElevatorCargoItems(RundownManager.ActiveExpedition.LevelLayoutData);
-            if (levelElevatorCargos == null || levelElevatorCargos.ElevatorCargoItems.Count < 1) return;
+            if (levelElevatorCargos == null || levelElevatorCargos.ElevatorCargoItems.Count < 1 || levelElevatorCargos.ForceDisable) return;
 
             foreach (var elevatorCargo in levelElevatorCargos.ElevatorCargoItems)
             {

@@ -97,7 +97,7 @@ namespace LEGACY.VanillaFix
                 if (OldCPInstance == null) continue;
 
                 OldCPInstance.OnPuzzleSolved += new System.Action(() => {
-                    // this result in the error
+                    // TODO: fix this
                     ChainedPuzzleInstance newCPInstance = ChainedPuzzleManager.CreatePuzzleInstance(OldCPInstance.Data, OldCPInstance.m_sourceArea, __instance.m_terminal.m_wardenObjectiveSecurityScanAlign.position, __instance.m_terminal.m_wardenObjectiveSecurityScanAlign, CommandEvents[eventIndex].UseStaticBioscanPoints);
 
                     Il2CppSystem.ValueTuple<TERM_Command, int> valueTuple = null;

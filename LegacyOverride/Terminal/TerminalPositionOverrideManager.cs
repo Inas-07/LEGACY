@@ -1,5 +1,4 @@
 ﻿using GTFO.API.Utilities;
-using LEGACY.LegacyOverride.ElevatorCargo;
 using LEGACY.Utils;
 using System.IO;
 using System.Collections.Generic;
@@ -38,7 +37,7 @@ namespace LEGACY.LegacyOverride.Terminal
             {
                 Directory.CreateDirectory(CONFIG_PATH);
                 var file = File.CreateText(Path.Combine(CONFIG_PATH, "Template.json"));
-                file.WriteLine(Json.Serialize(new LevelTerminalPosition()));
+                file.WriteLine(Json.Serialize(new TerminalPosition()));
                 file.Flush();
                 file.Close();
 

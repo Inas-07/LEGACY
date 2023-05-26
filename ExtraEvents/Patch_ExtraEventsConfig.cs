@@ -10,8 +10,9 @@ using SNetwork;
 using AK;
 using Agents;
 using LEGACY.LegacyOverride.PowerGenerator.IndividualGenerator;
+using LEGACY.LegacyOverride.ExtraExpeditionSettings;
 
-namespace LEGACY.ExtraEventsConfig
+namespace LEGACY.ExtraEvents
 {
     enum EventType
     {
@@ -37,8 +38,11 @@ namespace LEGACY.ExtraEventsConfig
 
         PlayGCEndSequence = 180,
 
+        
         ChainedPuzzle_AddReqItem = 200,
         ChainedPuzzle_RemoveReqItem,
+
+        ToggleBioTrackerState = 210,
 
         DEBUG_ZoneHibernateInfo = 250,
         DEBUG_LevelHibernateInfo = 251,
@@ -48,6 +52,11 @@ namespace LEGACY.ExtraEventsConfig
     [HarmonyPatch]
     class Patch_ExtraEventsConfig
     {
+        private static void ToggleBioTrackerState(WardenObjectiveEventData e)
+        {
+            ExpeditionSettingsManager.Current.ToggleBioTrackerState(e.Enabled);
+            LegacyLogger.Debug($"ToggleBioTrackerState: Enabled ? - {e.Enabled}");
+        }
 
         // specifying e.DimensionIndex is necessary!
         private static void WarpTeamsToArea(WardenObjectiveEventData e)
@@ -120,14 +129,16 @@ namespace LEGACY.ExtraEventsConfig
             switch (reactor.m_currentState.status)
             {
                 case eReactorStatus.Inactive_Idle:
-                    reactor.AttemptInteract(eReactorInteraction.Initiate_startup);
+                    if(SNet.IsMaster)
+                    {
+                        reactor.AttemptInteract(eReactorInteraction.Initiate_startup);
+                    }
                     reactor.m_terminal.TrySyncSetCommandHidden(TERM_Command.ReactorStartup);
                     break;
             }
 
             LegacyLogger.Debug($"ReactorStartup: Current reactor wave for {e.Layer} completed");
         }
-
 
         internal static void CompleteCurrentReactorVerify(WardenObjectiveEventData e)
         {
@@ -548,6 +559,7 @@ namespace LEGACY.ExtraEventsConfig
                 case (int)EventType.DEBUG_ZoneHibernateInfo:
                 case (int)EventType.DEBUG_LevelHibernateInfo:
                 case (int)EventType.DEBUG_OutputLevelHibernateSpawnEvent:
+                case (int)EventType.ToggleBioTrackerState:
                     coroutine = CoroutineManager.StartCoroutine(Handle(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
                     WorldEventManager.m_worldEventEventCoroutines.Add(coroutine);
                     return false;
@@ -656,6 +668,8 @@ namespace LEGACY.ExtraEventsConfig
                     SpawnHibernate.Debug_LevelEnemiesInfo(e); break;
                 case (int)EventType.DEBUG_OutputLevelHibernateSpawnEvent:
                     SpawnHibernate.Debug_OutputLevelHibernateSpawnEvent(e); break;
+                case (int)EventType.ToggleBioTrackerState:
+                    ToggleBioTrackerState(e); break;
                 case (int)EventType.SetTimerTitle_Custom:
                     {
                         float duration = e.Duration;

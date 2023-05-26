@@ -10,7 +10,7 @@ using SNetwork;
 using System.Collections;
 using GTFO.API;
 
-namespace LEGACY.ExtraEventsConfig
+namespace LEGACY.ExtraEvents
 {
     internal static class SurvivalWave_Custom
     {

@@ -40,7 +40,7 @@ namespace LEGACY.Reactor
             }
 
             LG_LayerType layer = __instance.SpawnNode.LayerType;
-
+            
             WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(db.EventsOnActivate, trigger, false);
         }
 
@@ -56,7 +56,6 @@ namespace LEGACY.Reactor
                 return;
             }
 
-            if (objective.Type != eWardenObjectiveType.Reactor_Shutdown) return;
             if (objective.ChainedPuzzleMidObjective <= 0U) return;
 
             __instance.m_chainedPuzzleAlignMidObjective = __instance.m_chainedPuzzleAlign;

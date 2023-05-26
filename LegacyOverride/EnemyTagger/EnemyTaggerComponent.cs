@@ -6,6 +6,7 @@ using SNetwork;
 using Player;
 using AK;
 using FX_EffectSystem;
+using LEGACY.Utils;
 
 namespace LEGACY.LegacyOverride.EnemyTagger
 {
@@ -28,10 +29,10 @@ namespace LEGACY.LegacyOverride.EnemyTagger
         internal float WarmupTime = 3f;
         private eEnemyTaggerState CurrentState = eEnemyTaggerState.Uninitialized;
 
-        public string DebugName { set; get; } = "EnemyTagger";
-
         internal CarryItemPickup_Core Parent { set; get; } = null;
+
         internal PlayerAgent PickedByPlayer { set; get; } = null;
+    
 
         private CellSoundPlayer m_sound = new();
 
@@ -134,7 +135,7 @@ namespace LEGACY.LegacyOverride.EnemyTagger
 
             if (Parent == null)
             {
-                Utils.LegacyLogger.Error("EnemyTagger: null parent");
+                LegacyLogger.Error("EnemyTagger: null parent");
                 return;
             }
 

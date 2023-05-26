@@ -6,6 +6,8 @@ using LEGACY.LegacyOverride.SecDoorIntText;
 using LEGACY.LegacyOverride.PowerGenerator;
 using MTFO.API;
 using System.IO;
+using LEGACY.LegacyOverride.HSUActivators;
+using LEGACY.LegacyOverride.ExtraExpeditionSettings;
 
 namespace LEGACY.LegacyOverride
 {
@@ -21,6 +23,9 @@ namespace LEGACY.LegacyOverride
             EnemyTaggerSettingManager.Current.Init();
             SecDoorIntTextOverrideManager.Current.Init();
             PowerGeneratorOverrideManager.Init();
+            HSUActivatorOverrideManager.Current.Init();
+            TerminalUplinkOverrideManager.Current.Init();
+            ExpeditionSettingsManager.Current.Init();
         }
     }
 }

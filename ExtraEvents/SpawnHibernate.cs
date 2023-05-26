@@ -12,7 +12,7 @@ using System.Text;
 using System.IO;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
 
-namespace LEGACY.ExtraEventsConfig
+namespace LEGACY.ExtraEvents
 {
     internal static class SpawnHibernate
     {

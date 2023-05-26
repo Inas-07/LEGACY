@@ -5,6 +5,8 @@ using LEGACY.LegacyOverride.EnemyTagger;
 using LevelGeneration;
 using Player;
 using UnityEngine;
+using GTFO.API;
+using LEGACY.Utils;
 
 namespace LEGACY.LegacyOverride.Patches
 {
@@ -19,11 +21,12 @@ namespace LEGACY.LegacyOverride.Patches
             CarryItemPickup_Core core = __instance.m_root.GetComponentInChildren<CarryItemPickup_Core>();
             Interact_Pickup_PickupItem interact = core.m_interact.Cast<Interact_Pickup_PickupItem>();
             LG_PickupItem_Sync sync = core.m_sync.Cast<LG_PickupItem_Sync>();
-
+            
             EnemyTaggerComponent tagger = core.gameObject.AddComponent<EnemyTaggerComponent>();
+            
             tagger.Parent = core;
             tagger.gameObject.SetActive(true);
-
+    
             interact.InteractDuration = setting.TimeToPickup;
             tagger.MaxTagPerScan = setting.MaxTagPerScan;
             tagger.TagInterval = setting.TagInterval;
@@ -45,7 +48,6 @@ namespace LEGACY.LegacyOverride.Patches
                         tagger.PickedByPlayer = playerAgent;
                         tagger.ChangeState(setting.TagWhenHold ? eEnemyTaggerState.Active_Warmup : eEnemyTaggerState.Inactive);
                         interact.InteractDuration = setting.TimeToPlace;
-
                         break;
                 }
             });

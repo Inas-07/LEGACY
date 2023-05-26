@@ -45,10 +45,7 @@ namespace LEGACY.Reactor
 
             if (db.Type != eWardenObjectiveType.Reactor_Startup || db.OnActivateOnSolveItem == true) return;
 
-            __instance.m_chainedPuzzleToStartSequence.OnPuzzleSolved += new System.Action(() =>
-            {
-                WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(db.EventsOnActivate, eWardenObjectiveEventTrigger.None, true);
-            });
+            __instance.m_chainedPuzzleToStartSequence.OnPuzzleSolved += new System.Action(() => WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(db.EventsOnActivate, eWardenObjectiveEventTrigger.None, true));
         }
     }
 }

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace LEGACY.LegacyOverride.EnemyTagger
+﻿namespace LEGACY.LegacyOverride.EnemyTagger
 {
     public class EnemyTaggerSetting
     {

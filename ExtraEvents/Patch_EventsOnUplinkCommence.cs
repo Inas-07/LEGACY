@@ -4,7 +4,7 @@ using GameData;
 using LEGACY.Utils;
 
 
-namespace LEGACY.ExtraEventsConfig
+namespace LEGACY.ExtraEvents
 {
     [HarmonyPatch]
     internal class Patch_EventsOnUplinkCommence

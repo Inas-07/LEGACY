@@ -52,20 +52,6 @@ namespace LEGACY.LegacyOverride.Patches
                 LegacyLogger.Debug($"LG_PowerGenerator_Core: modified position / rotation");
             }
 
-            //if (PGConfig.AreaIndex >= 0)
-            //{
-            //    if (PGConfig.AreaIndex < __instance.SpawnNode.m_zone.m_areas.Count)
-            //    {
-            //        __instance.m_terminalItem.SpawnNode = __instance.SpawnNode.m_zone.m_areas[PGConfig.AreaIndex].m_courseNode;
-            //        LegacyLogger.Debug($"Moved to Area_'{(char)PGConfig.AreaIndex + 'A'}'");
-            //    }
-
-            //    else
-            //    {
-            //        LegacyLogger.Error($"Invalid area index '{PGConfig.AreaIndex}', will not change area.");
-            //    }
-            //}
-
             if (PGConfig.ForceAllowPowerCellInsertion)
             {
                 __instance.SetCanTakePowerCell(true);
@@ -76,12 +62,9 @@ namespace LEGACY.LegacyOverride.Patches
                 __instance.OnSyncStatusChanged += new System.Action<ePowerGeneratorStatus>((status) => {
                     if (status == ePowerGeneratorStatus.Powered)
                     {
-                        foreach (var e in PGConfig.EventsOnInsertCell)
-                        {
-                            WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(e, eWardenObjectiveEventTrigger.None, true);
-                        }
+                        PGConfig.EventsOnInsertCell.ForEach(e => WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(e, eWardenObjectiveEventTrigger.None, true));
                     }
-                }); // todo: execute events here
+                }); 
             }
 
             LegacyLogger.Debug($"LG_PowerGenerator_Core: overriden, instance {zoneInstanceIndex} in {zonePGConfig.LocalIndex}, {zonePGConfig.LayerType}, {zonePGConfig.DimensionIndex}");

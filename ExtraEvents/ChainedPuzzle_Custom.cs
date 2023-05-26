@@ -4,8 +4,9 @@ using ChainedPuzzles;
 using Player;
 using ScanPosOverride.Managers;
 using LEGACY.Utils;
+using SNetwork;
 
-namespace LEGACY.ExtraEventsConfig
+namespace LEGACY.ExtraEvents
 {
     internal static class ChainedPuzzle_Custom
     {
@@ -56,7 +57,10 @@ namespace LEGACY.ExtraEventsConfig
                 }
             }
 
-            CPInstance.AttemptInteract(eChainedPuzzleInteraction.Activate);
+            if(SNet.IsMaster)
+            {
+                CPInstance.AttemptInteract(eChainedPuzzleInteraction.Activate);
+            }
 
             LegacyLogger.Debug($"ActivateChainedPuzzle: puzzle override index: {puzzleOverrideIndex}");
             LegacyLogger.Debug($"ChainedPuzzleZone: Dim {CPInstance.m_sourceArea.m_zone.DimensionIndex}, {CPInstance.m_sourceArea.m_zone.m_layer.m_type}, Zone {CPInstance.m_sourceArea.m_zone.Alias}");
