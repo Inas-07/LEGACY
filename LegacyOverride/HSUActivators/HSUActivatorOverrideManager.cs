@@ -97,24 +97,7 @@ namespace LEGACY.LegacyOverride.HSUActivators
             return instanceIndex;
         }
 
-        public uint GetIndex(LG_HSUActivator_Core instance) 
-        {
-            // TODO: improve InstanceManager and thereby support IntPtr search
-            uint result = instanceManager.GetIndex(instance.SpawnNode.m_dimension.DimensionIndex, instance.SpawnNode.LayerType, instance.SpawnNode.m_zone.LocalIndex, instance);
-            if (result != uint.MaxValue) return result;
-
-            var instanceInZone = instanceManager.GetInstanceInZone(instance.SpawnNode.m_dimension.DimensionIndex, instance.SpawnNode.LayerType, instance.SpawnNode.m_zone.LocalIndex);
-            for(int i = 0; i < instanceInZone.Count; i++)
-            {
-                var core = instanceInZone[i];
-                if (core.Pointer == instance.Pointer)
-                {
-                    return (uint)i;
-                }
-            }
-
-            return uint.MaxValue;
-        }
+        public uint GetIndex(LG_HSUActivator_Core instance) => instanceManager.GetIndex(instance.SpawnNode.m_dimension.DimensionIndex, instance.SpawnNode.LayerType, instance.SpawnNode.m_zone.LocalIndex, instance);        
 
         public HSUActivator GetOverride(eDimensionIndex dimensionIndex, LG_LayerType layerType, eLocalZoneIndex localIndex, uint instanceIndex)
         {

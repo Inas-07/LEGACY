@@ -34,7 +34,11 @@ namespace LEGACY.LegacyOverride.Terminal
         [JsonIgnore]
         public ChainedPuzzleInstance ChainedPuzzleToEndRoundInstance { get; set; } = null;
 
-        public TimeSettings OverrideTimeSettings { get; set; } = new();
+        public TimeSettings OverrideTimeSettings { get; set; } = new() {
+            TimeToStartVerify = -1f,
+            TimeToCompleteVerify = -1f,
+            TimeToRestoreFromFail = -1f,
+        };
 
         // trigger is not ignored: 
         // 1 - OnUplinkRound StartWaitingForVerify

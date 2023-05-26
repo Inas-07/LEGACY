@@ -7,7 +7,7 @@ namespace LEGACY.LegacyOverride
 {
     public class InstanceManager<T> where T: Il2CppSystem.Object
     {
-        private Dictionary<(eDimensionIndex, LG_LayerType, eLocalZoneIndex), Dictionary<T, uint>> instances2Index = new();
+        private Dictionary<(eDimensionIndex, LG_LayerType, eLocalZoneIndex), Dictionary<System.IntPtr, uint>> instances2Index = new();
         private Dictionary<(eDimensionIndex, LG_LayerType, eLocalZoneIndex), List<T>> index2Instance = new();
 
         public const uint INVALID_INSTANCE_INDEX = uint.MaxValue;
@@ -16,14 +16,14 @@ namespace LEGACY.LegacyOverride
         {
             if (instance == null) return INVALID_INSTANCE_INDEX;
 
-            Dictionary<T, uint> instancesInZone = null;
+            Dictionary<System.IntPtr, uint> instancesInZone = null;
             List<T> instanceIndexInZone = null;
             if (!instances2Index.ContainsKey(globalZoneIndex))
             {
                 instancesInZone = new();
                 instanceIndexInZone = new();
-                instances2Index.Add(globalZoneIndex, instancesInZone);
-                index2Instance.Add(globalZoneIndex, instanceIndexInZone);
+                instances2Index[globalZoneIndex] = instancesInZone;
+                index2Instance[globalZoneIndex] = instanceIndexInZone;
             }
             else
             {
@@ -31,7 +31,7 @@ namespace LEGACY.LegacyOverride
                 instanceIndexInZone = index2Instance[globalZoneIndex];
             }
 
-            if(instancesInZone.ContainsKey(instance)) 
+            if(instancesInZone.ContainsKey(instance.Pointer)) 
             {
                 LegacyLogger.Error($"InstanceManager<{typeof(T)}>: trying to register duplicate instance! Skipped....");
                 return INVALID_INSTANCE_INDEX;
@@ -39,7 +39,7 @@ namespace LEGACY.LegacyOverride
 
             uint instanceIndex = (uint)instancesInZone.Count; // valid index starts from 0
 
-            instancesInZone.Add(instance, instanceIndex);
+            instancesInZone[instance.Pointer] = instanceIndex;
             instanceIndexInZone.Add(instance);
 
             return instanceIndex;
@@ -52,7 +52,7 @@ namespace LEGACY.LegacyOverride
             if (!instances2Index.ContainsKey(globalZoneIndex)) return INVALID_INSTANCE_INDEX;
 
             var zoneInstanceIndices = instances2Index[globalZoneIndex];
-            return zoneInstanceIndices.ContainsKey(instance) ? zoneInstanceIndices[instance] : INVALID_INSTANCE_INDEX;
+            return zoneInstanceIndices.ContainsKey(instance.Pointer) ? zoneInstanceIndices[instance.Pointer] : INVALID_INSTANCE_INDEX;
         }
 
         public uint GetIndex(eDimensionIndex dimensionIndex, LG_LayerType layerType, eLocalZoneIndex localIndex, T instance) => GetIndex((dimensionIndex, layerType, localIndex), instance);
