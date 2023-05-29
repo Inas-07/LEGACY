@@ -69,7 +69,6 @@
     <Compile Include="PlayerPortal\ZonePortal.cs" />
     <Compile Include="Utils\Helper.cs" />
     <Compile Include="ExtraEvents\SurvivalWave_Custom.cs" />
-    <Compile Include="ExtraEvents\Patch_EventsOnUplinkCommence.cs" />
     <Compile Include="Utils\LegacyLogger.cs" />
     <Compile Include="Utils\SpawnHibernateEnemiesEvent.cs" />
     <Compile Include="Utils\VersionWatermark.cs" />

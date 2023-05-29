@@ -24,6 +24,9 @@ namespace LEGACY.Utils
             // from ScanPositionOverride
             _setting.Converters.Add(MTFOPartialDataUtil.PersistentIDConverter);
             _setting.Converters.Add(MTFOPartialDataUtil.LocalizedTextConverter);
+
+            // if not using partial data, use this line instead
+            //_setting.Converters.Add(new LocalizedTextConverter());
         }
 
         public static T Deserialize<T>(string json)

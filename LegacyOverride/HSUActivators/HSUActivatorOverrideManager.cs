@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using GTFO.API;
 using LevelGeneration;
 using GameData;
-
 using ChainedPuzzles;
 using UnityEngine;
 
@@ -126,10 +125,19 @@ namespace LEGACY.LegacyOverride.HSUActivators
                 return;
             }
 
-            if (config.RequireItemAfterActivationInExitScan)
+            if (config.RequireItemAfterActivationInExitScan == true)
             {
-                WardenObjectiveManager.AddObjectiveItemAsRequiredForExitScan(true, new iWardenObjectiveItem[1] { new iWardenObjectiveItem(instance.m_linkedItemComingOut.Pointer) });
-                LegacyLogger.Debug($"HSUActivator: {(config.DimensionIndex, config.LayerType, config.LocalIndex, config.InstanceIndex)} - added required item for extraction scan");
+                instance.m_sequencerExtractionDone.OnSequenceDone += new System.Action(() => {
+                    WardenObjectiveManager.AddObjectiveItemAsRequiredForExitScan(true, new iWardenObjectiveItem[1] { new iWardenObjectiveItem(instance.m_linkedItemComingOut.Pointer) });
+                    LegacyLogger.Debug($"HSUActivator: {(config.DimensionIndex, config.LayerType, config.LocalIndex, config.InstanceIndex)} - added required item for extraction scan");
+                });
+            }
+
+            if (config.TakeOutItemAfterActivation)
+            {
+                instance.m_sequencerExtractionDone.OnSequenceDone += new System.Action(() => {
+                    instance.LinkedItemComingOut.m_navMarkerPlacer.SetMarkerVisible(true);
+                });
             }
 
             if (config.ChainedPuzzleOnActivation != 0)

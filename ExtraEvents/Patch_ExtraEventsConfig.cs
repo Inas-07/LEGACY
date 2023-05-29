@@ -17,14 +17,14 @@ namespace LEGACY.ExtraEvents
     enum EventType
     {
         CloseSecurityDoor_Custom = 100,
-        KillEnemiesInDimension_Custom,
-        SetTimerTitle_Custom,
-        ToggleEnableDisableAllTerminalsInZone_Custom,
-        ToggleEnableDisableTerminalInZone_Custom,
+        KillEnemiesInDimension_Custom, // dont use
+        SetTimerTitle_Custom = 102, 
+        ToggleEnableDisableAllTerminalsInZone_Custom, // unimplemented
+        ToggleEnableDisableTerminalInZone_Custom, // unimplemented
         KillEnemiesInZone_Custom, // remove this in the future
-        StopSpecifiedEnemyWave,
-        AlertEnemiesInZone,
-        AlertEnemiesInArea,
+        StopSpecifiedEnemyWave = 106,
+        AlertEnemiesInZone = 107,
+        AlertEnemiesInArea = 108,
 
         KillEnemiesInArea = 140,
         KillEnemiesInZone = 141,
@@ -38,7 +38,6 @@ namespace LEGACY.ExtraEvents
 
         PlayGCEndSequence = 180,
 
-        
         ChainedPuzzle_AddReqItem = 200,
         ChainedPuzzle_RemoveReqItem,
 
@@ -563,9 +562,9 @@ namespace LEGACY.ExtraEvents
                     coroutine = CoroutineManager.StartCoroutine(Handle(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
                     WorldEventManager.m_worldEventEventCoroutines.Add(coroutine);
                     return false;
-                case (int)EventType.StopSpecifiedEnemyWave:
-                    SurvivalWave_Custom.StopSpecifiedWave(eventToTrigger, currentDuration);
-                    return false;
+                //case (int)EventType.StopSpecifiedEnemyWave:
+                //    SurvivalWave_Custom.StopSpecifiedWave(eventToTrigger, currentDuration);
+                //    return false;
                 case (int)EventType.ChainedPuzzle_AddReqItem:
                     coroutine = CoroutineManager.StartCoroutine(ChainedPuzzle_Custom.AddReqItem(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
                     WorldEventManager.m_worldEventEventCoroutines.Add(coroutine);
@@ -584,12 +583,6 @@ namespace LEGACY.ExtraEvents
                     WorldEventManager.m_worldEventEventCoroutines.Add(coroutine);
                     //WardenObjectiveManager.m_wardenObjectiveEventCoroutines.Add(coroutine);
                     return false;
-                case eWardenObjectiveEventType.SpawnEnemyWave:
-                    bool use_vanilla_impl = SurvivalWave_Custom.SpawnWave(eventToTrigger, currentDuration);
-                    return use_vanilla_impl;
-                case eWardenObjectiveEventType.StopEnemyWaves:
-                    SurvivalWave_Custom.OnStopAllWave();
-                    return true;
                 case eWardenObjectiveEventType.ActivateChainedPuzzle:
                     coroutine = CoroutineManager.StartCoroutine(ChainedPuzzle_Custom.ActivateChainedPuzzle(eventToTrigger, currentDuration).WrapToIl2Cpp(), null);
                     WorldEventManager.m_worldEventEventCoroutines.Add(coroutine);
@@ -613,6 +606,7 @@ namespace LEGACY.ExtraEvents
             {
                 PlayerDialogManager.WantToStartDialog(e.DialogueID, -1, false, false);
             }
+
             if (e.SoundID > 0u)
             {
                 WardenObjectiveManager.Current.m_sound.Post(e.SoundID, true);

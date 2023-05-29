@@ -306,10 +306,14 @@ namespace LEGACY.LegacyOverride.Patches
             UplinkRound roundOverride = i != -1 ? uplinkConfig.RoundOverrides[i] : null;
             TimeSettings timeSettings = i != -1 ? roundOverride.OverrideTimeSettings : uplinkConfig.DefaultTimeSettings;
 
+            float timeToStartVerify = timeSettings.TimeToStartVerify >= 0f ? timeSettings.TimeToStartVerify : uplinkConfig.DefaultTimeSettings.TimeToStartVerify;
+            float timeToCompleteVerify = timeSettings.TimeToCompleteVerify >= 0f ? timeSettings.TimeToCompleteVerify : uplinkConfig.DefaultTimeSettings.TimeToCompleteVerify;
+            float timeToRestoreFromFail = timeSettings.TimeToRestoreFromFail >= 0f ? timeSettings.TimeToRestoreFromFail : uplinkConfig.DefaultTimeSettings.TimeToRestoreFromFail;
+
             if (uplinkPuzzle.Connected)
             {
                 // Attempting uplink verification
-                __instance.AddOutput(TerminalLineType.SpinningWaitNoDone, Text.Get(2734004688), timeSettings.TimeToStartVerify); 
+                __instance.AddOutput(TerminalLineType.SpinningWaitNoDone, Text.Get(2734004688), timeToStartVerify); 
 
                 // correct verification 
                 if (!uplinkPuzzle.Solved && uplinkPuzzle.CurrentRound.CorrectCode.ToUpper() == param1.ToUpper())
@@ -322,12 +326,19 @@ namespace LEGACY.LegacyOverride.Patches
                         int j = uplinkConfig.RoundOverrides.FindIndex(o => o.RoundIndex == newRoundIndex);
                         UplinkRound newRoundOverride = j != -1 ? uplinkConfig.RoundOverrides[j] : null;
 
-                        __instance.AddOutput(TerminalLineType.ProgressWait, Text.Get(27959760), timeSettings.TimeToCompleteVerify); // "Building uplink verification signature"
+
                         roundOverride?.EventsOnRound.ForEach(e => WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(e, eWardenObjectiveEventTrigger.OnMid, false));
 
                         if (roundOverride != null && roundOverride.ChainedPuzzleToEndRoundInstance != null) 
                         {
+                            TextDataBlock block = GameDataBlockBase<TextDataBlock>.GetBlock("InGame.UplinkTerminal.ScanRequiredToProgress");
+                            if (block != null)
+                            {
+                                __instance.AddOutput(TerminalLineType.ProgressWait, Text.Get(block.persistentID));
+                            }
+
                             roundOverride.ChainedPuzzleToEndRoundInstance.OnPuzzleSolved += new System.Action(() => {
+                                __instance.AddOutput(TerminalLineType.ProgressWait, Text.Get(27959760), timeToCompleteVerify); // "Building uplink verification signature"
                                 __instance.AddOutput("");
                                 __instance.AddOutput(string.Format(Text.Get(4269617288), uplinkPuzzle.CurrentProgress, uplinkPuzzle.CurrentRound.CorrectPrefix));
                                 __instance.OnEndOfQueue = new System.Action(() =>
@@ -345,6 +356,7 @@ namespace LEGACY.LegacyOverride.Patches
                         }
                         else
                         {
+                            __instance.AddOutput(TerminalLineType.ProgressWait, Text.Get(27959760), timeToCompleteVerify); // "Building uplink verification signature"
                             __instance.AddOutput("");
                             __instance.AddOutput(string.Format(Text.Get(4269617288), uplinkPuzzle.CurrentProgress, uplinkPuzzle.CurrentRound.CorrectPrefix));
 
@@ -411,7 +423,7 @@ namespace LEGACY.LegacyOverride.Patches
                 {
                     __instance.AddOutput("");
                     __instance.AddOutput(TerminalLineType.Fail, string.Format(Text.Get(507647514), uplinkPuzzle.CurrentRound.CorrectPrefix)); //"Verfication failed! Use public key <color=orange>" + + "</color> to obtain the code");
-                    __instance.AddOutput(TerminalLineType.Normal, Text.Get(4104839742), timeSettings.TimeToRestoreFromFail);
+                    __instance.AddOutput(TerminalLineType.Normal, Text.Get(4104839742), timeToRestoreFromFail);
                 }
             }
             else // unconnected

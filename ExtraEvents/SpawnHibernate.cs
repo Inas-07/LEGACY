@@ -235,18 +235,11 @@ namespace LEGACY.ExtraEvents
                                 }
                             }
 
-
                             char selectedArea = candidateAreas[rand.Next(candidateAreas.Length)];
                             int areaIndex = selectedArea - 'A';
                             node = zone.m_areas[areaIndex].m_courseNode;
                             position = node.GetRandomPositionInside();
                             break;
-                    }
-
-                    if(UnityEngine.Vector3.Equals(position, UnityEngine.Vector3.zero))
-                    {
-                        LegacyLogger.Error("SpawnEnemy_Hibernate: got zero position vector, aborting all spawn!");
-                        yield break;
                     }
 
                     // scout:
