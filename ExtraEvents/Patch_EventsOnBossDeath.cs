@@ -3,7 +3,6 @@ using Enemies;
 using LevelGeneration;
 using GameData;
 using AIGraph;
-using Globals;
 using System.Collections.Generic;
 using LEGACY.Utils;
 using GTFO.API;

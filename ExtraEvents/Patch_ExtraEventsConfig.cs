@@ -8,10 +8,8 @@ using Player;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
 using SNetwork;
 using AK;
-using Agents;
-using LEGACY.LegacyOverride.PowerGenerator.IndividualGenerator;
 using LEGACY.LegacyOverride.ExtraExpeditionSettings;
-
+using ExtraObjectiveSetup.Instances;
 namespace LEGACY.ExtraEvents
 {
     enum EventType
@@ -22,7 +20,7 @@ namespace LEGACY.ExtraEvents
         ToggleEnableDisableAllTerminalsInZone_Custom, // unimplemented
         ToggleEnableDisableTerminalInZone_Custom, // unimplemented
         KillEnemiesInZone_Custom, // remove this in the future
-        StopSpecifiedEnemyWave = 106,
+        StopSpecifiedEnemyWave = 106, // TODO: FULLY REMOVE
         AlertEnemiesInZone = 107,
         AlertEnemiesInArea = 108,
 
@@ -718,7 +716,7 @@ namespace LEGACY.ExtraEvents
 
                 case (int)EventType.PlayGCEndSequence: // 13 seconds in total
                     {
-                        var gcInZone = IndividualGeneratorOverrideManager.Current.GetInstanceInZone(e.DimensionIndex, e.Layer, e.LocalIndex);
+                        var gcInZone = PowerGeneratorInstanceManager.Current.GetInstancesInZone(e.DimensionIndex, e.Layer, e.LocalIndex);
 
                         yield return new UnityEngine.WaitForSeconds(4f);
                         

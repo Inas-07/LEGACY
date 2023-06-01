@@ -4,7 +4,6 @@ using System.IO;
 using System.Collections.Generic;
 using LEGACY.Utils;
 using GTFO.API;
-using LEGACY.LegacyOverride.PowerGenerator;
 
 namespace LEGACY.LegacyOverride.FogBeacon
 {

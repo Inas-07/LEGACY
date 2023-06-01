@@ -11,14 +11,15 @@ namespace LEGACY
     [BepInDependency("MTFO.Extension.PartialBlocks", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("Flowaria.MeltdownReactor", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("Inas.LocalProgression", BepInDependency.DependencyFlags.HardDependency)]
-
+    [BepInDependency("Inas.ExtraSurvivalWaveSettings", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("Inas.ExtraObjectiveSetup", BepInDependency.DependencyFlags.HardDependency)]
     [BepInPlugin(AUTHOR + "." + RUNDOWN_NAME, RUNDOWN_NAME, VERSION)]
     
     public class EntryPoint: BasePlugin
     {
-        public const string AUTHOR = "Inas07";
+        public const string AUTHOR = "Inas";
         public const string RUNDOWN_NAME = "LEGACY";
-        public const string VERSION = "3.6.3";
+        public const string VERSION = "3.6.4";
         public const bool TESTING = false;
         public const string TEST_STRING = "T2";
 

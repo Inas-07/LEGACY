@@ -1,12 +1,9 @@
 ﻿using LEGACY.LegacyOverride.ElevatorCargo;
 using LEGACY.LegacyOverride.FogBeacon;
-using LEGACY.LegacyOverride.Terminal;
 using LEGACY.LegacyOverride.EnemyTagger;
 using LEGACY.LegacyOverride.SecDoorIntText;
-using LEGACY.LegacyOverride.PowerGenerator;
 using MTFO.API;
 using System.IO;
-using LEGACY.LegacyOverride.HSUActivators;
 using LEGACY.LegacyOverride.ExtraExpeditionSettings;
 
 namespace LEGACY.LegacyOverride
@@ -18,13 +15,9 @@ namespace LEGACY.LegacyOverride
         internal static void Init()
         {
             ElevatorCargoOverrideManager.Current.Init();
-            TerminalPositionOverrideManager.Current.Init();
             FogBeaconSettingManager.Current.Init();
             EnemyTaggerSettingManager.Current.Init();
             SecDoorIntTextOverrideManager.Current.Init();
-            PowerGeneratorOverrideManager.Init();
-            HSUActivatorOverrideManager.Current.Init();
-            TerminalUplinkOverrideManager.Current.Init();
             ExpeditionSettingsManager.Current.Init();
         }
     }
