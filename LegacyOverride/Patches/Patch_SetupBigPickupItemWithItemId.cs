@@ -133,14 +133,10 @@ namespace LEGACY.LegacyOverride.Patches
         [HarmonyPatch(typeof(LG_PickupItem), nameof(LG_PickupItem.SetupBigPickupItemWithItemId))]
         private static void Post_SetupBigPickupItemWithItemId(LG_PickupItem __instance, uint itemId)
         {
-            if (itemId == 233u)
+            switch (itemId) 
             {
-                SetupAsFogBeacon(__instance);
-            }
-
-            else if (itemId == 234u)
-            {
-                SetupAsObserver(__instance);
+                case 233u: SetupAsFogBeacon(__instance); break;
+                case 234u: SetupAsObserver(__instance); break;
             }
         }
     }

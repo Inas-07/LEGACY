@@ -37,7 +37,7 @@ namespace LEGACY.Reactor
 
             if (db.Type != eWardenObjectiveType.Reactor_Startup) return;
 
-            if(dbs[(int)__instance.SpawnNode.LayerType] != null)
+            if (dbs[(int)__instance.SpawnNode.LayerType] != null)
             {
                 LegacyLogger.Error($"ReactorStartup_OverwriteGUIBehaviour: multiple reactor startup objective definition found for layer {__instance.SpawnNode.LayerType}. Nonsense!");
             }
@@ -196,7 +196,7 @@ namespace LEGACY.Reactor
 
         private static void Clear()
         {
-           for (int i = 0; i < 3; i++) dbs[i] = null;
+            for (int i = 0; i < 3; i++) dbs[i] = null;
         }
     }
 }

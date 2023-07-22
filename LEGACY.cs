@@ -13,15 +13,16 @@ namespace LEGACY
     [BepInDependency("Inas.LocalProgression", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("Inas.ExtraSurvivalWaveSettings", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("Inas.ExtraObjectiveSetup", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInIncompatibility("GTFO.AWO")]
     [BepInPlugin(AUTHOR + "." + RUNDOWN_NAME, RUNDOWN_NAME, VERSION)]
     
     public class EntryPoint: BasePlugin
     {
         public const string AUTHOR = "Inas";
         public const string RUNDOWN_NAME = "LEGACY";
-        public const string VERSION = "3.6.4";
+        public const string VERSION = "3.6.13";
         public const bool TESTING = false;
-        public const string TEST_STRING = "T2";
+        public const string TEST_STRING = "TESTING";
 
         private Harmony m_Harmony;
         

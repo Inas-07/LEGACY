@@ -40,7 +40,7 @@ namespace LEGACY.Reactor
             }
 
             LG_LayerType layer = __instance.SpawnNode.LayerType;
-            
+
             WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(db.EventsOnActivate, trigger, false);
         }
 

@@ -21,7 +21,7 @@ namespace LEGACY.LegacyOverride.EnemyTagger
 
     public class EnemyTaggerComponent : MonoBehaviour
     {
-        private const float INACTIVE_SOUND_UPDATE_INTERVAL = 5f;
+        private const float INACTIVE_SOUND_UPDATE_INTERVAL = 1.0f;
 
         internal int MaxTagPerScan = 12;
         internal float TagInterval = 3.0f;

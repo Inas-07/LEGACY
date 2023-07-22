@@ -57,9 +57,9 @@ namespace LEGACY.VanillaFix
                 return;
             }
 
-            if (TargetZoneData.TerminalPlacements.Count != TerminalsInZone.Count)
+            if(TerminalDataIndex >= TargetZoneData.TerminalPlacements.Count)
             {
-                LegacyLogger.Error("The numbers of terminal placement and spawn, skipped for the zone terminal.");
+                LegacyLogger.Debug("RepeatableCommand: TerminalDataIndex >= TargetZoneData.TerminalPlacements.Count: found sec-door terminal, skipping");
                 return;
             }
 
@@ -96,7 +96,8 @@ namespace LEGACY.VanillaFix
 
                 if (OldCPInstance == null) continue;
 
-                OldCPInstance.OnPuzzleSolved += new System.Action(() => {
+                OldCPInstance.OnPuzzleSolved += new System.Action(() =>
+                {
                     // TODO: fix this
                     ChainedPuzzleInstance newCPInstance = ChainedPuzzleManager.CreatePuzzleInstance(OldCPInstance.Data, OldCPInstance.m_sourceArea, __instance.m_terminal.m_wardenObjectiveSecurityScanAlign.position, __instance.m_terminal.m_wardenObjectiveSecurityScanAlign, CommandEvents[eventIndex].UseStaticBioscanPoints);
 
