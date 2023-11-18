@@ -8,9 +8,9 @@ using SNetwork;
 
 namespace LEGACY.ExtraEvents
 {
-    internal static class ChainedPuzzle_Custom
+    internal static partial class LegacyExtraEvents
     {
-        internal static IEnumerator ActivateChainedPuzzle(WardenObjectiveEventData e, float currentDuration)
+        private static void ActivateChainedPuzzle(WardenObjectiveEventData e)
         {
             uint puzzleOverrideIndex = e.ChainPuzzle;
 
@@ -26,36 +26,16 @@ namespace LEGACY.ExtraEvents
             else
             {
                 LegacyLogger.Error($"ActivateChainedPuzzle: Cannot find puzzle with puzzle override index {puzzleOverrideIndex}!");
-                yield break;
+                return;
             }
             
             ChainedPuzzleInstance CPInstance = owner.TryCast<ChainedPuzzleInstance>();
             if (CPInstance == null)
             {
                 LegacyLogger.Error("ActivateChainedPuzzle: Cannot find ChainedPuzzleInstance!");
-                yield break;
+                return;
             }
 
-            float delay = UnityEngine.Mathf.Max(e.Delay - currentDuration, 0f);
-            if (delay > 0f)
-            {
-                yield return new UnityEngine.WaitForSeconds(delay);
-            }
-
-            WardenObjectiveManager.DisplayWardenIntel(e.Layer, e.WardenIntel);
-            if (e.DialogueID > 0u)
-            {
-                PlayerDialogManager.WantToStartDialog(e.DialogueID, -1, false, false);
-            }
-            if (e.SoundID > 0u)
-            {
-                WardenObjectiveManager.Current.m_sound.Post(e.SoundID, true);
-                var line = e.SoundSubtitle.ToString();
-                if (!string.IsNullOrWhiteSpace(line))
-                {
-                    GuiManager.PlayerLayer.ShowMultiLineSubtitle(line);
-                }
-            }
 
             if(SNet.IsMaster)
             {
@@ -66,7 +46,8 @@ namespace LEGACY.ExtraEvents
             LegacyLogger.Debug($"ChainedPuzzleZone: Dim {CPInstance.m_sourceArea.m_zone.DimensionIndex}, {CPInstance.m_sourceArea.m_zone.m_layer.m_type}, Zone {CPInstance.m_sourceArea.m_zone.Alias}");
             LegacyLogger.Debug($"ChainedPuzzle Alarm name: {CPInstance.Data.PublicAlarmName}");
         }
-    
+
+        // currently unused
         internal static IEnumerator AddReqItem(WardenObjectiveEventData e, float currentDuration)
         {
             uint puzzleOverrideIndex = e.ChainPuzzle;

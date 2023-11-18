@@ -14,9 +14,59 @@ using BepInEx.Unity.IL2CPP.Utils.Collections;
 
 namespace LEGACY.ExtraEvents
 {
-    internal static class SpawnHibernate
+    internal static partial class LegacyExtraEvents
     {
-        internal static void Debug_OutputLevelHibernateSpawnEvent(WardenObjectiveEventData e)
+        private static void Info_ZoneHibernate(WardenObjectiveEventData e)
+        {
+            LG_Zone zone;
+            if (!Builder.CurrentFloor.TryGetZoneByLocalIndex(e.DimensionIndex, e.Layer, e.LocalIndex, out zone) || zone == null)
+            {
+                LegacyLogger.Error($"Debug_ZoneEnemiesInfo: cannot find zone {e.LocalIndex}, {e.Layer}, {e.DimensionIndex}");
+                return;
+            }
+
+            var map = ZoneEnemiesInfo(zone);
+
+            StringBuilder s = new();
+            foreach (var enemyID in map.Keys)
+            {
+                var db = GameDataBlockBase<EnemyDataBlock>.GetBlock(enemyID);
+                s.AppendLine($"{db.name}, Num: {map[enemyID]}, ID: {enemyID}");
+            }
+
+            LegacyLogger.Debug(s.ToString());
+        }
+
+        private static void Info_LevelEnemies(WardenObjectiveEventData e)
+        {
+            StringBuilder s = new();
+            s.AppendLine();
+            foreach (var zone in Builder.CurrentFloor.allZones)
+            {
+                s.AppendLine($"Zone {zone.LocalIndex}, {zone.Layer.m_type}, {zone.DimensionIndex}:");
+
+                var map = ZoneEnemiesInfo(zone);
+                foreach (var enemyID in map.Keys)
+                {
+                    var db = GameDataBlockBase<EnemyDataBlock>.GetBlock(enemyID);
+                    s.AppendLine($"{db.name}, Num: {map[enemyID]}, ID: {enemyID}");
+                }
+
+                s.AppendLine();
+            }
+
+            LegacyLogger.Debug(s.ToString());
+        }
+
+        private static void SpawnHibernate(WardenObjectiveEventData e)
+        {
+            if (!SNet.IsMaster) return;
+
+            UnityEngine.Coroutine coroutine = CoroutineManager.StartCoroutine(Spawn(e).WrapToIl2Cpp(), null);
+            WorldEventManager.m_worldEventEventCoroutines.Add(coroutine);
+        }
+
+        private static void Output_LevelHibernateSpawnEvent(WardenObjectiveEventData e)
         {
             LegacyLogger.Warning("Debug_OutputLevelHibernateSpawnEvent: This event involves IO operation. Do not use this event on released rundown!");
 
@@ -61,70 +111,6 @@ namespace LEGACY.ExtraEvents
 
                 events.Clear();
             }
-        }
-
-        internal static void Debug_LevelEnemiesInfo(WardenObjectiveEventData e)
-        {
-            StringBuilder s = new();
-            s.AppendLine();
-            foreach (var zone in Builder.CurrentFloor.allZones)
-            {
-                s.AppendLine($"Zone {zone.LocalIndex}, {zone.Layer.m_type}, {zone.DimensionIndex}:");
-
-                var map = ZoneEnemiesInfo(zone);
-                foreach (var enemyID in map.Keys)
-                {
-                    var db = GameDataBlockBase<EnemyDataBlock>.GetBlock(enemyID);
-                    s.AppendLine($"{db.name}, Num: {map[enemyID]}, ID: {enemyID}");
-                }
-
-                s.AppendLine();
-            }
-
-            LegacyLogger.Debug(s.ToString());
-        }
-
-        internal static void Debug_ZoneEnemiesInfo(WardenObjectiveEventData e)
-        {
-            LG_Zone zone;
-            if (!Builder.CurrentFloor.TryGetZoneByLocalIndex(e.DimensionIndex, e.Layer, e.LocalIndex, out zone) || zone == null)
-            {
-                LegacyLogger.Error($"Debug_ZoneEnemiesInfo: cannot find zone {e.LocalIndex}, {e.Layer}, {e.DimensionIndex}");
-                return;
-            }
-
-            var map = ZoneEnemiesInfo(zone);
-
-            StringBuilder s = new();
-            foreach (var enemyID in map.Keys)
-            {
-                var db = GameDataBlockBase<EnemyDataBlock>.GetBlock(enemyID);
-                s.AppendLine($"{db.name}, Num: {map[enemyID]}, ID: {enemyID}");
-            }
-
-            LegacyLogger.Debug(s.ToString());
-        }
-
-        public static Dictionary<uint, uint> ZoneEnemiesInfo(LG_Zone zone)
-        {
-            Dictionary<uint, uint> map = new();
-
-            foreach (var node in zone.m_courseNodes)
-            {
-                foreach (var enemy in node.m_enemiesInNode)
-                {
-                    if (map.ContainsKey(enemy.EnemyData.persistentID))
-                    {
-                        map[enemy.EnemyData.persistentID]++;
-                    }
-                    else
-                    {
-                        map.Add(enemy.EnemyData.persistentID, 1);
-                    }
-                }
-            }
-
-            return map;
         }
 
         private static System.Collections.IEnumerator Spawn(WardenObjectiveEventData e)
@@ -262,14 +248,6 @@ namespace LEGACY.ExtraEvents
             }
         }
 
-        internal static void SpawnEnemy_Hibernate(WardenObjectiveEventData e)
-        {
-            if (!SNet.IsMaster) return;
-
-            UnityEngine.Coroutine coroutine = CoroutineManager.StartCoroutine(Spawn(e).WrapToIl2Cpp(), null);
-            WorldEventManager.m_worldEventEventCoroutines.Add(coroutine);
-        }
-
         private static void SpawnScout(uint scoutID, AIG_CourseNode node, UnityEngine.Vector3 position)
         {
             eEnemyGroupType groupType = (eEnemyGroupType)3;
@@ -310,5 +288,28 @@ namespace LEGACY.ExtraEvents
 
             EnemyGroup.Spawn(scoutSpawnData);
         }
+    
+        private static Dictionary<uint, uint> ZoneEnemiesInfo(LG_Zone zone)
+        {
+            Dictionary<uint, uint> map = new();
+
+            foreach (var node in zone.m_courseNodes)
+            {
+                foreach (var enemy in node.m_enemiesInNode)
+                {
+                    if (map.ContainsKey(enemy.EnemyData.persistentID))
+                    {
+                        map[enemy.EnemyData.persistentID]++;
+                    }
+                    else
+                    {
+                        map.Add(enemy.EnemyData.persistentID, 1);
+                    }
+                }
+            }
+
+            return map;
+        }
+
     }
 }

@@ -28,8 +28,14 @@
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="ExtraEvents\ChainedPuzzle_Custom.cs" />
-    <Compile Include="ExtraEvents\SpawnHibernate.cs" />
+    <Compile Include="ExtraEvents\LegacyExtraEvents.Terminal.cs" />
+    <Compile Include="ExtraEvents\LegacyExtraEvents.ChainedPuzzle.cs" />
+    <Compile Include="ExtraEvents\LegacyExtraEvents.GC.cs" />
+    <Compile Include="ExtraEvents\LegacyExtraEvents.TimerTitle.cs" />
+    <Compile Include="ExtraEvents\LegacyExtraEvents.Misc.cs" />
+    <Compile Include="ExtraEvents\LegacyExtraEvents.KillEnemies.cs" />
+    <Compile Include="ExtraEvents\LegacyExtraEvents.AlertEnemies.cs" />
+    <Compile Include="ExtraEvents\LegacyExtraEvents.SpawnHibernate.cs" />
     <Compile Include="LegacyOverride\EnemyTagger\EnemyTaggerComponent.cs" />
     <Compile Include="LegacyOverride\ExtraExpeditionSettings\ExpeditionSettings.cs" />
     <Compile Include="LegacyOverride\Patches\Patch_Customize_SecDoor_Interaction_Text.cs" />
@@ -44,6 +50,7 @@
     <Compile Include="LegacyOverride\ElevatorCargo\LevelElevatorCargo.cs" />
     <Compile Include="LegacyOverride\Patches\Patch_ExpeditionSettings.cs" />
     <Compile Include="LegacyOverride\ExtraExpeditionSettings\ExpeditionSettingsManager.cs" />
+    <Compile Include="LegacyOverride\Patches\Patch_ThermalScope.cs" />
     <Compile Include="Utils\Json.cs" />
     <Compile Include="LegacyOverride\SecDoorIntText\LevelSecDoorIntTextOverride.cs" />
     <Compile Include="LegacyOverride\SecDoorIntText\SecDoorIntTextOverrideManager.cs" />
@@ -56,9 +63,7 @@
     <Compile Include="Utils\WeightedRandomBag.cs" />
     <Compile Include="VanillaFix\Patch_FixHiddenCommandExecution.cs" />
     <Compile Include="VanillaFix\Patch_FixScoutFreeze.cs" />
-    <Compile Include="ExtraEvents\Patch_EventsOnBossDeath.cs" />
-    <Compile Include="ExtraEvents\Patch_EventsOnZoneScoutScream.cs" />
-    <Compile Include="ExtraEvents\Patch_ExtraEventsConfig.cs" />
+    <Compile Include="ExtraEvents\LegacyExtraEvents.cs" />
     <Compile Include="LegacyOverride\Patches\Patch_ElevatorCargoOverride.cs" />
     <Compile Include="VanillaFix\Patch_LG_SecurityDoor_Fix-EventsOnUnlockDoor_Powergenerator.cs" />
     <Compile Include="VanillaFix\Patch_LockSecurityDoor_FixCustomText.cs" />
