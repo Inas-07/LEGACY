@@ -128,11 +128,6 @@ namespace LEGACY.ExtraEvents
         }
 
         // === unused events, and thus not fully implemented ===
-        private static void ToggleBioTrackerState(WardenObjectiveEventData e)
-        {
-            ExpeditionSettingsManager.Current.ToggleBioTrackerState(e.Enabled);
-            LegacyLogger.Debug($"ToggleBioTrackerState: Enabled ? - {e.Enabled}");
-        }
 
         private static void WarpTeamsToArea(WardenObjectiveEventData e)
         {

@@ -34,7 +34,6 @@
   <!-- hard dependency -->
   <ItemGroup>
     <Reference Include="$(PluginsFolder)/GTFO-API.dll" Private="false" />
-    <Reference Include="$(PluginsFolder)/MTFO.Ext.PartialData.dll" Private="false" />
     <Reference Include="$(PluginsFolder)/MTFO.dll" Private="false" />
     <Reference Include="$(PluginsFolder)/net6/ScanPosOverride.dll" Private="false" />
     <Reference Include="$(PluginsFolder)/net6/Inas07.ExtraObjectiveSetup.dll" Private="false" />

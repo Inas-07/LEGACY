@@ -6,6 +6,5 @@ namespace LEGACY.LegacyOverride.ExtraExpeditionSettings
     {
         public uint MainLevelLayout { get; set; } 
 
-        public bool DisableBioTracker { get; set; } = false;
     }
 }

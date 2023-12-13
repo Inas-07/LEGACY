@@ -48,9 +48,7 @@
     <Compile Include="LegacyOverride\FogBeacon\FogBeaconSettingManager.cs" />
     <Compile Include="LegacyOverride\LegacyOverrideManagers.cs" />
     <Compile Include="LegacyOverride\ElevatorCargo\LevelElevatorCargo.cs" />
-    <Compile Include="LegacyOverride\Patches\Patch_ExpeditionSettings.cs" />
     <Compile Include="LegacyOverride\ExtraExpeditionSettings\ExpeditionSettingsManager.cs" />
-    <Compile Include="LegacyOverride\Patches\Patch_ThermalScope.cs" />
     <Compile Include="Utils\Json.cs" />
     <Compile Include="LegacyOverride\SecDoorIntText\LevelSecDoorIntTextOverride.cs" />
     <Compile Include="LegacyOverride\SecDoorIntText\SecDoorIntTextOverrideManager.cs" />
@@ -71,7 +69,7 @@
     <Compile Include="Reactor\Patch_ReactorShutdown.cs" />
     <Compile Include="Reactor\Patch_ReactorStartup_ExtraEventsExecution.cs" />
     <Compile Include="Reactor\Patch_ReactorStartup_OverwriteGUIBehaviour.cs" />
-    <Compile Include="VanillaFix\Patch_Debug.cs" />
+    <Compile Include="VanillaFix\Debugger.cs" />
     <Compile Include="VanillaFix\Patch_RepeatableCommandEventFix.cs" />
   </ItemGroup>
   <ItemGroup>

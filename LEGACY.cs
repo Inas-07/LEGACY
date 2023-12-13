@@ -1,6 +1,7 @@
 ﻿using BepInEx;
 using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
+using LEGACY.VanillaFix;
 using LEGACY.ExtraEvents;
 using LEGACY.LegacyOverride;
 
@@ -10,7 +11,6 @@ namespace LEGACY
     [BepInDependency("dev.gtfomodding.gtfo-api", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("ScanPositionOverride", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("MTFO.Extension.PartialBlocks", BepInDependency.DependencyFlags.HardDependency)]
-    //[BepInDependency("Flowaria.MeltdownReactor", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("Inas.LocalProgression", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("Inas.ExtraSurvivalWaveSettings", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("Inas.ExtraObjectiveSetup", BepInDependency.DependencyFlags.HardDependency)]
@@ -23,7 +23,7 @@ namespace LEGACY
     {
         public const string AUTHOR = "Inas";
         public const string RUNDOWN_NAME = "LEGACY";
-        public const string VERSION = "3.7.0";
+        public const string VERSION = "3.8.5";
         public const bool TESTING = false;
         public const string TEST_STRING = "TESTING";
 
@@ -37,6 +37,8 @@ namespace LEGACY
 
             LegacyOverrideManagers.Init();
             LegacyExtraEvents.Init();
+
+            Debugger.Current.Init();
         }
     }
 }

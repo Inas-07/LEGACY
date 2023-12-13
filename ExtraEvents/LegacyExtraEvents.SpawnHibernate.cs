@@ -163,8 +163,10 @@ namespace LEGACY.ExtraEvents
                     case 20:
                     case 40:
                     case 41:
-                    case 23:
-                    case 48:
+                    case 56:
+                    case 54:
+                    case 200:
+                    case 201:
                         mode = AgentMode.Scout; break;
                 }
 
@@ -250,28 +252,51 @@ namespace LEGACY.ExtraEvents
 
         private static void SpawnScout(uint scoutID, AIG_CourseNode node, UnityEngine.Vector3 position)
         {
-            eEnemyGroupType groupType = (eEnemyGroupType)3;
+            eEnemyGroupType groupType = 0;
             eEnemyRoleDifficulty difficulty = 0;
 
             switch (scoutID)
             {
                 case 20:
-                    difficulty = 0; break;
+                    groupType = (eEnemyGroupType)3;
+                    difficulty = 0; 
+                    break;
+
                 case 40:
-                    difficulty = (eEnemyRoleDifficulty)14; break;
+                    groupType = (eEnemyGroupType)3;
+                    difficulty = (eEnemyRoleDifficulty)14; 
+                    break;
+
                 case 41:
-                    difficulty = (eEnemyRoleDifficulty)3; break;
-                case 23:
-                    difficulty = (eEnemyRoleDifficulty)6; break;
-                case 48:
-                    difficulty = (eEnemyRoleDifficulty)13; break;
+                    groupType = (eEnemyGroupType)3;
+                    difficulty = (eEnemyRoleDifficulty)3; 
+                    break;
+
+                case 200: // scout no tag
+                    groupType = (eEnemyGroupType)3;
+                    difficulty = (eEnemyRoleDifficulty)6; 
+                    break;
+
+                case 201: // scout shadow no tag
+                    groupType = (eEnemyGroupType)3;
+                    difficulty = (eEnemyRoleDifficulty)13; 
+                    break;
+
+                case 56: // scout nightmare
+                    groupType = (eEnemyGroupType)3;
+                    difficulty = (eEnemyRoleDifficulty)16;
+                    break;
+
+                case 54: // scout zoomer
+                    groupType = (eEnemyGroupType)3;
+                    difficulty = (eEnemyRoleDifficulty)15;
+                    break;
                 default:
                     LegacyLogger.Error($"Undefined scout, enemy ID {scoutID}");
                     break;
             }
 
-            EnemyGroupRandomizer r = null;
-            if (!EnemySpawnManager.TryCreateEnemyGroupRandomizer(groupType, difficulty, out r) || r == null)
+            if (!EnemySpawnManager.TryCreateEnemyGroupRandomizer(groupType, difficulty, out var r) || r == null)
             {
                 LegacyLogger.Error("EnemySpawnManager.TryCreateEnemyGroupRandomizer false");
                 return;

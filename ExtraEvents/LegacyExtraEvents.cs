@@ -1,6 +1,7 @@
 ﻿using GameData;
 using LEGACY.Utils;
 using ExtraObjectiveSetup.ExtendedWardenEvents;
+using LEGACY.VanillaFix;
 
 namespace LEGACY.ExtraEvents
 {
@@ -56,7 +57,6 @@ namespace LEGACY.ExtraEvents
             // ==== misc ====
             EOSWardenEventManager.Current.AddEventDefinition(EventType.CloseSecurityDoor_Custom.ToString(), (uint)EventType.CloseSecurityDoor_Custom, CloseSecurityDoor);
             EOSWardenEventManager.Current.AddEventDefinition(EventType.SetTimerTitle.ToString(), (uint)EventType.SetTimerTitle, SetTimerTitle);
-            EOSWardenEventManager.Current.AddEventDefinition(eWardenObjectiveEventType.SetTerminalCommand.ToString(), (uint)eWardenObjectiveEventType.SetTerminalCommand, SetTerminalCommand_Custom);
 
             // ==== alert enemies ====
             EOSWardenEventManager.Current.AddEventDefinition(EventType.AlertEnemiesInArea.ToString(), (uint)EventType.AlertEnemiesInArea, AlertEnemiesInArea);
@@ -73,18 +73,21 @@ namespace LEGACY.ExtraEvents
             EOSWardenEventManager.Current.AddEventDefinition(EventType.Info_LevelHibernate.ToString(), (uint)EventType.Info_LevelHibernate, Info_LevelEnemies);
             EOSWardenEventManager.Current.AddEventDefinition(EventType.Output_LevelHibernateSpawnEvent.ToString(), (uint)EventType.Output_LevelHibernateSpawnEvent, Output_LevelHibernateSpawnEvent);
 
-            // ==== reactor startup ====
-            //EOSWardenEventManager.Current.AddEventDefinition(EventType.Reactor_Startup.ToString(), (uint)EventType.Reactor_Startup, ReactorStartup);
-            //EOSWardenEventManager.Current.AddEventDefinition(EventType.Reactor_CompleteCurrentVerify.ToString(), (uint)EventType.Reactor_CompleteCurrentVerify, CompleteCurrentVerify);
-
             // ==== generator / generator cluster====
             EOSWardenEventManager.Current.AddEventDefinition(EventType.PlayGCEndSequence.ToString(), (uint)EventType.PlayGCEndSequence, PlayGCEndSequence);
 
-            // ==== chained puzzle ====
-            EOSWardenEventManager.Current.AddEventDefinition(eWardenObjectiveEventType.ActivateChainedPuzzle.ToString(), (uint)eWardenObjectiveEventType.ActivateChainedPuzzle, ActivateChainedPuzzle);
-
             //EOSWardenEventManager.Current.AddEventDefinition(EventType.Terminal_ToggleEnableDisable.ToString(), (uint)EventType.Terminal_ToggleEnableDisable, ToggleEnableDisableTerminal);
             EOSWardenEventManager.Current.AddEventDefinition(EventType.Terminal_ShowTerminalInfoInZone.ToString(), (uint)EventType.Terminal_ShowTerminalInfoInZone, ShowTerminalInfoInZone);
+
+            if (!Debugger.Current.DEBUGGING)
+            {
+                EOSWardenEventManager.Current.AddEventDefinition(eWardenObjectiveEventType.ActivateChainedPuzzle.ToString(), (uint)eWardenObjectiveEventType.ActivateChainedPuzzle, ActivateChainedPuzzle);
+                EOSWardenEventManager.Current.AddEventDefinition(eWardenObjectiveEventType.SetTerminalCommand.ToString(), (uint)eWardenObjectiveEventType.SetTerminalCommand, SetTerminalCommand_Custom);
+            }
+            else
+            {
+                LegacyLogger.Error("Debugging active - vanilla event definition un-overwritten");
+            }
 
             LegacyLogger.Log("Legacy warden event definitions setup completed");
             initialized = true;

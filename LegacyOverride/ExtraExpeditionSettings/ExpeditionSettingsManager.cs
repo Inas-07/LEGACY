@@ -20,14 +20,6 @@ namespace LEGACY.LegacyOverride.ExtraExpeditionSettings
 
         private static readonly string CONFIG_PATH = Path.Combine(LegacyOverrideManagers.LEGACY_CONFIG_PATH, "ExpeditionSettings");
 
-        private List<EnemyScanner> biotrackers = new();
-
-        private ExpeditionSettings currentSettings = new();
-
-        private bool CheckedMapperTracker = false;
-
-        private MonoBehaviour MapperTrackerScript = null;
-
         private void AddOverride(ExpeditionSettings _override)
         {
             if (_override == null) return;
@@ -80,82 +72,27 @@ namespace LEGACY.LegacyOverride.ExtraExpeditionSettings
             });
         }
 
-        internal void Register(EnemyScanner scanner) => biotrackers.Add(scanner);
-
         private void OnBuildDone()
         {
             if (!expSettings.ContainsKey(RundownManager.ActiveExpedition.LevelLayoutData)) return;
 
             var setting = expSettings[RundownManager.ActiveExpedition.LevelLayoutData];
-            if(setting.DisableBioTracker)
-            {
-                ToggleBioTrackerState(false);
-            }
-        }
 
-        public bool IsBioTrackerDisabled => currentSettings.DisableBioTracker;
-
-        public void ToggleBioTrackerState(bool enabled)
-        {
-            currentSettings.DisableBioTracker = !enabled;
-            biotrackers.ForEach(b => {
-                if(enabled)
-                {
-                    b.m_graphics.m_display.enabled = true;
-                    b.m_screen.SetNoTargetsText("");
-                    b.m_screen.SetStatusText("Ready to tag");
-                    b.m_screen.ResetGuixColor();
-                    b.Sound.Post(EVENTS.BIOTRACKER_RECHARGED);
-                    MapperTrackerScript?.gameObject.SetActive(true);
-                }
-                else
-                {
-                    b.m_screen.SetGuixColor(UnityEngine.Color.yellow);
-                    b.m_graphics.m_display.enabled = false;
-                    b.Sound.Post(EVENTS.BIOTRACKER_TOOL_LOOP_STOP);
-                    MapperTrackerScript?.gameObject.SetActive(false);
-                }
-            });
-            LegacyLogger.Warning($"Toggled {enabled}?");
-        }
-
-        private void CheckMapperTracker()
-        {
-            if (CheckedMapperTracker) return;
-
-            var scripts = GameObject.FindObjectsOfType<MonoBehaviour>();
-            foreach (MonoBehaviour script in scripts)
-            {
-                var scriptType = script.GetType();
-                LegacyLogger.Error(scriptType.Assembly.GetName().Name);
-                var scope = scriptType.Namespace;
-                if (scope != null && scope.Equals("MapperTracker"))
-                {
-                    LegacyLogger.Error("Found MapperTracker instance");
-                    MapperTrackerScript = script;
-                    break;
-                }
-            }
-
-            if (MapperTrackerScript == null) LegacyLogger.Error("Didn find MapperTracker");
-            CheckedMapperTracker = true;
         }
 
         private void OnBuildStart()
         {
-            //CheckMapperTracker();
+
         }
 
         private void OnLevelCleanup()
         {
-            biotrackers.Clear();
-            currentSettings = new();
+
         }
 
         private void OnEnterLevel()
         {
-            currentSettings = expSettings.ContainsKey(RundownManager.ActiveExpedition.LevelLayoutData) 
-                ? expSettings[RundownManager.ActiveExpedition.LevelLayoutData] : new();
+
         }
 
         private ExpeditionSettingsManager() { }

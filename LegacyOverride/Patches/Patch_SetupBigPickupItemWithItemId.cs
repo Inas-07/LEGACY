@@ -135,8 +135,12 @@ namespace LEGACY.LegacyOverride.Patches
         {
             switch (itemId) 
             {
-                case 233u: SetupAsFogBeacon(__instance); break;
-                case 234u: SetupAsObserver(__instance); break;
+                case 233u: 
+                    SetupAsFogBeacon(__instance); break;
+                case 234u:
+                case 235u: 
+                    SetupAsObserver(__instance); 
+                    break;
             }
         }
     }
