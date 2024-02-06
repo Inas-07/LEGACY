@@ -11,5 +11,6 @@
         public float TagRadius { set; get; } = 12f;
         public bool TagWhenPlaced { set; get; } = true;
         public bool TagWhenHold { set; get; } = false;
+        public bool UseVisual { set; get; } = false;
     }
 }

@@ -4,6 +4,11 @@ using HarmonyLib;
 using LEGACY.VanillaFix;
 using LEGACY.ExtraEvents;
 using LEGACY.LegacyOverride;
+using LEGACY.HardcodedBehaviours;
+using GTFO.API;
+using AssetShards;
+using LEGACY.LegacyOverride.Patches;
+using CellMenu;
 
 namespace LEGACY
 {
@@ -16,6 +21,7 @@ namespace LEGACY
     [BepInDependency("Inas.ExtraObjectiveSetup", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("Inas.EOSExt.SecurityDoorTerminal", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("Inas.EOSExt.Reactor", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("GTFO.FloLib", BepInDependency.DependencyFlags.HardDependency)]
     [BepInIncompatibility("GTFO.AWO")]
     [BepInPlugin(AUTHOR + "." + RUNDOWN_NAME, RUNDOWN_NAME, VERSION)]
     
@@ -23,8 +29,8 @@ namespace LEGACY
     {
         public const string AUTHOR = "Inas";
         public const string RUNDOWN_NAME = "LEGACY";
-        public const string VERSION = "3.8.5";
-        public const bool TESTING = false;
+        public const string VERSION = "4.0.0";
+        public const bool TESTING = true;
         public const string TEST_STRING = "TESTING";
 
         private Harmony m_Harmony;
@@ -39,6 +45,12 @@ namespace LEGACY
             LegacyExtraEvents.Init();
 
             Debugger.Current.Init();
+
+            //PlayFabManager.OnTitleDataUpdated += new System.Action(RundownSelectionPageConfig.Setup);
+            AssetAPI.OnAssetBundlesLoaded += Assets.Init;
+            EventAPI.OnManagersSetup += new System.Action(() => 
+                AssetShardManager.add_OnStartupAssetsLoaded(new System.Action(MainMenuGuiLayer.Current.PageRundownNew.SetupCustomTutorialButton)) // init after pdata             
+            );
         }
     }
 }

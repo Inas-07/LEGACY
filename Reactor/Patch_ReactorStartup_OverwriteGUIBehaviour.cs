@@ -1,12 +1,9 @@
 ﻿using HarmonyLib;
 using LevelGeneration;
 using GameData;
-using System;
 using AK;
-using Localization;
 using UnityEngine;
 using LEGACY.Utils;
-using GTFO.API;
 using System.Collections.Generic;
 
 namespace LEGACY.Reactor
@@ -15,35 +12,7 @@ namespace LEGACY.Reactor
     [HarmonyPatch]
     internal class Patch_ReactorStartup_OverwriteGUIBehaviour
     {
-        //private static bool[] overrideHideGUITimer = null;
-        private static WardenObjectiveDataBlock[] dbs = new WardenObjectiveDataBlock[3] { null, null, null };
-
-        private const float hideTimeThreshold = 43200.0f;
-
         private static HashSet<uint> ForceDisableLevels = new();
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(LG_WardenObjective_Reactor), nameof(LG_WardenObjective_Reactor.OnBuildDone))]
-        private static void Post_OnBuildDone(LG_WardenObjective_Reactor __instance)
-        {
-            WardenObjectiveDataBlock db = null;
-            if (WardenObjectiveManager.Current.TryGetActiveWardenObjectiveData(__instance.SpawnNode.LayerType, out db) == false
-                || db == null)
-            {
-                LegacyLogger.Error("Patch_ReactorStartup_OverwriteGUIBehaviour: ");
-                LegacyLogger.Error("Failed to get warden objective datablock");
-                return;
-            }
-
-            if (db.Type != eWardenObjectiveType.Reactor_Startup) return;
-
-            if (dbs[(int)__instance.SpawnNode.LayerType] != null)
-            {
-                LegacyLogger.Error($"ReactorStartup_OverwriteGUIBehaviour: multiple reactor startup objective definition found for layer {__instance.SpawnNode.LayerType}. Nonsense!");
-            }
-
-            dbs[(int)__instance.SpawnNode.LayerType] = db;
-        }
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(LG_WardenObjective_Reactor), nameof(LG_WardenObjective_Reactor.OnStateChange))]
@@ -118,7 +87,7 @@ namespace LEGACY.Reactor
                         __instance.m_alarmCountdownPlayed = false;
                         __instance.m_progressUpdateEnabled = true;
                         __instance.m_currentDuration = __instance.m_currentWaveData.Wave;
-                        int num = (int)__instance.m_sound.Post(EVENTS.REACTOR_POWER_LEVEL_1_TO_3_TRANSITION);
+                        __instance.m_sound.Post(EVENTS.REACTOR_POWER_LEVEL_1_TO_3_TRANSITION);
                         //GuiManager.PlayerLayer.m_wardenIntel.ShowSubObjectiveMessage("", Text.Get(1077U));
                         break;
                     case eReactorStatus.Startup_waitForVerify:
@@ -142,24 +111,21 @@ namespace LEGACY.Reactor
             return true;
         }
 
-        private static bool ForceDisable()
-        {
-            return ForceDisableLevels.Contains(RundownManager.ActiveExpedition.LevelLayoutData);
-        }
-
+        private static bool ForceDisable() => ForceDisableLevels.Contains(RundownManager.ActiveExpedition.LevelLayoutData);
+        
         static Patch_ReactorStartup_OverwriteGUIBehaviour()
         {
-            LevelAPI.OnLevelCleanup += Clear;
-            LevelLayoutDataBlock block = LevelLayoutDataBlock.GetBlock("Legacy_L3E2_L1");
-            ForceDisableLevels.Add(block.persistentID);
+            var block = LevelLayoutDataBlock.GetBlock("Legacy_L3E2_L1");
+            if(block != null)
+            {
+                ForceDisableLevels.Add(block.persistentID);
+            }
 
             block = LevelLayoutDataBlock.GetBlock("Legacy_L1E1_L1");
-            ForceDisableLevels.Add(block.persistentID);
-        }
-
-        private static void Clear()
-        {
-            for (int i = 0; i < 3; i++) dbs[i] = null;
+            if(block != null)
+            {
+               ForceDisableLevels.Add(block.persistentID);
+            }
         }
     }
 }

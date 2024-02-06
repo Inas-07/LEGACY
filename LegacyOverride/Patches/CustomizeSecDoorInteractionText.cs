@@ -7,7 +7,7 @@ using LevelGeneration;
 namespace LEGACY.LegacyOverride.Patches
 {
     [HarmonyPatch]
-    internal class Patch_Customize_SecDoor_Interaction_Text
+    internal class CustomizeSecDoorInteractionText
     {
         [HarmonyPostfix]
         [HarmonyPatch(typeof(LG_SecurityDoor_Locks), nameof(LG_SecurityDoor_Locks.OnDoorState))]

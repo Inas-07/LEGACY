@@ -1,7 +1,6 @@
 ﻿using GameData;
 using LEGACY.Utils;
 using ExtraObjectiveSetup.ExtendedWardenEvents;
-using LEGACY.VanillaFix;
 
 namespace LEGACY.ExtraEvents
 {
@@ -10,25 +9,19 @@ namespace LEGACY.ExtraEvents
         // ==== misc ====
         CloseSecurityDoor_Custom = 100,
         SetTimerTitle = 102,
-        ToggleBioTrackerState = 210,
-        TP_WarpTeamsToArea = 160,
 
         // ==== alert enemies ====
         AlertEnemiesInZone = 107,
         AlertEnemiesInArea = 108,
 
-        // ==== terminal
+        // ==== terminal ====
         Terminal_ShowTerminalInfoInZone = 130,
-        Terminal_ToggleEnableDisable, // unimplemented
+        Terminal_ToggleState = 131, 
 
         // ==== kill enemies ====
         KillEnemiesInArea = 140,
         KillEnemiesInZone = 141,
         KillEnemiesInDimension = 142,
-
-        // ==== reactor =====
-        //Reactor_Startup = 150,
-        //Reactor_CompleteCurrentVerify = 151,
 
         // ==== generator cluster =====
         PlayGCEndSequence = 180,
@@ -41,7 +34,29 @@ namespace LEGACY.ExtraEvents
         SpawnHibernate = 170,
         Info_ZoneHibernate = 250,
         Info_LevelHibernate = 251,
-        Output_LevelHibernateSpawnEvent = 252
+        Output_LevelHibernateSpawnEvent = 252,
+
+        // ==== warp ====
+        TP_WarpTeams = 160,
+        TP_WarpPlayersInRange = 161,
+        TP_WarpItemsInZone = 162,
+
+        // ==== force level failed ====
+        FF_ToggleFFCheck = 210,
+        FF_AddPlayersInRangeToCheck = 211,
+        FF_AddPlayersOutOfRangeToCheck = 212,
+        FF_ToggleCheckOnGroup = 213,
+        FF_Reset = 214,
+        FF_ResetGroup = 215,
+        FF_SetExpeditionFailedText = 216,
+        FF_ResetExpeditionFailedText = 217,
+
+        // ==== nav marker ====
+        SetNavMarker = 220,
+
+        // ==== custom play sound ====
+        PlayMusic = 260,
+        StopMusic = 261,
     }
 
     internal static partial class LegacyExtraEvents
@@ -76,18 +91,45 @@ namespace LEGACY.ExtraEvents
             // ==== generator / generator cluster====
             EOSWardenEventManager.Current.AddEventDefinition(EventType.PlayGCEndSequence.ToString(), (uint)EventType.PlayGCEndSequence, PlayGCEndSequence);
 
-            //EOSWardenEventManager.Current.AddEventDefinition(EventType.Terminal_ToggleEnableDisable.ToString(), (uint)EventType.Terminal_ToggleEnableDisable, ToggleEnableDisableTerminal);
+            // ==== terminal ====
+            EOSWardenEventManager.Current.AddEventDefinition(EventType.Terminal_ToggleState.ToString(), (uint)EventType.Terminal_ToggleState, ToggleTerminalState);
             EOSWardenEventManager.Current.AddEventDefinition(EventType.Terminal_ShowTerminalInfoInZone.ToString(), (uint)EventType.Terminal_ShowTerminalInfoInZone, ShowTerminalInfoInZone);
 
-            if (!Debugger.Current.DEBUGGING)
-            {
-                EOSWardenEventManager.Current.AddEventDefinition(eWardenObjectiveEventType.ActivateChainedPuzzle.ToString(), (uint)eWardenObjectiveEventType.ActivateChainedPuzzle, ActivateChainedPuzzle);
-                EOSWardenEventManager.Current.AddEventDefinition(eWardenObjectiveEventType.SetTerminalCommand.ToString(), (uint)eWardenObjectiveEventType.SetTerminalCommand, SetTerminalCommand_Custom);
-            }
-            else
-            {
-                LegacyLogger.Error("Debugging active - vanilla event definition un-overwritten");
-            }
+            // ==== warpping ====
+            EOSWardenEventManager.Current.AddEventDefinition(EventType.TP_WarpTeams.ToString(), (uint)EventType.TP_WarpTeams, WarpTeam);
+            EOSWardenEventManager.Current.AddEventDefinition(EventType.TP_WarpPlayersInRange.ToString(), (uint)EventType.TP_WarpPlayersInRange, WarpAlivePlayersAndItemsInRange);
+            EOSWardenEventManager.Current.AddEventDefinition(EventType.TP_WarpItemsInZone.ToString(), (uint)EventType.TP_WarpItemsInZone, WarpItemsInZone);
+
+            // ==== force fail check ====
+            EOSWardenEventManager.Current.AddEventDefinition(EventType.FF_ToggleFFCheck.ToString(), (uint)EventType.FF_ToggleFFCheck, ToggleFFCheckGroup);
+            EOSWardenEventManager.Current.AddEventDefinition(EventType.FF_AddPlayersInRangeToCheck.ToString(), (uint)EventType.FF_AddPlayersInRangeToCheck, AddPlayersInRangeToFFCheckGroup);
+            EOSWardenEventManager.Current.AddEventDefinition(EventType.FF_AddPlayersOutOfRangeToCheck.ToString(), (uint)EventType.FF_AddPlayersOutOfRangeToCheck, AddPlayersOutOfRangeToFFCheckGroup);
+            EOSWardenEventManager.Current.AddEventDefinition(EventType.FF_ToggleCheckOnGroup.ToString(), (uint)EventType.FF_ToggleCheckOnGroup, ToggleFFCheckOnGroup);
+            EOSWardenEventManager.Current.AddEventDefinition(EventType.FF_Reset.ToString(), (uint)EventType.FF_Reset, ResetFFCheck);
+            EOSWardenEventManager.Current.AddEventDefinition(EventType.FF_ResetGroup.ToString(), (uint)EventType.FF_ResetGroup, ResetFFCheckGroup);
+            EOSWardenEventManager.Current.AddEventDefinition(EventType.FF_SetExpeditionFailedText.ToString(), (uint)EventType.FF_SetExpeditionFailedText, SetExpeditionFailedText);
+            EOSWardenEventManager.Current.AddEventDefinition(EventType.FF_ResetExpeditionFailedText.ToString(), (uint)EventType.FF_ResetExpeditionFailedText, ResetExpeditionFailedText);
+            
+            // ==== nav marker ====
+            EOSWardenEventManager.Current.AddEventDefinition(EventType.SetNavMarker.ToString(), (uint)EventType.SetNavMarker, SetNavMarker);
+
+            // ==== custom play sound ====
+            EOSWardenEventManager.Current.AddEventDefinition(EventType.PlayMusic.ToString(), (uint)EventType.PlayMusic, PlayMusic);
+            EOSWardenEventManager.Current.AddEventDefinition(EventType.StopMusic.ToString(), (uint)EventType.StopMusic, StopMusic);
+
+            // ==== vanilla event override ====
+            EOSWardenEventManager.Current.AddEventDefinition(eWardenObjectiveEventType.ActivateChainedPuzzle.ToString(), (uint)eWardenObjectiveEventType.ActivateChainedPuzzle, ActivateChainedPuzzle);
+            EOSWardenEventManager.Current.AddEventDefinition(eWardenObjectiveEventType.SetTerminalCommand.ToString(), (uint)eWardenObjectiveEventType.SetTerminalCommand, SetTerminalCommand_Custom);
+
+            //if (!Debugger.Current.DEBUGGING)
+            //{
+            //    EOSWardenEventManager.Current.AddEventDefinition(eWardenObjectiveEventType.ActivateChainedPuzzle.ToString(), (uint)eWardenObjectiveEventType.ActivateChainedPuzzle, ActivateChainedPuzzle);
+            //    EOSWardenEventManager.Current.AddEventDefinition(eWardenObjectiveEventType.SetTerminalCommand.ToString(), (uint)eWardenObjectiveEventType.SetTerminalCommand, SetTerminalCommand_Custom);
+            //}
+            //else
+            //{
+            //    LegacyLogger.Error("Debugging active - vanilla event definition un-overwritten");
+            //}
 
             LegacyLogger.Log("Legacy warden event definitions setup completed");
             initialized = true;

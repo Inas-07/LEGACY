@@ -9,16 +9,17 @@ namespace LEGACY.Reactor
     [HarmonyPatch]
     internal class Patch_ReactorStartup_ExtraEventsExecution
     {
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(LG_WardenObjective_Reactor), nameof(LG_WardenObjective_Reactor.OnTerminalStartupSequenceVerify))]
-        private static void Post_ExecuteEventsOnEndOnClientSide(LG_WardenObjective_Reactor __instance)
-        {
-            // execute events on client side
-            if (SNet.IsMaster) return;
+        // NOTE: fixed in EOSExt_Reactor instead
+        //[HarmonyPostfix]
+        //[HarmonyPatch(typeof(LG_WardenObjective_Reactor), nameof(LG_WardenObjective_Reactor.OnTerminalStartupSequenceVerify))]
+        //private static void Post_ExecuteEventsOnEndOnClientSide(LG_WardenObjective_Reactor __instance)
+        //{
+        //    // execute events on client side
+        //    if (SNet.IsMaster) return;
 
-            /* LG_WardenObjective_Reactor.OnTerminalStartupSequenceVerify is called on correct verification */
-            WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(__instance.m_currentWaveData.Events, eWardenObjectiveEventTrigger.OnEnd, false);
-        }
+        //    /* LG_WardenObjective_Reactor.OnTerminalStartupSequenceVerify is called on correct verification */
+        //    WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(__instance.m_currentWaveData.Events, eWardenObjectiveEventTrigger.OnEnd, false);
+        //}
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(LG_WardenObjective_Reactor), nameof(LG_WardenObjective_Reactor.OnStateChange))]

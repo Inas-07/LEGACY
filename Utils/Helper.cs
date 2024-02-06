@@ -4,12 +4,12 @@ using ChainedPuzzles;
 using GameData;
 using Il2CppSystem.Collections.Generic;
 using Player;
+using AIGraph;
 
 namespace LEGACY.Utils
 {
-    public static class Helper
+    public static partial class Helper
     {
-
         public static bool TryGetComponent<T>(this GameObject obj, out T comp)
         {
             comp = obj.GetComponent<T>();
@@ -270,6 +270,21 @@ namespace LEGACY.Utils
 
             return terminalIndex < 0 ? null : zone.TerminalsSpawnedInZone[terminalIndex];
         }
+
+        public static AIG_NodeCluster GetNodeFromDimensionPosition(eDimensionIndex dimensionIndex, Vector3 position)
+        {
+            if (!AIG_GeomorphNodeVolume.TryGetGeomorphVolume(0, dimensionIndex, position, out var resultingGeoVolume)
+                || !resultingGeoVolume.m_voxelNodeVolume.TryGetPillar(position, out var pillar)
+                || !pillar.TryGetVoxelNode(position.y, out var bestNode)
+                || !AIG_NodeCluster.TryGetNodeCluster(bestNode.ClusterID, out var nodeCluster)
+                )
+            {
+                LegacyLogger.Error("TryWarpTo : Position is not valid, try again inside an area.");
+                return null;
+            }
+            return nodeCluster;
+        }
+
     }
 }
 

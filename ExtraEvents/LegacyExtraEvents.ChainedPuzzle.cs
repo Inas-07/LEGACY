@@ -12,39 +12,52 @@ namespace LEGACY.ExtraEvents
     {
         private static void ActivateChainedPuzzle(WardenObjectiveEventData e)
         {
+            if (!SNet.IsMaster) return;
+
             uint puzzleOverrideIndex = e.ChainPuzzle;
+            bool ActivateChildPuzzleOnly = e.Enabled; 
 
             CP_Bioscan_Core bioscanCore = PuzzleOverrideManager.Current.GetBioscanCore(puzzleOverrideIndex);
             CP_Cluster_Core clusterCore = PuzzleOverrideManager.Current.GetClusterCore(puzzleOverrideIndex);
 
-            iChainedPuzzleOwner owner;
-
-            if (bioscanCore != null)
-                owner = PuzzleOverrideManager.Current.ChainedPuzzleInstanceOwner(bioscanCore);
-            else if(clusterCore != null) 
-                owner = clusterCore.m_owner;
-            else
+            if (bioscanCore == null && clusterCore == null) 
             {
                 LegacyLogger.Error($"ActivateChainedPuzzle: Cannot find puzzle with puzzle override index {puzzleOverrideIndex}!");
                 return;
             }
-            
-            ChainedPuzzleInstance CPInstance = owner.TryCast<ChainedPuzzleInstance>();
-            if (CPInstance == null)
+
+            if(ActivateChildPuzzleOnly)
             {
-                LegacyLogger.Error("ActivateChainedPuzzle: Cannot find ChainedPuzzleInstance!");
-                return;
+                if(bioscanCore != null)
+                {
+                    bioscanCore.Activate();
+                }
+                else
+                {
+                    clusterCore.Activate();
+                }
+
+                LegacyLogger.Debug($"ActivateChainedPuzzle: puzzle override index: {puzzleOverrideIndex}; activated child puzzle only.");
             }
-
-
-            if(SNet.IsMaster)
+            else
             {
+                iChainedPuzzleOwner owner;
+                if (bioscanCore != null)
+                {
+                    owner = PuzzleOverrideManager.Current.ChainedPuzzleInstanceOwner(bioscanCore);
+                }
+                else
+                {
+                    owner = clusterCore.m_owner;
+                }
+
+                ChainedPuzzleInstance CPInstance = owner.Cast<ChainedPuzzleInstance>();
                 CPInstance.AttemptInteract(eChainedPuzzleInteraction.Activate);
-            }
 
-            LegacyLogger.Debug($"ActivateChainedPuzzle: puzzle override index: {puzzleOverrideIndex}");
-            LegacyLogger.Debug($"ChainedPuzzleZone: Dim {CPInstance.m_sourceArea.m_zone.DimensionIndex}, {CPInstance.m_sourceArea.m_zone.m_layer.m_type}, Zone {CPInstance.m_sourceArea.m_zone.Alias}");
-            LegacyLogger.Debug($"ChainedPuzzle Alarm name: {CPInstance.Data.PublicAlarmName}");
+                LegacyLogger.Debug($"ActivateChainedPuzzle: puzzle override index: {puzzleOverrideIndex}");
+                LegacyLogger.Debug($"ChainedPuzzleZone: Dim {CPInstance.m_sourceArea.m_zone.DimensionIndex}, {CPInstance.m_sourceArea.m_zone.m_layer.m_type}, Zone {CPInstance.m_sourceArea.m_zone.Alias}");
+                LegacyLogger.Debug($"ChainedPuzzle Alarm name: {CPInstance.Data.PublicAlarmName}");
+            }
         }
 
         // currently unused

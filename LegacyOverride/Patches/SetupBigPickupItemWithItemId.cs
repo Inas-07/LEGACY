@@ -5,53 +5,12 @@ using LEGACY.LegacyOverride.EnemyTagger;
 using LevelGeneration;
 using Player;
 using UnityEngine;
-using GTFO.API;
-using LEGACY.Utils;
 
 namespace LEGACY.LegacyOverride.Patches
 {
     [HarmonyPatch]
-    internal class Patch_SetupBigPickupItemWithItemId
+    internal class SetupBigPickupItemWithItemId
     {
-        // enemy tagger
-        private static void SetupAsObserver(LG_PickupItem __instance)
-        {
-            var setting = EnemyTaggerSettingManager.Current.SettingForCurrentLevel;
-
-            CarryItemPickup_Core core = __instance.m_root.GetComponentInChildren<CarryItemPickup_Core>();
-            Interact_Pickup_PickupItem interact = core.m_interact.Cast<Interact_Pickup_PickupItem>();
-            LG_PickupItem_Sync sync = core.m_sync.Cast<LG_PickupItem_Sync>();
-            
-            EnemyTaggerComponent tagger = core.gameObject.AddComponent<EnemyTaggerComponent>();
-            
-            tagger.Parent = core;
-            tagger.gameObject.SetActive(true);
-    
-            interact.InteractDuration = setting.TimeToPickup;
-            tagger.MaxTagPerScan = setting.MaxTagPerScan;
-            tagger.TagInterval = setting.TagInterval;
-            tagger.TagRadius = setting.TagRadius;
-            tagger.WarmupTime = setting.WarmupTime;
-
-            sync.OnSyncStateChange += new System.Action<ePickupItemStatus, pPickupPlacement, PlayerAgent, bool>((status, placement, playerAgent, isRecall) =>
-            {
-                switch (status)
-                {
-                    case ePickupItemStatus.PlacedInLevel:
-                        tagger.PickedByPlayer = null;
-                        tagger.ChangeState(setting.TagWhenPlaced ? eEnemyTaggerState.Active_Warmup : eEnemyTaggerState.Inactive);
-                        interact.InteractDuration = setting.TimeToPickup;
-                        break;
-
-                    case ePickupItemStatus.PickedUp:
-                        tagger.gameObject.SetActive(true);
-                        tagger.PickedByPlayer = playerAgent;
-                        tagger.ChangeState(setting.TagWhenHold ? eEnemyTaggerState.Active_Warmup : eEnemyTaggerState.Inactive);
-                        interact.InteractDuration = setting.TimeToPlace;
-                        break;
-                }
-            });
-        }
 
         private static void SetupAsFogBeacon(LG_PickupItem __instance)
         {
@@ -138,10 +97,59 @@ namespace LEGACY.LegacyOverride.Patches
                 case 233u: 
                     SetupAsFogBeacon(__instance); break;
                 case 234u:
-                case 235u: 
-                    SetupAsObserver(__instance); 
+                case 235u:
+                case 236u:
+                case 237u:
+                    EnemyTaggerSettingManager.Current.SetupAsObserver(__instance); 
                     break;
+                //case 236u:
+                //    ConfigureXRayObserver(__instance);
+                //    LegacyLogger.Warning($"ConfigureXRayObserver!");
+                //    break;
             }
         }
+
+        static SetupBigPickupItemWithItemId()
+        {
+
+        }
+
+        //private static HashSet<IntPtr> xrays = new();
+
+        //private static void ConfigureXRayObserver(LG_PickupItem __instance)
+        //{
+        //    var xray = __instance.GetComponentInChildren<XRays>(true);
+        //    LegacyLogger.Error($"xray isActiveAndEnabled? {xray.isActiveAndEnabled}");
+
+        //    __instance.gameObject.SetActiveRecursively(true);
+        //    if (xray.m_renderer == null)
+        //    {
+        //        xray.m_renderer = __instance.GetComponent<XRayRenderer>();
+        //    }
+
+        //    xrays.Add(xray.gameObject.Pointer);
+        //}
+
+        //[HarmonyPrefix]
+        //[HarmonyPatch(typeof(XRays), nameof(XRays.Update))]
+        //private static bool Pre_XRayUpdate(XRays __instance)
+        //{
+        //    if (!xrays.Contains(__instance.gameObject.Pointer)) return true;
+
+        //    if (GameStateManager.CurrentStateName != eGameStateName.InLevel) return false;
+
+        //    int n = Mathf.CeilToInt(__instance.raysPerSecond * Mathf.Min(0.05f, Time.deltaTime));
+        //    __instance.Cast(n);
+        //    __instance.m_renderer.range = __instance.maxDistance;
+        //    __instance.m_renderer.mode = 1;
+        //    LegacyLogger.Warning($"{n}, {__instance.m_renderer.range} ,{__instance.m_renderer.mode}");
+        //    LegacyLogger.Warning($"{__instance.gameObject.transform.position}");
+        //    return false;
+        //}
+
+        //static Patch_SetupBigPickupItemWithItemId() {
+        //    LevelAPI.OnBuildStart += xrays.Clear;
+        //    LevelAPI.OnLevelCleanup += xrays.Clear;
+        //}
     }
 }

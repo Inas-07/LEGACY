@@ -4,6 +4,7 @@ using LevelGeneration;
 using GameData;
 using LEGACY.Utils;
 using ChainedPuzzles;
+using Il2CppSystem.Linq.Expressions;
 
 namespace LEGACY.VanillaFix
 {
@@ -96,35 +97,38 @@ namespace LEGACY.VanillaFix
 
                 if (OldCPInstance == null) continue;
 
-                OldCPInstance.OnPuzzleSolved += new System.Action(() =>
-                {
-                    // TODO: fix this
-                    ChainedPuzzleInstance newCPInstance = ChainedPuzzleManager.CreatePuzzleInstance(OldCPInstance.Data, OldCPInstance.m_sourceArea, __instance.m_terminal.m_wardenObjectiveSecurityScanAlign.position, __instance.m_terminal.m_wardenObjectiveSecurityScanAlign, CommandEvents[eventIndex].UseStaticBioscanPoints);
+                OldCPInstance.OnPuzzleSolved += new System.Action(() => Helper.ResetChainedPuzzle(OldCPInstance));
 
-                    Il2CppSystem.ValueTuple<TERM_Command, int> valueTuple = null;
 
-                    foreach (var entry in __instance.m_terminal.m_commandToChainPuzzleMap.entries)
-                    {
-                        ChainedPuzzleInstance CPInstance = entry.value;
-                        if (CPInstance.m_sourceArea == OldCPInstance.m_sourceArea && CPInstance.m_parent == OldCPInstance.m_parent)
-                        {
-                            valueTuple = entry.key;
-                            break;
-                        }
-                    }
+                //OldCPInstance.OnPuzzleSolved += new System.Action(() =>
+                //{
+                //    // TODO: fix this
+                //    ChainedPuzzleInstance newCPInstance = ChainedPuzzleManager.CreatePuzzleInstance(OldCPInstance.Data, OldCPInstance.m_sourceArea, __instance.m_terminal.m_wardenObjectiveSecurityScanAlign.position, __instance.m_terminal.m_wardenObjectiveSecurityScanAlign, CommandEvents[eventIndex].UseStaticBioscanPoints);
 
-                    if (valueTuple != null)
-                    {
-                        __instance.m_terminal.m_commandToChainPuzzleMap.Remove(valueTuple);
-                        __instance.m_terminal.SetChainPuzzleForCommand(CMD, eventIndex, newCPInstance);
+                //    Il2CppSystem.ValueTuple<TERM_Command, int> valueTuple = null;
 
-                        newCPInstance.OnPuzzleSolved = OldCPInstance.OnPuzzleSolved;
-                    }
-                    else
-                    {
-                        LegacyLogger.Error("value tuple is null!");
-                    }
-                });
+                //    foreach (var entry in __instance.m_terminal.m_commandToChainPuzzleMap.entries)
+                //    {
+                //        ChainedPuzzleInstance CPInstance = entry.value;
+                //        if (CPInstance.m_sourceArea == OldCPInstance.m_sourceArea && CPInstance.m_parent == OldCPInstance.m_parent)
+                //        {
+                //            valueTuple = entry.key;
+                //            break;
+                //        }
+                //    }
+
+                //    if (valueTuple != null)
+                //    {
+                //        __instance.m_terminal.m_commandToChainPuzzleMap.Remove(valueTuple);
+                //        __instance.m_terminal.SetChainPuzzleForCommand(CMD, eventIndex, newCPInstance);
+
+                //        newCPInstance.OnPuzzleSolved = OldCPInstance.OnPuzzleSolved;
+                //    }
+                //    else
+                //    {
+                //        LegacyLogger.Error("value tuple is null!");
+                //    }
+                //});
             }
         }
     }

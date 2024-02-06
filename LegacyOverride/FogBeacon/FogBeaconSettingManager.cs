@@ -1,5 +1,4 @@
 ﻿using GTFO.API.Utilities;
-using LEGACY.LegacyOverride.ElevatorCargo;
 using System.IO;
 using System.Collections.Generic;
 using LEGACY.Utils;
@@ -9,7 +8,7 @@ namespace LEGACY.LegacyOverride.FogBeacon
 {
     internal class FogBeaconSettingManager
     {
-        public static readonly FogBeaconSettingManager Current;
+        public static FogBeaconSettingManager Current { get; private set; }
 
         private Dictionary<uint, FogBeaconSetting> fogBeaconSettings = new();
 
@@ -17,7 +16,9 @@ namespace LEGACY.LegacyOverride.FogBeacon
 
         private static readonly string CONFIG_PATH = Path.Combine(LegacyOverrideManagers.LEGACY_CONFIG_PATH, "FogBeaconSetting");
 
-        internal FogBeaconSetting SettingForCurrentLevel { private set; get; } = default;
+        public static readonly FogBeaconSetting DEDFAULT_SETTING = new FogBeaconSetting();
+
+        internal FogBeaconSetting SettingForCurrentLevel { private set; get; } = DEDFAULT_SETTING;
 
         private void AddOverride(FogBeaconSetting _override)
         {
@@ -79,7 +80,7 @@ namespace LEGACY.LegacyOverride.FogBeacon
         private void UpdateSetting()
         {
             uint mainLevelLayout = RundownManager.ActiveExpedition.LevelLayoutData;
-            SettingForCurrentLevel = fogBeaconSettings.ContainsKey(mainLevelLayout) ? fogBeaconSettings[mainLevelLayout] : default(FogBeaconSetting);
+            SettingForCurrentLevel = fogBeaconSettings.ContainsKey(mainLevelLayout) ? fogBeaconSettings[mainLevelLayout] : DEDFAULT_SETTING;
             LegacyLogger.Debug($"FogBeaconSettingManager: updated setting for level with main level layout id {mainLevelLayout}");
         }
 

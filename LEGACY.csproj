@@ -28,6 +28,11 @@
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Assets.cs" />
+    <Compile Include="ExtraEvents\LegacyExtraEvents.Music.cs" />
+    <Compile Include="ExtraEvents\LegacyExtraEvents.NavMarker.cs" />
+    <Compile Include="ExtraEvents\LegacyExtraEvents.ForceFail.cs" />
+    <Compile Include="ExtraEvents\LegacyExtraEvents.Warp.cs" />
     <Compile Include="ExtraEvents\LegacyExtraEvents.Terminal.cs" />
     <Compile Include="ExtraEvents\LegacyExtraEvents.ChainedPuzzle.cs" />
     <Compile Include="ExtraEvents\LegacyExtraEvents.GC.cs" />
@@ -36,10 +41,24 @@
     <Compile Include="ExtraEvents\LegacyExtraEvents.KillEnemies.cs" />
     <Compile Include="ExtraEvents\LegacyExtraEvents.AlertEnemies.cs" />
     <Compile Include="ExtraEvents\LegacyExtraEvents.SpawnHibernate.cs" />
+    <Compile Include="ExtraEvents\LegacyExtraEventsPatches.cs" />
     <Compile Include="LegacyOverride\EnemyTagger\EnemyTaggerComponent.cs" />
-    <Compile Include="LegacyOverride\ExtraExpeditionSettings\ExpeditionSettings.cs" />
-    <Compile Include="LegacyOverride\Patches\Patch_Customize_SecDoor_Interaction_Text.cs" />
-    <Compile Include="LegacyOverride\Patches\Patch_SetupBigPickupItemWithItemId.cs" />
+    <Compile Include="LegacyOverride\EnemyTargeting\Patch.cs" />
+    <Compile Include="LegacyOverride\ForceFail\FFPlayerGroup.cs" />
+    <Compile Include="LegacyOverride\ForceFail\FFReplicationStruct.cs" />
+    <Compile Include="LegacyOverride\ForceFail\ForceFailManager.cs" />
+    <Compile Include="LegacyOverride\ExpeditionIntelNotification\ExpeditionIntel.cs" />
+    <Compile Include="LegacyOverride\ExpeditionIntelNotification\ExpeditionIntelNotifier.cs" />
+    <Compile Include="LegacyOverride\Music\MusicOverride.cs" />
+    <Compile Include="LegacyOverride\Music\MusicStateOverrider.cs" />
+    <Compile Include="LegacyOverride\Music\Patches.cs" />
+    <Compile Include="LegacyOverride\NavMarkerManager.cs" />
+    <Compile Include="LegacyOverride\Patches\CustomizeSecDoorInteractionText.cs" />
+    <Compile Include="LegacyOverride\Patches\OBSVisualOptimization.cs" />
+    <Compile Include="LegacyOverride\Patches\PrioritizeEnemyTargeting.cs" />
+    <Compile Include="LegacyOverride\Patches\RundownSelectionCustomization.cs" />
+    <Compile Include="LegacyOverride\Patches\DisableExpeditionFailPageArtifactDisplay.cs" />
+    <Compile Include="LegacyOverride\Patches\SetupBigPickupItemWithItemId.cs" />
     <Compile Include="LEGACY.cs" />
     <Compile Include="LegacyOverride\ElevatorCargo\ElevatorCargoOverrideManager.cs" />
     <Compile Include="LegacyOverride\EnemyTagger\EnemyTaggerSetting.cs" />
@@ -48,11 +67,17 @@
     <Compile Include="LegacyOverride\FogBeacon\FogBeaconSettingManager.cs" />
     <Compile Include="LegacyOverride\LegacyOverrideManagers.cs" />
     <Compile Include="LegacyOverride\ElevatorCargo\LevelElevatorCargo.cs" />
-    <Compile Include="LegacyOverride\ExtraExpeditionSettings\ExpeditionSettingsManager.cs" />
+    <Compile Include="LegacyOverride\EnemyTargeting\EnemyTargetingPrioritizer.cs" />
+    <Compile Include="LegacyOverride\Terminal\TerminalState.cs" />
+    <Compile Include="LegacyOverride\Terminal\TerminalStateManager.cs" />
+    <Compile Include="LegacyOverride\Terminal\TerminalWrapper.cs" />
+    <Compile Include="LegacyOverride\Warp\DimensionWarpPosition.cs" />
+    <Compile Include="LegacyOverride\Warp\DimensionWarpPositionManager.cs" />
+    <Compile Include="Utils\CoroutineEase.cs" />
+    <Compile Include="Utils\Helper.ChainedPuzzle.cs" />
     <Compile Include="Utils\Json.cs" />
     <Compile Include="LegacyOverride\SecDoorIntText\LevelSecDoorIntTextOverride.cs" />
     <Compile Include="LegacyOverride\SecDoorIntText\SecDoorIntTextOverrideManager.cs" />
-    <Compile Include="Utils\Vec3.cs" />
     <Compile Include="Utils\Helper.cs" />
     <Compile Include="Utils\LegacyLogger.cs" />
     <Compile Include="Utils\SpawnHibernateEnemiesEvent.cs" />
@@ -62,7 +87,7 @@
     <Compile Include="VanillaFix\Patch_FixHiddenCommandExecution.cs" />
     <Compile Include="VanillaFix\Patch_FixScoutFreeze.cs" />
     <Compile Include="ExtraEvents\LegacyExtraEvents.cs" />
-    <Compile Include="LegacyOverride\Patches\Patch_ElevatorCargoOverride.cs" />
+    <Compile Include="LegacyOverride\Patches\ElevatorCargoOverride.cs" />
     <Compile Include="VanillaFix\Patch_LG_SecurityDoor_Fix-EventsOnUnlockDoor_Powergenerator.cs" />
     <Compile Include="VanillaFix\Patch_LockSecurityDoor_FixCustomText.cs" />
     <Compile Include="HardcodedBehaviours\Patch_PickupItem_Hardcoded.cs" />

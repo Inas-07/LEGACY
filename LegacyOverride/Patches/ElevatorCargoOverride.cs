@@ -6,7 +6,7 @@ using LEGACY.LegacyOverride.ElevatorCargo;
 namespace LEGACY.LegacyOverride.Patches
 {
     [HarmonyPatch]
-    internal class Patch_ElevatorCargoOverride
+    internal class ElevatorCargoOverride
     {
         [HarmonyPrefix]
         [HarmonyPatch(typeof(ElevatorCargoCage), nameof(ElevatorCargoCage.SpawnObjectiveItemsInLandingArea))]

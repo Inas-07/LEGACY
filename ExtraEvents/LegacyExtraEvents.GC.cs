@@ -3,8 +3,6 @@ using AK;
 using ExtraObjectiveSetup.Instances;
 using System.Collections;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
-using ExtraObjectiveSetup.BaseClasses;
-using LevelGeneration;
 using UnityEngine;
 
 namespace LEGACY.ExtraEvents
@@ -38,7 +36,7 @@ namespace LEGACY.ExtraEvents
 
         private static void PlayGCEndSequence(WardenObjectiveEventData e)
         {
-            Coroutine val = CoroutineManager.StartCoroutine(CollectionExtensions.WrapToIl2Cpp(Play(e)), null);
+            Coroutine val = CoroutineManager.StartCoroutine(Play(e).WrapToIl2Cpp());
             WorldEventManager.m_worldEventEventCoroutines.Add(val);
         }
     }

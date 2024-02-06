@@ -1,40 +1,31 @@
 ﻿using GameData;
+using LEGACY.LegacyOverride.Terminal;
 using LEGACY.Utils;
-using Player;
+
 
 namespace LEGACY.ExtraEvents
 {
     internal static partial class LegacyExtraEvents
     {
-        private static void ToggleEnableDisableTerminal(WardenObjectiveEventData e)
+        private static void ToggleTerminalState(WardenObjectiveEventData e)
         {
-            bool active = e.Enabled;
+            bool enabled = e.Enabled;
 
             var terminal = Helper.FindTerminal(e.DimensionIndex, e.Layer, e.LocalIndex, e.Count);
-            if (terminal == null) return;
-
-            terminal.OnProximityExit();
-            Interact_ComputerTerminal componentInChildren = terminal.GetComponentInChildren<Interact_ComputerTerminal>(true);
-            if (componentInChildren != null)
+            if (terminal == null)
             {
-                componentInChildren.enabled = active;
-                componentInChildren.SetActive(active);
-            }
-            GUIX_VirtualSceneLink component = terminal.GetComponent<GUIX_VirtualSceneLink>();
-            if (component != null && component.m_virtualScene != null)
-            {
-                GUIX_VirtualCamera virtualCamera = component.m_virtualScene.virtualCamera;
-                virtualCamera.SetFovAndClip(virtualCamera.paramCamera.fieldOfView, active ? 0.3f : 0.0f, active ? 1000f : 0.0f);
+                LegacyLogger.Error($"ToggleTerminalState: terminal with index {(e.DimensionIndex, e.Layer, e.LocalIndex, e.Count)} not found");
+                return;
             }
 
-            if(terminal.m_text != null) terminal.m_text.enabled = active;
-            
-            if (!active)
+            var wrapper = TerminalStateManager.Current.Get(terminal);
+            if(wrapper == null) 
             {
-                PlayerAgent interactionSource = terminal.m_localInteractionSource;
-                if (interactionSource != null && interactionSource.FPItemHolder.InTerminalTrigger)
-                    terminal.ExitFPSView();
+                LegacyLogger.Error($"ToggleTerminalState: internal error: terminal wrapper not found - {(e.DimensionIndex, e.Layer, e.LocalIndex, e.Count)}");
+                return;
             }
+
+            wrapper.ChangeState(enabled);
         }
     }
 }

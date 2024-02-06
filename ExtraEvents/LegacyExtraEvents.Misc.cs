@@ -2,10 +2,9 @@
 using GameData;
 using LEGACY.Utils;
 using AK;
-using Player;
+using UnityEngine;
 using System.Text;
 using ExtraObjectiveSetup.Instances;
-using LEGACY.LegacyOverride.ExtraExpeditionSettings;
 using EOSExt.Reactor.Managers;
 
 namespace LEGACY.ExtraEvents
@@ -67,7 +66,7 @@ namespace LEGACY.ExtraEvents
                 case TERM_Command.ReactorStartup:
                 case TERM_Command.ReactorShutdown:
                 case TERM_Command.ReactorVerify:
-                    LG_WardenObjective_Reactor reactor = ReactorInstanceManager.FindVanillaReactor(layer); // Find vanilla reactor terminal
+                    LG_WardenObjective_Reactor reactor = ReactorInstanceManager.FindVanillaReactor(layer, e.Count); // Find vanilla reactor terminal
                     if (reactor == null)
                     {
                         // find EOSExt.Reactor terminal
@@ -125,51 +124,6 @@ namespace LEGACY.ExtraEvents
             }
 
             LegacyLogger.Debug(s.ToString());
-        }
-
-        // === unused events, and thus not fully implemented ===
-
-        private static void WarpTeamsToArea(WardenObjectiveEventData e)
-        {
-            if (GameStateManager.CurrentStateName != eGameStateName.InLevel) return;
-
-            // with area unspecified, warp players to random area in zone
-            PlayerAgent localPlayer = PlayerManager.GetLocalPlayerAgent();
-
-            if (localPlayer == null)
-            {
-                LegacyLogger.Error("WarpTeamsToArea: Cannot get local player agent!");
-                return;
-            }
-
-            eDimensionIndex flashFromDimensionIndex = localPlayer.DimensionIndex;
-            Dimension flashToDimension;
-            if (Dimension.GetDimension(e.DimensionIndex, out flashToDimension) == false || flashToDimension == null)
-            {
-                LegacyLogger.Error("WarpTeamsToArea: Cannot find dimension to warp to!");
-                return;
-            }
-
-            LG_Zone warpToZone;
-            if (!Builder.CurrentFloor.TryGetZoneByLocalIndex(e.DimensionIndex, e.Layer, e.LocalIndex, out warpToZone) || warpToZone == null)
-            {
-                LegacyLogger.Error($"WarpTeamsToArea: Cannot find target zone! {e.LocalIndex}, {e.Layer}, {e.DimensionIndex}");
-                return;
-            }
-
-            int areaIndex = e.Count;
-            if (areaIndex < 0 || areaIndex >= warpToZone.m_areas.Count)
-            {
-                LegacyLogger.Warning($"WarpTeamsToArea: invalid area index {areaIndex}, defaulting to first area");
-                areaIndex = 0;
-            }
-
-            LG_Area warpToArea = warpToZone.m_areas[areaIndex];
-
-            UnityEngine.Vector3 warpToPosition = warpToArea.m_courseNode.GetRandomPositionInside();
-
-            localPlayer.TryWarpTo(e.DimensionIndex, warpToPosition, UnityEngine.Random.onUnitSphere, true);
-            LegacyLogger.Debug($"WarpTeamsToArea: warpped to {e.LocalIndex}{'A' + areaIndex}, {e.Layer}, {e.DimensionIndex}");
         }
 
     }
