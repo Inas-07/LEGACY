@@ -30,7 +30,7 @@ namespace LEGACY
         public const string AUTHOR = "Inas";
         public const string RUNDOWN_NAME = "LEGACY";
         public const string VERSION = "4.0.0";
-        public const bool TESTING = true;
+        public const bool TESTING = false;
         public const string TEST_STRING = "TESTING";
 
         private Harmony m_Harmony;
