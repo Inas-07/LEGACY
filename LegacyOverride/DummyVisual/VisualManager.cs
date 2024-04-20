@@ -69,7 +69,6 @@ namespace LEGACY.LegacyOverride.DummyVisual
                 {
                     LegacyLogger.Debug($"Rebuilding visual group '{def.WorldEventObjectFilter}'");
                     vsg.ResetupOnDef(def);
-                    vsg.ChangeToState(new() { visualType = VisualType.ON });
                 }
             }
         }

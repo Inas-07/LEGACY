@@ -1,9 +1,13 @@
 ﻿using BepInEx.Unity.IL2CPP.Utils.Collections;
 using ExtraObjectiveSetup;
 using FloLib.Networks.Replications;
+using GTFO.API;
+using LEGACY.LegacyOverride.DummyVisual.VisualGOAnimation;
 using LEGACY.Utils;
 using SNetwork;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using IEnumerator = System.Collections.IEnumerator;
@@ -24,7 +28,7 @@ namespace LEGACY.LegacyOverride.DummyVisual
 
         private void OnStateChanged(VisualGroupState oldState, VisualGroupState newState, bool isRecall)
         {
-            if(oldState.visualType != newState.visualType) 
+            if (oldState.visualType != newState.visualType)
             {
                 LegacyLogger.Debug($"VisualGroup OnStateChange: {oldState.visualType} -> {newState.visualType}");
             }
@@ -36,13 +40,12 @@ namespace LEGACY.LegacyOverride.DummyVisual
         public void ChangeToState(VisualGroupState state)
         {
             ChangeToStateUnsynced(state);
-            if(SNet.IsMaster)
+            if (SNet.IsMaster)
             {
                 StateReplicator.SetState(state);
             }
         }
-
-        private void ChangeToStateUnsynced(VisualGroupState state) 
+        private void ChangeToStateUnsynced(VisualGroupState state)
         {
             coroutines.ForEach(CoroutineManager.StopCoroutine);
             coroutines.Clear();
@@ -59,15 +62,9 @@ namespace LEGACY.LegacyOverride.DummyVisual
 
                 case VisualType.DIRECTIONAL:
                 case VisualType.REVERSE_DIRECTIONAL:
-                    var gos = state.visualType == VisualType.DIRECTIONAL ? Visuals : new List<GameObject>(Visuals);
-
-                    float curDelay = 0f;
-                    foreach (var go in gos)
-                    {
-                        coroutine = CoroutineManager.StartCoroutine(Directional(go, def.DirectionalConfig.ShowHideTime, curDelay).WrapToIl2Cpp());
-                        curDelay += def.DirectionalConfig.DelayPerGO;
-                        coroutines.Add(coroutine);
-                    }
+                    var gos = state.visualType == VisualType.DIRECTIONAL ? Visuals : Visuals.Reverse<GameObject>().ToList();
+                    coroutine = CoroutineManager.StartCoroutine(Directional(gos, def.DirectionalConfig).WrapToIl2Cpp());
+                    coroutines.Add(coroutine);
 
                     break;
                 case VisualType.BLINK:
@@ -113,7 +110,7 @@ namespace LEGACY.LegacyOverride.DummyVisual
                 var rot = vs.Rotation.ToQuaternion();
                 for (int i = 0; i < vs.Count; i++)
                 {
-                    var go = Object.Instantiate(visualGO);
+                    var go = GameObject.Instantiate(visualGO);
                     go.transform.SetPositionAndRotation(curPos, rot);
                     var cylinder = go.transform.GetChild(0).GetChild(0).gameObject;
                     cylinder.SetActive(def.DisplayCylinder);
@@ -143,9 +140,7 @@ namespace LEGACY.LegacyOverride.DummyVisual
 
         private void DestroyVisualGOs()
         {
-            coroutines.ForEach(CoroutineManager.StopCoroutine);
-            coroutines.Clear();
-            Visuals.ForEach(Object.Destroy);
+            Visuals.ForEach(GameObject.Destroy);
             Visuals.Clear();
         }
 
@@ -154,7 +149,7 @@ namespace LEGACY.LegacyOverride.DummyVisual
             this.def = def;
             DestroyVisualGOs();
             BuildVisualGOs();
-            ChangeToStateUnsynced(new() { visualType = def.InitialVisual });
+            ChangeToStateUnsynced(StateReplicator.State);
         }
 
         public bool Setup()
@@ -167,21 +162,71 @@ namespace LEGACY.LegacyOverride.DummyVisual
                 return false;
             }
 
-            var initialState = new VisualGroupState() { visualType = VisualType.ON };
-            StateReplicator = StateReplicator<VisualGroupState>.Create(id, initialState, LifeTimeType.Level);
+            StateReplicator = StateReplicator<VisualGroupState>.Create(id, new() { visualType = VisualType.OFF }, LifeTimeType.Level);
             StateReplicator.OnStateChanged += OnStateChanged;
-            ChangeToStateUnsynced(initialState);
+
+            LevelAPI.OnEnterLevel += OnEnterLevel;
             return true;
         }
 
-        private IEnumerator Directional(GameObject go, float showHideTime, float startDelay)
+        private void OnEnterLevel()
         {
-            yield return new WaitForSeconds(startDelay);
-            while(true)
+            ChangeToState(new() { visualType = def.InitialVisual });
+        }
+
+        //private IEnumerator Directional(GameObject go, float showHideTime, float startDelay)
+        //{
+        //    yield return new WaitForSeconds(startDelay);
+        //    while (true)
+        //    {
+        //        bool active = go.active;
+        //        go.SetActive(!active);
+        //        yield return new WaitForSeconds(showHideTime);
+        //    }
+        //}
+
+        private IEnumerator Directional(List<GameObject> gos, DirectionalConfig conf)
+        {
+            // TODO: implement as sliding window?
+            int goInWindow = conf.WindowSize;
+            int leastValidIndex = -goInWindow + 1;
+
+            LinkedList<int> windows = new();
+
+            windows.AddFirst(leastValidIndex);
+
+            void SetGOsInRange(int start, int end, bool active)
             {
-                bool active = go.active;
-                go.SetActive(!active);
-                yield return new WaitForSeconds(showHideTime); 
+                start = Math.Max(start, 0);
+                end = Math.Min(end, gos.Count);
+                for(int i = start; i < end; i++)
+                    gos[i].SetActive(active);
+            }
+
+            while (true)
+            {
+                SetGOsInRange(0, gos.Count, false);  
+
+                var n = windows.First;
+                while (n != null)
+                {
+                    int i = n.Value;
+                    SetGOsInRange(i, i + goInWindow, true);
+
+                    n.Value = i + 1;
+                    
+                    if(n == windows.First && 1/*leastValidIndex + goInWindow*/ < n.Value - conf.WindowInterval)
+                    {
+                        windows.AddFirst(leastValidIndex);
+                    }
+                    else if(n == windows.Last && n.Value >= gos.Count)
+                    {
+                        windows.RemoveLast();
+                    }
+                    n = n.Next;
+                }
+
+                yield return new WaitForSeconds(conf.UpdateInterval);
             }
         }
 
@@ -189,7 +234,7 @@ namespace LEGACY.LegacyOverride.DummyVisual
         {
             while (true)
             {
-                foreach(var go in gos)
+                foreach (var go in gos)
                 {
                     bool active = go.active;
                     go.SetActive(!active);
@@ -200,6 +245,7 @@ namespace LEGACY.LegacyOverride.DummyVisual
 
         public void Destroy()
         {
+            LevelAPI.OnEnterLevel -= OnEnterLevel;
             DestroyVisualGOs();
             StateReplicator = null;
         }

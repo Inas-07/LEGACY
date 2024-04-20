@@ -47,9 +47,12 @@
     <Compile Include="LegacyOverride\DummyVisual\BlinkConfig.cs" />
     <Compile Include="LegacyOverride\DummyVisual\DirectionalConfig.cs" />
     <Compile Include="LegacyOverride\DummyVisual\MaterialType.cs" />
+    <Compile Include="LegacyOverride\DummyVisual\VisualGOAnimation\BlinkAnimation.cs" />
+    <Compile Include="LegacyOverride\DummyVisual\VisualGOAnimation\DirectionalAnimation.cs" />
+    <Compile Include="LegacyOverride\DummyVisual\VisualGroup_Coroutine.cs" />
     <Compile Include="LegacyOverride\DummyVisual\VisualSequence.cs" />
     <Compile Include="LegacyOverride\DummyVisual\VisualType.cs" />
-    <Compile Include="LegacyOverride\DummyVisual\VisualGroup.cs" />
+    <Compile Include="LegacyOverride\DummyVisual\VisualGroup_Component.cs" />
     <Compile Include="LegacyOverride\DummyVisual\VisualGroupDefinition.cs" />
     <Compile Include="LegacyOverride\DummyVisual\VisualManager.cs" />
     <Compile Include="LegacyOverride\DummyVisual\VisualToggle.cs" />
