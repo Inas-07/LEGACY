@@ -42,7 +42,7 @@ namespace LEGACY.ExtraEvents
         TP_WarpItemsInZone = 162,
 
         // ==== force level failed ====
-        FF_ToggleFFCheck = 210,
+        FF_ToggleFFCheck = 210,  // do not use
         FF_AddPlayersInRangeToCheck = 211,
         FF_AddPlayersOutOfRangeToCheck = 212,
         FF_ToggleCheckOnGroup = 213,
@@ -51,12 +51,17 @@ namespace LEGACY.ExtraEvents
         FF_SetExpeditionFailedText = 216,
         FF_ResetExpeditionFailedText = 217,
 
-        // ==== nav marker ====
+        // ==== misc ====
         SetNavMarker = 220,
+        ToggleDummyVisual = 221,
+        ToggleLSFBState = 222,
 
         // ==== custom play sound ====
         PlayMusic = 260,
         StopMusic = 261,
+
+        // event scan
+        ToggleEventScanState = 270,
     }
 
     internal static partial class LegacyExtraEvents
@@ -110,12 +115,17 @@ namespace LEGACY.ExtraEvents
             EOSWardenEventManager.Current.AddEventDefinition(EventType.FF_SetExpeditionFailedText.ToString(), (uint)EventType.FF_SetExpeditionFailedText, SetExpeditionFailedText);
             EOSWardenEventManager.Current.AddEventDefinition(EventType.FF_ResetExpeditionFailedText.ToString(), (uint)EventType.FF_ResetExpeditionFailedText, ResetExpeditionFailedText);
             
-            // ==== nav marker ====
+            // ==== misc ====
             EOSWardenEventManager.Current.AddEventDefinition(EventType.SetNavMarker.ToString(), (uint)EventType.SetNavMarker, SetNavMarker);
+            EOSWardenEventManager.Current.AddEventDefinition(EventType.ToggleDummyVisual.ToString(), (uint)EventType.ToggleDummyVisual, ToggleDummyVisual);
+            EOSWardenEventManager.Current.AddEventDefinition(EventType.ToggleLSFBState.ToString(), (uint)EventType.ToggleLSFBState, ToggleLevelSpawnedFogBeaconState);
 
             // ==== custom play sound ====
             EOSWardenEventManager.Current.AddEventDefinition(EventType.PlayMusic.ToString(), (uint)EventType.PlayMusic, PlayMusic);
             EOSWardenEventManager.Current.AddEventDefinition(EventType.StopMusic.ToString(), (uint)EventType.StopMusic, StopMusic);
+
+            // ==== event scan state toggle ====
+            EOSWardenEventManager.Current.AddEventDefinition(EventType.ToggleEventScanState.ToString(), (uint)EventType.ToggleEventScanState, ToggleEventScanState);
 
             // ==== vanilla event override ====
             EOSWardenEventManager.Current.AddEventDefinition(eWardenObjectiveEventType.ActivateChainedPuzzle.ToString(), (uint)eWardenObjectiveEventType.ActivateChainedPuzzle, ActivateChainedPuzzle);

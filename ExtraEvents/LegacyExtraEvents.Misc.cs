@@ -2,10 +2,11 @@
 using GameData;
 using LEGACY.Utils;
 using AK;
-using UnityEngine;
 using System.Text;
 using ExtraObjectiveSetup.Instances;
 using EOSExt.Reactor.Managers;
+using LEGACY.LegacyOverride.EventScan;
+using LEGACY.LegacyOverride.FogBeacon;
 
 namespace LEGACY.ExtraEvents
 {
@@ -126,5 +127,14 @@ namespace LEGACY.ExtraEvents
             LegacyLogger.Debug(s.ToString());
         }
 
+        private static void ToggleEventScanState(WardenObjectiveEventData e)
+        {
+            EventScanManager.Current.ToggleEventScanState(e.WorldEventObjectFilter, e.Enabled);
+        }
+
+        private static void ToggleLevelSpawnedFogBeaconState(WardenObjectiveEventData e)
+        {
+            LevelSpawnedFogBeaconManager.Current.ToggleLSFBState(e.WorldEventObjectFilter, e.Enabled);
+        }
     }
 }

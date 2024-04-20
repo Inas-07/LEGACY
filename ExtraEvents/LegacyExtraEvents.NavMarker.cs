@@ -14,9 +14,8 @@ namespace LEGACY.ExtraEvents
         {
             string markerName = e.WorldEventObjectFilter;
             bool enabled = e.Enabled;
-            float scale = e.FogTransitionDuration > 0f ? e.FogTransitionDuration : 3.2f;
+            float scale = e.FogTransitionDuration >= 0f ? e.FogTransitionDuration : 3.2f;
             int objectType = e.SustainedEventSlotIndex;
-
 
             if (enabled)
             {
@@ -30,8 +29,7 @@ namespace LEGACY.ExtraEvents
                             return;
                         }
 
-                        var go = terminal.gameObject;
-                        NavMarkerManager.Current.EnableMarkerAt(markerName, go, scale);
+                        NavMarkerManager.Current.EnableMarkerAt(markerName, terminal.gameObject, scale);
                         break;
 
                     case 1: // big pickup
@@ -42,9 +40,8 @@ namespace LEGACY.ExtraEvents
                             return;
                         }
 
-                        go = big_pickup.gameObject;
                         var prev_marker = NavMarkerManager.Current.GetMarkerVisuals(markerName);
-                        NavMarkerManager.Current.EnableMarkerAt(markerName, go, scale);
+                        NavMarkerManager.Current.EnableMarkerAt(markerName, big_pickup.gameObject, scale);
 
                         var cur_marker = NavMarkerManager.Current.GetMarkerVisuals(markerName);
                         if (prev_marker.markerVisual == null && cur_marker.markerVisual != null) // first call on this marker name, do some setup
@@ -60,6 +57,23 @@ namespace LEGACY.ExtraEvents
                         }
 
                         break;
+
+                    case 2: // sec door 
+                        if(!Builder.CurrentFloor.TryGetZoneByLocalIndex(e.DimensionIndex, e.Layer, e.LocalIndex, out var zone) || zone == null)
+                        {
+                            LegacyLogger.Error($"SetNavMarker: cannot find zone {(e.DimensionIndex, e.Layer, e.LocalIndex)}");
+                            return;
+                        }
+
+                        var door = zone.m_sourceGate.SpawnedDoor.Cast<LG_SecurityDoor>();
+                        NavMarkerManager.Current.EnableMarkerAt(markerName, door.gameObject, scale);
+
+                        break;
+
+                    case -1: // arbitrary position
+                        NavMarkerManager.Current.EnableArbitraryMarkerAt(markerName, e.Position);
+                        break;
+
                     default:
                         LegacyLogger.Error($"Find Object of Type '{objectType}' is not implemented");
                         break;

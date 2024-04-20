@@ -5,9 +5,10 @@ using LEGACY.LegacyOverride.SecDoorIntText;
 using MTFO.API;
 using System.IO;
 using LEGACY.LegacyOverride.ForceFail;
-using LEGACY.LegacyOverride.EnemyTargeting;
-using Il2CppInterop.Runtime.Injection;
 using LEGACY.LegacyOverride.ExpeditionIntelNotification;
+using LEGACY.LegacyOverride.EventScan;
+using LEGACY.LegacyOverride.DummyVisual;
+using LEGACY.LegacyOverride.Music;
 
 namespace LEGACY.LegacyOverride
 {
@@ -18,13 +19,16 @@ namespace LEGACY.LegacyOverride
         internal static void Init()
         {
             ElevatorCargoOverrideManager.Current.Init();
-            FogBeaconSettingManager.Current.Init();
+            BigPickupFogBeaconSettingManager.Current.Init();
             EnemyTaggerSettingManager.Current.Init();
             SecDoorIntTextOverrideManager.Current.Init();
             DimensionWarpPositionManager.Current.Init();
             ForceFailManager.Current.Init();
             ExpeditionIntelNotifier.Current.Init();
-            ClassInjector.RegisterTypeInIl2Cpp<EnemyTargetingPrioritizer>();
+            EventScanManager.Current.Init();
+            VisualManager.Current.Init();
+            MusicStateOverrider.Current.Init();
+            LevelSpawnedFogBeaconManager.Current.Init(); 
         }
     }
 }

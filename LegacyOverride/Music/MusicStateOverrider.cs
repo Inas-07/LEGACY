@@ -5,6 +5,9 @@ using ExtraObjectiveSetup.BaseClasses;
 using GTFO.API.Utilities;
 using UnityEngine;
 using Il2CppSystem.Runtime.Remoting.Messaging;
+using FloLib.Networks.Replications;
+using ExtraObjectiveSetup;
+using SNetwork;
 
 namespace LEGACY.LegacyOverride.Music
 {
@@ -38,22 +41,27 @@ namespace LEGACY.LegacyOverride.Music
 
         public const uint DEF_ID = 0;
 
+        public const int MAX_PLAYING_MUSIC_COUNT = 5;
+
         public bool MCSStateLocked { get; internal set; } = false;
 
-        //// start ID
-        //private Dictionary<uint, MusicOverride> soundIDStarts = new();
+        private Dictionary<string, MusicOverride> Musics { get; } = new();
 
-        //private Dictionary<uint, MusicOverride> soundIDStops = new();
-
-        //private HashSet<uint> soundIDsPlaying = new();
-
-        private Dictionary<string, MusicOverride> musics = new();
+        private Dictionary<uint, MusicOverride> musicStartID = new();
 
         private HashSet<string> musicPlaying = new();
 
+        public StateReplicator<MusicSyncStruct> StateReplicator { get; private set; }
+
         internal void PlayMusic(string worldEventObjectFilter)
         {
-            if(!musics.ContainsKey(worldEventObjectFilter)) 
+            if (musicPlaying.Count >= MAX_PLAYING_MUSIC_COUNT)
+            {
+                LegacyLogger.Error("PlayMusic: There're 5 music playing now, cannot start playing more!");
+                return;
+            }
+
+            if(!Musics.ContainsKey(worldEventObjectFilter)) 
             {
                 LegacyLogger.Error($"Music {worldEventObjectFilter} is not config-ed.");
                 return;
@@ -72,15 +80,26 @@ namespace LEGACY.LegacyOverride.Music
         private void DoPlayMusic(string worldEventObjectFilter)
         {
             musicPlaying.Add(worldEventObjectFilter);
-            var musicSetting = musics[worldEventObjectFilter];
+            var musicSetting = Musics[worldEventObjectFilter];
             Sound.Post(musicSetting.StartID, true);
             CellSound.SetGlobalRTPCValue(musicSetting.VolumeRTPC, CellSettingsManager.SettingsData.Audio.MusicVolume.Value * 100f); // TODO: test
             MusicManager.Current.m_machine.ChangeState(MUS_State.Silence);
+
+            if(SNet.IsMaster)
+            {
+                var newState = new MusicSyncStruct(StateReplicator.State);
+                if (newState.Id0 == 0)      newState.Id0 = musicSetting.StartID;
+                else if (newState.Id1 == 0) newState.Id1 = musicSetting.StartID;
+                else if (newState.Id2 == 0) newState.Id2 = musicSetting.StartID;
+                else if (newState.Id3 == 0) newState.Id3 = musicSetting.StartID;
+                else if (newState.Id4 == 0) newState.Id4 = musicSetting.StartID;
+                StateReplicator.SetState(newState);
+            }
         }
 
         internal void StopMusic(string worldEventObjectFilter)
         {
-            if (!musics.ContainsKey(worldEventObjectFilter))
+            if (!Musics.ContainsKey(worldEventObjectFilter))
             {
                 LegacyLogger.Error($"Music {worldEventObjectFilter} is not config-ed.");
                 return;
@@ -99,8 +118,19 @@ namespace LEGACY.LegacyOverride.Music
         private void DoStopMusic(string worldEventObjectFilter)
         {
             musicPlaying.Remove(worldEventObjectFilter);
-            var musicSetting = musics[worldEventObjectFilter];
+            var musicSetting = Musics[worldEventObjectFilter];
             Sound.Post(musicSetting.StopID, true);
+
+            if (SNet.IsMaster)
+            {
+                var newState = new MusicSyncStruct(StateReplicator.State);
+                if (newState.Id0 == musicSetting.StartID) newState.Id0 = 0;
+                if (newState.Id1 == musicSetting.StartID) newState.Id1 = 0;
+                if (newState.Id2 == musicSetting.StartID) newState.Id2 = 0;
+                if (newState.Id3 == musicSetting.StartID) newState.Id3 = 0;
+                if (newState.Id4 == musicSetting.StartID) newState.Id4 = 0;
+                StateReplicator.SetState(newState);
+            }
         }
 
         public bool ShouldOverrideMusicState(MUS_State currentState)
@@ -115,7 +145,7 @@ namespace LEGACY.LegacyOverride.Music
             float multi = focus ? CellSettingsManager.SettingsData.Audio.MusicVolume.Value : 0f;
             foreach(var worldEventObjectFilter in musicPlaying)
             {
-                var musicSetting = musics[worldEventObjectFilter];
+                var musicSetting = Musics[worldEventObjectFilter];
                 CellSound.SetGlobalRTPCValue(musicSetting.VolumeRTPC, multi * 100f);  // TODO: test
             }
         }
@@ -124,7 +154,7 @@ namespace LEGACY.LegacyOverride.Music
         {
             foreach (var worldEventObjectFilter in musicPlaying)
             {
-                var musicSetting = musics[worldEventObjectFilter];
+                var musicSetting = Musics[worldEventObjectFilter];
                 CellSound.SetGlobalRTPCValue(musicSetting.VolumeRTPC, CellSettingsManager.SettingsData.Audio.MusicVolume.Value * 100f);  // TODO: test
             }
         }
@@ -137,7 +167,7 @@ namespace LEGACY.LegacyOverride.Music
                 return;
             }
 
-            musics.Clear();
+            Musics.Clear();
             var settings = definitions[DEF_ID].Definitions;
             foreach(var setting in settings)
             {
@@ -158,28 +188,8 @@ namespace LEGACY.LegacyOverride.Music
                     LegacyLogger.Error("StopID == 0: MusicStateOverrider doesn't implement un-looped sound!");
                 }
 
-                musics[setting.WorldEventObjectFilter] = setting;
-                //if (soundIDStarts.ContainsKey(setting.StartID))
-                //{
-                //    LegacyLogger.Error($"Find duplicate StartID {setting.StartID}, will override!");
-                //}
-
-                //soundIDStarts[setting.StartID] = setting;
-                //LegacyLogger.Debug($"Added StartID {setting.StartID}!");
-
-                //if (setting.StopID != 0) 
-                //{
-                //    if (soundIDStops.ContainsKey(setting.StopID))
-                //    {
-                //        LegacyLogger.Error($"Find duplicate Stop {setting.StopID}, will override!");
-                //    }
-                //    soundIDStops[setting.StopID] = setting;
-                //    LegacyLogger.Debug($"Added StopID {setting.StopID}!");
-                //}
-                //else
-                //{
-                //    LegacyLogger.Error("MusicStateOverrider doesn't implement un-looped sound.");
-                //}
+                Musics[setting.WorldEventObjectFilter] = setting;
+                musicStartID[setting.StartID] = setting;
             }
         }
 
@@ -193,6 +203,43 @@ namespace LEGACY.LegacyOverride.Music
         {
             MCSStateLocked = false;
             musicPlaying.Clear();
+        }
+
+        private void OnStateChanged(MusicSyncStruct oldState, MusicSyncStruct newState, bool isRecall) 
+        {
+            if (!isRecall) return;
+
+            void TryPlay(uint StartID)
+            {
+                if(StartID != 0 && musicStartID.TryGetValue(StartID, out var music))
+                {
+                    PlayMusic(music.WorldEventObjectFilter);
+                }
+            }
+
+            TryPlay(newState.Id0);
+            TryPlay(newState.Id1);
+            TryPlay(newState.Id2);
+            TryPlay(newState.Id3);
+            TryPlay(newState.Id4);
+        }
+
+        public override void Init()
+        {
+            base.Init();
+            EventAPI.OnAssetsLoaded += () =>
+            {
+                if (StateReplicator != null) return;
+
+                uint id = EOSNetworking.AllotForeverReplicatorID();
+                if (id == EOSNetworking.INVALID_ID)
+                {
+                    LegacyLogger.Error("PlayMusic: failed to setup state replicator!");
+                }
+
+                StateReplicator = StateReplicator<MusicSyncStruct>.Create(id, new(), LifeTimeType.Forever);
+                StateReplicator.OnStateChanged += OnStateChanged;
+            };
         }
 
         private MusicStateOverrider(): base() 

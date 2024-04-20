@@ -3,6 +3,7 @@ using HarmonyLib;
 using LEGACY.Utils;
 using LEGACY.LegacyOverride.SecDoorIntText;
 using LevelGeneration;
+using PlayFab.AuthenticationModels;
 
 namespace LEGACY.LegacyOverride.Patches
 {
@@ -13,22 +14,16 @@ namespace LEGACY.LegacyOverride.Patches
         [HarmonyPatch(typeof(LG_SecurityDoor_Locks), nameof(LG_SecurityDoor_Locks.OnDoorState))]
         private static void Post_Customize_SecDoor_Interaction_Text(pDoorState state, LG_SecurityDoor_Locks __instance)
         {
+            LG_SecurityDoor door = __instance.m_door;
+            var dim = door.Gate.DimensionIndex;
+            var layer = door.LinksToLayerType;
+            var localIndex = door.LinkedToZoneData.LocalIndex;
+            var setting = SecDoorIntTextOverrideManager.Current.GetDefinition(dim, layer, localIndex);
 
-            var levelSetting = SecDoorIntTextOverrideManager.Current.SettingForCurrentLevel;
-            if (levelSetting == null) return;
+            if (setting == null || setting.GlitchMode != GlitchMode.None) return;
 
             if (state.status != eDoorStatus.Unlocked && state.status != eDoorStatus.Closed_LockedWithChainedPuzzle) return;
 
-            int i = levelSetting.doorToZones.FindIndex((door) =>
-                door.DimensionIndex == __instance.m_door.Gate.DimensionIndex &&
-                door.LayerType == __instance.m_door.LinksToLayerType &&
-                door.LocalIndex == __instance.m_door.LinkedToZoneData.LocalIndex);
-
-            if (i == -1) return;
-
-            var setting = levelSetting.doorToZones[i];
-
-            LG_SecurityDoor door = __instance.m_door;
             Interact_Timed intOpenDoor = __instance.m_intOpenDoor;
 
             string Prefix = setting.Prefix;

@@ -29,6 +29,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Assets.cs" />
+    <Compile Include="ExtraEvents\LegacyExtraEvents.LocalizedTextDBGeneration.cs" />
+    <Compile Include="ExtraEvents\LegacyExtraEvents.DummyVisual.cs" />
     <Compile Include="ExtraEvents\LegacyExtraEvents.Music.cs" />
     <Compile Include="ExtraEvents\LegacyExtraEvents.NavMarker.cs" />
     <Compile Include="ExtraEvents\LegacyExtraEvents.ForceFail.cs" />
@@ -42,8 +44,24 @@
     <Compile Include="ExtraEvents\LegacyExtraEvents.AlertEnemies.cs" />
     <Compile Include="ExtraEvents\LegacyExtraEvents.SpawnHibernate.cs" />
     <Compile Include="ExtraEvents\LegacyExtraEventsPatches.cs" />
+    <Compile Include="LegacyOverride\DummyVisual\BlinkConfig.cs" />
+    <Compile Include="LegacyOverride\DummyVisual\DirectionalConfig.cs" />
+    <Compile Include="LegacyOverride\DummyVisual\MaterialType.cs" />
+    <Compile Include="LegacyOverride\DummyVisual\VisualSequence.cs" />
+    <Compile Include="LegacyOverride\DummyVisual\VisualType.cs" />
+    <Compile Include="LegacyOverride\DummyVisual\VisualGroup.cs" />
+    <Compile Include="LegacyOverride\DummyVisual\VisualGroupDefinition.cs" />
+    <Compile Include="LegacyOverride\DummyVisual\VisualManager.cs" />
+    <Compile Include="LegacyOverride\DummyVisual\VisualToggle.cs" />
+    <Compile Include="LegacyOverride\DummyVisual\VisualGroupState.cs" />
     <Compile Include="LegacyOverride\EnemyTagger\EnemyTaggerComponent.cs" />
     <Compile Include="LegacyOverride\EnemyTargeting\Patch.cs" />
+    <Compile Include="LegacyOverride\EventScan\EventScanComponent.cs" />
+    <Compile Include="LegacyOverride\EventScan\EventScanDefinition.cs" />
+    <Compile Include="LegacyOverride\EventScan\EventScanManager.cs" />
+    <Compile Include="LegacyOverride\EventScan\EventScanState.cs" />
+    <Compile Include="LegacyOverride\FogBeacon\LevelSpawnedFogBeacon.cs" />
+    <Compile Include="LegacyOverride\FogBeacon\LevelSpawnedFogBeaconManager.cs" />
     <Compile Include="LegacyOverride\ForceFail\FFPlayerGroup.cs" />
     <Compile Include="LegacyOverride\ForceFail\FFReplicationStruct.cs" />
     <Compile Include="LegacyOverride\ForceFail\ForceFailManager.cs" />
@@ -51,10 +69,13 @@
     <Compile Include="LegacyOverride\ExpeditionIntelNotification\ExpeditionIntelNotifier.cs" />
     <Compile Include="LegacyOverride\Music\MusicOverride.cs" />
     <Compile Include="LegacyOverride\Music\MusicStateOverrider.cs" />
+    <Compile Include="LegacyOverride\Music\MusicSyncStruct.cs" />
     <Compile Include="LegacyOverride\Music\Patches.cs" />
     <Compile Include="LegacyOverride\NavMarkerManager.cs" />
     <Compile Include="LegacyOverride\Patches\CustomizeSecDoorInteractionText.cs" />
-    <Compile Include="LegacyOverride\Patches\OBSVisualOptimization.cs" />
+    <Compile Include="LegacyOverride\Patches\DynamicVisualAdjustment.cs" />
+    <Compile Include="LegacyOverride\Patches\InteractGlitch.cs" />
+    <Compile Include="LegacyOverride\Patches\LevelSpawnFogBeacon_FixRange.cs" />
     <Compile Include="LegacyOverride\Patches\PrioritizeEnemyTargeting.cs" />
     <Compile Include="LegacyOverride\Patches\RundownSelectionCustomization.cs" />
     <Compile Include="LegacyOverride\Patches\DisableExpeditionFailPageArtifactDisplay.cs" />
@@ -63,11 +84,12 @@
     <Compile Include="LegacyOverride\ElevatorCargo\ElevatorCargoOverrideManager.cs" />
     <Compile Include="LegacyOverride\EnemyTagger\EnemyTaggerSetting.cs" />
     <Compile Include="LegacyOverride\EnemyTagger\EnemyTaggerSettingManager.cs" />
-    <Compile Include="LegacyOverride\FogBeacon\FogBeaconSetting.cs" />
-    <Compile Include="LegacyOverride\FogBeacon\FogBeaconSettingManager.cs" />
+    <Compile Include="LegacyOverride\FogBeacon\BigPickupFogBeaconSetting.cs" />
+    <Compile Include="LegacyOverride\FogBeacon\BigPickupFogBeaconSettingManager.cs" />
     <Compile Include="LegacyOverride\LegacyOverrideManagers.cs" />
     <Compile Include="LegacyOverride\ElevatorCargo\LevelElevatorCargo.cs" />
     <Compile Include="LegacyOverride\EnemyTargeting\EnemyTargetingPrioritizer.cs" />
+    <Compile Include="LegacyOverride\SecDoorIntText\InteractGlitchManager.cs" />
     <Compile Include="LegacyOverride\Terminal\TerminalState.cs" />
     <Compile Include="LegacyOverride\Terminal\TerminalStateManager.cs" />
     <Compile Include="LegacyOverride\Terminal\TerminalWrapper.cs" />
@@ -76,7 +98,7 @@
     <Compile Include="Utils\CoroutineEase.cs" />
     <Compile Include="Utils\Helper.ChainedPuzzle.cs" />
     <Compile Include="Utils\Json.cs" />
-    <Compile Include="LegacyOverride\SecDoorIntText\LevelSecDoorIntTextOverride.cs" />
+    <Compile Include="LegacyOverride\SecDoorIntText\SecDoorIntTextOverride.cs" />
     <Compile Include="LegacyOverride\SecDoorIntText\SecDoorIntTextOverrideManager.cs" />
     <Compile Include="Utils\Helper.cs" />
     <Compile Include="Utils\LegacyLogger.cs" />

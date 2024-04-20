@@ -13,6 +13,8 @@ namespace LEGACY.LegacyOverride
 
         private Dictionary<string, NavMarker> navMarkers = new();
 
+        private List<GameObject> arbitraryNavMarkers = new();
+
         private GameObject InstantiateMarkerVisual()
         {
             var marker = Object.Instantiate(Assets.ObjectiveMarker);
@@ -82,6 +84,37 @@ namespace LEGACY.LegacyOverride
             LegacyLogger.Debug($"EnableMarker: marker {markerName} enabled");
         }
 
+        public void EnableArbitraryMarkerAt(string markerName, Vector3 Position)
+        {
+            if (navMarkers.ContainsKey(markerName))
+            {
+                navMarkers[markerName].SetVisible(true);
+            }
+            else
+            {
+                GameObject arbitraryMarkerGO = new GameObject(markerName);
+                arbitraryMarkerGO.transform.SetPositionAndRotation(Position, Quaternion.identity);
+                arbitraryNavMarkers.Add(arbitraryMarkerGO);
+
+                NavMarker navMarker = GuiManager.NavMarkerLayer.PrepareGenericMarker(arbitraryMarkerGO);
+                if (navMarker != null)
+                {
+                    navMarker.SetColor(new Color(0.855f, 0.482f, 0.976f));
+                    navMarker.SetStyle(eNavMarkerStyle.LocationBeaconNoText);
+                    navMarker.SetVisible(true);
+                    navMarkers[markerName] = navMarker;
+                }
+                else
+                {
+                    LegacyLogger.Error("EnableMarkerAt: got null nav marker");
+                }
+            }
+
+            LegacyLogger.Debug($"EnableMarker: marker {markerName} enabled");
+        }
+
+
+
         internal (GameObject markerVisual, NavMarker navMakrer) GetMarkerVisuals(string markerName) => 
             markerVisuals.TryGetValue(markerName, out var markerVisual) && navMarkers.TryGetValue(markerName, out var navMarker) ? (markerVisual, navMarker) : (null, null);
 
@@ -112,8 +145,11 @@ namespace LEGACY.LegacyOverride
                 Object.Destroy(marker);
             }
 
+            arbitraryNavMarkers.ForEach(Object.Destroy);
+
             markerVisuals.Clear();
             navMarkers.Clear();
+            arbitraryNavMarkers.Clear();
         }
 
         private NavMarkerManager()

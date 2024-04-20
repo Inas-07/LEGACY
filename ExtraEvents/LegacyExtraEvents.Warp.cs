@@ -63,11 +63,11 @@ namespace LEGACY.ExtraEvents
             var localIndex = e.LocalIndex;
             string worldEventObjectFilter = e.WorldEventObjectFilter;
 
-            if (e.DimensionIndex != localPlayer.DimensionIndex)
-            {
-                LegacyLogger.Error($"WarpItemsInZone: this event is only for warping in the same dimension");
-                return;
-            }
+            //if (e.DimensionIndex != localPlayer.DimensionIndex)
+            //{
+            //    LegacyLogger.Error($"WarpItemsInZone: this event is only for warping in the same dimension");
+            //    return;
+            //}
 
             var warpLocations = DimensionWarpPositionManager.Current.GetWarpPositions(e.DimensionIndex, worldEventObjectFilter);
 
@@ -104,11 +104,11 @@ namespace LEGACY.ExtraEvents
                 return;
             }
 
-            if (e.DimensionIndex != localPlayer.DimensionIndex)
-            {
-                LegacyLogger.Error($"WarpAlivePlayersAndItemsInRange: this event is only for warping in the same dimension");
-                return;
-            }
+            //if (e.DimensionIndex != localPlayer.DimensionIndex)
+            //{
+            //    LegacyLogger.Error($"WarpAlivePlayersAndItemsInRange: this event is only for warping in the same dimension");
+            //    return;
+            //}
 
             var rangeOrigin = e.Position;
             float range = e.FogTransitionDuration;
@@ -179,11 +179,11 @@ namespace LEGACY.ExtraEvents
                 return;
             }
 
-            if (e.DimensionIndex != localPlayer.DimensionIndex)
-            {
-                LegacyLogger.Error($"WarpTeam: this event is only for warping in the same dimension");
-                return;
-            }
+            //if (e.DimensionIndex != localPlayer.DimensionIndex)
+            //{
+            //    LegacyLogger.Error($"WarpTeam: this event is only for warping in the same dimension");
+            //    return;
+            //}
 
             string worldEventObjectFilter = e.WorldEventObjectFilter;
             var warpLocations = DimensionWarpPositionManager.Current.GetWarpPositions(e.DimensionIndex, worldEventObjectFilter);
@@ -191,7 +191,7 @@ namespace LEGACY.ExtraEvents
             if (warpLocations.Count == 0)
             {
                 LegacyLogger.Error($"WarpTeam: no warp position found");
-                return;
+                return; 
             }
 
             int positionIndex = localPlayer.PlayerSlotIndex % warpLocations.Count;

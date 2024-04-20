@@ -64,7 +64,6 @@ namespace LEGACY.LegacyOverride.EnemyTagger
             }
 
             LevelAPI.OnBuildStart += UpdateSetting;
-            ClassInjector.RegisterTypeInIl2Cpp<EnemyTaggerComponent>();
 
             liveEditListener = LiveEdit.CreateListener(CONFIG_PATH, "*.json", true);
             liveEditListener.FileChanged += FileChanged;
@@ -177,7 +176,7 @@ namespace LEGACY.LegacyOverride.EnemyTagger
         {
             LevelAPI.OnBuildStart += Clear;
             LevelAPI.OnLevelCleanup += Clear;
-            AssetShardManager.add_OnStartupAssetsLoaded(new System.Action(OBSVisualOptimization.Init)); // init after pdata 
+            AssetShardManager.add_OnStartupAssetsLoaded(new System.Action(DynamicVisualAdjustment.Init)); // init after pdata 
         }
 
         static EnemyTaggerSettingManager()

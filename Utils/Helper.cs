@@ -10,6 +10,16 @@ namespace LEGACY.Utils
 {
     public static partial class Helper
     {
+        public static System.Collections.Generic.List<T> ToManagedList<T>(this Il2CppSystem.Collections.Generic.List<T> il2cppList)
+        {
+            System.Collections.Generic.List<T> ret = new();
+            foreach(var e in il2cppList)
+            {
+                ret.Add(e);
+            }
+            return ret;
+        }
+
         public static bool TryGetComponent<T>(this GameObject obj, out T comp)
         {
             comp = obj.GetComponent<T>();

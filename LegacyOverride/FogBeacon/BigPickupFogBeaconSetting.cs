@@ -8,7 +8,7 @@
         public float Range { get; set; } = 11f;
     }
 
-    public class FogBeaconSetting
+    public class BigPickupFogBeaconSetting
     {
         public uint MainLevelLayout { set; get; } = 0;
         public float TimeToPickup { set; get; } = 1f;

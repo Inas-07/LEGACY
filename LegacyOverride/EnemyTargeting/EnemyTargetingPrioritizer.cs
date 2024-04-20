@@ -1,5 +1,6 @@
 ﻿using Agents;
 using Enemies;
+using Il2CppInterop.Runtime.Injection;
 using LEGACY.Utils;
 using Player;
 using SNetwork;
@@ -94,6 +95,11 @@ namespace LEGACY.LegacyOverride.EnemyTargeting
         void OnDestroy()
         {
             enemy = null;
+        }
+
+        static EnemyTargetingPrioritizer()
+        {
+            ClassInjector.RegisterTypeInIl2Cpp<EnemyTargetingPrioritizer>();
         }
     }
 }

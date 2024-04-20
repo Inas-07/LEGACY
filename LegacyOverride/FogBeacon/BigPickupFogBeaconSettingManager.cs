@@ -6,21 +6,21 @@ using GTFO.API;
 
 namespace LEGACY.LegacyOverride.FogBeacon
 {
-    internal class FogBeaconSettingManager
+    internal class BigPickupFogBeaconSettingManager
     {
-        public static FogBeaconSettingManager Current { get; private set; }
+        public static BigPickupFogBeaconSettingManager Current { get; private set; }
 
-        private Dictionary<uint, FogBeaconSetting> fogBeaconSettings = new();
+        private Dictionary<uint, BigPickupFogBeaconSetting> fogBeaconSettings = new();
 
         private LiveEditListener liveEditListener;
 
         private static readonly string CONFIG_PATH = Path.Combine(LegacyOverrideManagers.LEGACY_CONFIG_PATH, "FogBeaconSetting");
 
-        public static readonly FogBeaconSetting DEDFAULT_SETTING = new FogBeaconSetting();
+        public static readonly BigPickupFogBeaconSetting DEDFAULT_SETTING = new BigPickupFogBeaconSetting();
 
-        internal FogBeaconSetting SettingForCurrentLevel { private set; get; } = DEDFAULT_SETTING;
+        internal BigPickupFogBeaconSetting SettingForCurrentLevel { private set; get; } = DEDFAULT_SETTING;
 
-        private void AddOverride(FogBeaconSetting _override)
+        private void AddOverride(BigPickupFogBeaconSetting _override)
         {
             if (_override == null) return;
 
@@ -41,7 +41,7 @@ namespace LEGACY.LegacyOverride.FogBeacon
             {
                 Directory.CreateDirectory(CONFIG_PATH);
                 var file = File.CreateText(Path.Combine(CONFIG_PATH, "Template.json"));
-                file.WriteLine(Json.Serialize(new FogBeaconSetting()));
+                file.WriteLine(Json.Serialize(new BigPickupFogBeaconSetting()));
                 file.Flush();
                 file.Close();
 
@@ -50,7 +50,7 @@ namespace LEGACY.LegacyOverride.FogBeacon
 
             foreach (string confFile in Directory.EnumerateFiles(CONFIG_PATH, "*.json", SearchOption.AllDirectories))
             {
-                FogBeaconSetting conf;
+                BigPickupFogBeaconSetting conf;
                 Json.Load(confFile, out conf);
 
                 AddOverride(conf);
@@ -67,7 +67,7 @@ namespace LEGACY.LegacyOverride.FogBeacon
             LegacyLogger.Warning($"LiveEdit File Changed: {e.FullPath}");
             LiveEdit.TryReadFileContent(e.FullPath, (content) =>
             {
-                FogBeaconSetting conf = Json.Deserialize<FogBeaconSetting>(content);
+                BigPickupFogBeaconSetting conf = Json.Deserialize<BigPickupFogBeaconSetting>(content);
                 AddOverride(conf);
 
                 if(GameStateManager.IsInExpedition)
@@ -84,9 +84,9 @@ namespace LEGACY.LegacyOverride.FogBeacon
             LegacyLogger.Debug($"FogBeaconSettingManager: updated setting for level with main level layout id {mainLevelLayout}");
         }
 
-        private FogBeaconSettingManager() { }
+        private BigPickupFogBeaconSettingManager() { }
 
-        static FogBeaconSettingManager()
+        static BigPickupFogBeaconSettingManager()
         {
             Current = new();
         }

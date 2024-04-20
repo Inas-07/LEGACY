@@ -123,11 +123,23 @@ namespace LEGACY.ExtraEvents
             }
 
             string worldEventObjectFilter = e.WorldEventObjectFilter.ToUpperInvariant();
+            AgentMode mode = AgentMode.Hibernate;
 
+            switch (e.EnemyID)
+            {
+                case 20:
+                case 40:
+                case 41:
+                case 56:
+                case 54:
+                case 200:
+                case 201:
+                    mode = AgentMode.Scout; break;
+            }
             // SPAWN ON POSITION
             if (e.Position != UnityEngine.Vector3.zero)
             {
-                LegacyLogger.Debug($"SpawnEnemy_Hibernate: using SpawnOnPosition, will only spawn 1 enemy (spawning scout is not supported).\nYou'll have to specify the correct area as well");
+                LegacyLogger.Debug($"SpawnEnemy_Hibernate: using SpawnOnPosition, will only spawn 1 enemy (spawning scout is not supported). You'll have to specify the correct area as well");
 
                 if (!worldEventObjectFilter.Contains("AREA_") || worldEventObjectFilter.Length != "AREA_".Length + 1)
                 {
@@ -143,9 +155,16 @@ namespace LEGACY.ExtraEvents
                 }
 
                 UnityEngine.Quaternion rotation = UnityEngine.Quaternion.LookRotation(new UnityEngine.Vector3(EnemyGroup.s_randomRot2D.x, 0.0f, EnemyGroup.s_randomRot2D.y), UnityEngine.Vector3.up);
-                EnemyAllocator.Current.SpawnEnemy(e.EnemyID, zone.m_areas[areaIndex].m_courseNode, AgentMode.Hibernate, e.Position, rotation);
-            
-                LegacyLogger.Debug($"SpawnEnemy_Hibernate: spawned {e.Count} enemy/enemies on position ({e.Position.x}, {e.Position.y}, {e.Position.z}), in zone_{e.LocalIndex}, {e.Layer}, {e.DimensionIndex}");
+                var node = zone.m_areas[areaIndex].m_courseNode;
+                if (mode != AgentMode.Scout)
+                {
+                    EnemyAllocator.Current.SpawnEnemy(e.EnemyID, node, AgentMode.Hibernate, e.Position, rotation);
+                    LegacyLogger.Debug($"SpawnEnemy_Hibernate: spawned {e.Count} enemy/enemies on position ({e.Position.x}, {e.Position.y}, {e.Position.z}), in zone_{e.LocalIndex}, {e.Layer}, {e.DimensionIndex}");
+                }
+                else
+                {
+                    SpawnScout(e.EnemyID, node, e.Position);
+                }
 
                 yield break;
             }
@@ -156,19 +175,7 @@ namespace LEGACY.ExtraEvents
                 float CompleteSpawnInSeconds = e.Duration != 0.0f ? e.Duration : 2.0f;
                 float SpawnInterval = CompleteSpawnInSeconds / e.Count;
 
-                AgentMode mode = AgentMode.Hibernate;
 
-                switch (e.EnemyID)
-                {
-                    case 20:
-                    case 40:
-                    case 41:
-                    case 56:
-                    case 54:
-                    case 200:
-                    case 201:
-                        mode = AgentMode.Scout; break;
-                }
 
                 Random rand = new Random();
                 string candidateAreas = string.Empty;

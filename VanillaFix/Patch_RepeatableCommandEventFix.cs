@@ -131,5 +131,24 @@ namespace LEGACY.VanillaFix
                 //});
             }
         }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(CP_Cluster_Core), nameof(CP_Cluster_Core.OnSyncStateChange))]
+        private static bool Pre_CP_Cluster_Core_OnSyncStateChange(CP_Cluster_Core __instance,
+            eClusterStatus newStatus, float progress, bool isDropinState)
+        {
+            pClusterState currentState = __instance.m_sync.GetCurrentState();
+            if (currentState.status != eClusterStatus.Finished) return true;
+
+            if(newStatus == eClusterStatus.SplineReveal)
+            {
+                if (isDropinState) return true;
+
+                __instance.m_spline.Reveal();
+                return false;
+            }
+
+            return true;
+        }
     }
 }

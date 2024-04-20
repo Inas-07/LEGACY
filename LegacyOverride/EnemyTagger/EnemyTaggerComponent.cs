@@ -7,6 +7,7 @@ using Player;
 using AK;
 using FX_EffectSystem;
 using LEGACY.Utils;
+using Il2CppInterop.Runtime.Injection;
 
 namespace LEGACY.LegacyOverride.EnemyTagger
 {
@@ -169,6 +170,11 @@ namespace LEGACY.LegacyOverride.EnemyTagger
             }
 
             Parent = null;
+        }
+
+        static EnemyTaggerComponent()
+        {
+            ClassInjector.RegisterTypeInIl2Cpp<EnemyTaggerComponent>();
         }
     }
 }

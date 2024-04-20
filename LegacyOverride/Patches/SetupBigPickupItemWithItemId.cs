@@ -11,7 +11,6 @@ namespace LEGACY.LegacyOverride.Patches
     [HarmonyPatch]
     internal class SetupBigPickupItemWithItemId
     {
-
         private static void SetupAsFogBeacon(LG_PickupItem __instance)
         {
             FogRepeller_Sphere fogRepFake = new GameObject("FogInstance_Beacon_Fake").AddComponent<FogRepeller_Sphere>();
@@ -21,7 +20,7 @@ namespace LEGACY.LegacyOverride.Patches
             fogRepFake.ShrinkDuration = 99999f;
             fogRepFake.Range = 1f;
 
-            var setting = FogBeaconSettingManager.Current.SettingForCurrentLevel;
+            var setting = BigPickupFogBeaconSettingManager.Current.SettingForCurrentLevel;
             FogRepeller_Sphere fogRepHold = new GameObject("FogInstance_Beacon_SmallLayer").AddComponent<FogRepeller_Sphere>();
             fogRepHold.InfiniteDuration = setting.RSHold.InfiniteDuration;
             fogRepHold.GrowDuration = setting.RSHold.GrowDuration;

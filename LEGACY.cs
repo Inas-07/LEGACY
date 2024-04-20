@@ -9,6 +9,7 @@ using GTFO.API;
 using AssetShards;
 using LEGACY.LegacyOverride.Patches;
 using CellMenu;
+using ChainedPuzzles;
 
 namespace LEGACY
 {
@@ -29,7 +30,7 @@ namespace LEGACY
     {
         public const string AUTHOR = "Inas";
         public const string RUNDOWN_NAME = "LEGACY";
-        public const string VERSION = "4.0.0";
+        public const string VERSION = "4.2.0";
         public const bool TESTING = false;
         public const string TEST_STRING = "TESTING";
 
@@ -45,7 +46,7 @@ namespace LEGACY
             LegacyExtraEvents.Init();
 
             Debugger.Current.Init();
-
+            //ChainedPuzzleManager.DEBUG_ENABLED = true;
             //PlayFabManager.OnTitleDataUpdated += new System.Action(RundownSelectionPageConfig.Setup);
             AssetAPI.OnAssetBundlesLoaded += Assets.Init;
             EventAPI.OnManagersSetup += new System.Action(() => 

@@ -117,6 +117,7 @@ namespace LEGACY.ExtraEvents
                         LegacyLogger.Error("AddReqItem: Failed to get scanner for the CP_Bioscan_Core");
                     }
                 }
+
                 bioscanCore.AddRequiredItems(new iWardenObjectiveItem[1] { new iWardenObjectiveItem(itemToAdd.Pointer) });
                 LegacyLogger.Debug($"AddReqItem: puzzle override index: {puzzleOverrideIndex}");
                 LegacyLogger.Debug($"Item name: {itemToAdd.ItemDataBlock.publicName}");
