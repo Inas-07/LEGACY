@@ -3,6 +3,7 @@ using FloLib.Networks.Replications;
 using LEGACY.Utils;
 using LevelGeneration;
 using Player;
+using SNetwork;
 
 namespace LEGACY.LegacyOverride.Terminal
 {
@@ -12,16 +13,13 @@ namespace LEGACY.LegacyOverride.Terminal
 
         public StateReplicator<TerminalState> stateReplicator { get; private set; }
 
-        public void ChangeState(bool enabled) => stateReplicator.SetState(new() { Enabled = enabled });
-
-        private void OnStateChanged(TerminalState oldState, TerminalState newState, bool isRecall)
+        private void ChangeStateUnsynced(bool enabled)
         {
-            if (oldState.Enabled == newState.Enabled) return;
-            LegacyLogger.Debug($"{lgTerminal.ItemKey} state: {newState.Enabled}");
+            LegacyLogger.Debug($"{lgTerminal.ItemKey} state, enabled: {enabled}");
 
             lgTerminal.OnProximityExit();
             Interact_ComputerTerminal interact = lgTerminal.GetComponentInChildren<Interact_ComputerTerminal>(true);
-            bool active = newState.Enabled;
+            bool active = enabled;
 
             if (interact != null)
             {
@@ -53,6 +51,23 @@ namespace LEGACY.LegacyOverride.Terminal
                     lgTerminal.ExitFPSView();
                 }
             }
+
+        }
+
+        public void ChangeState(bool enabled)
+        {
+            ChangeStateUnsynced(enabled);
+            if(SNet.IsMaster)
+            {
+                stateReplicator.SetState(new() { Enabled = enabled });
+            }
+        }
+
+        private void OnStateChanged(TerminalState oldState, TerminalState newState, bool isRecall)
+        {
+            if (!isRecall) return;
+
+            ChangeStateUnsynced(newState.Enabled);
         }
 
         public static TerminalWrapper Instantiate(LG_ComputerTerminal lgTerminal, uint replicatorID)

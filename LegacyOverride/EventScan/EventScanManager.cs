@@ -22,7 +22,7 @@ namespace LEGACY.LegacyOverride.EventScan
             var pos = def.Position.ToVector3();
             if (pos == Vector3.zero) return;
 
-            var go = Object.Instantiate(Assets.CircleSensor);
+            var go = Object.Instantiate(Assets.EventScan);
             var comp = go.AddComponent<EventScanComponent>();
             comp.def = def;
             comp.Setup();
@@ -52,9 +52,9 @@ namespace LEGACY.LegacyOverride.EventScan
             foreach (var comp in eventScans[WorldEventObjectFilter])
             {
                 if(!active && comp.StateReplicator.State.Status != EventScanState.Disabled )
-                    comp.ChangeState(EventScanState.Disabled);
+                    comp.ChangeToState(EventScanState.Disabled);
                 else if (active && comp.StateReplicator.State.Status == EventScanState.Disabled ) 
-                    comp.ChangeState(EventScanState.Waiting);
+                    comp.ChangeToState(EventScanState.Waiting);
             }
         }
 

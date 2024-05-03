@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace LEGACY.LegacyOverride.DummyVisual.VisualGOAnimation
+namespace LEGACY.LegacyOverride.DummyVisual.VisualGOAnimation.AnimationComp_Deprecated
 {
-    internal class BlinkAnimation: MonoBehaviour
+    internal class BlinkAnimation : MonoBehaviour
     {
         internal GameObject VisualGO;
 
@@ -29,7 +29,7 @@ namespace LEGACY.LegacyOverride.DummyVisual.VisualGOAnimation
         internal void SetPlayAnimation(bool play)
         {
             PlayAnimation = play;
-            if(play)
+            if (play)
             {
                 NextUpdateTime = Clock.Time + ShowHideTime;
             }
@@ -48,7 +48,7 @@ namespace LEGACY.LegacyOverride.DummyVisual.VisualGOAnimation
             bool active = Zone.active;
             Zone.SetActive(!active);
 
-            if(ShowCylinder)
+            if (ShowCylinder)
             {
                 Cylinder.SetActive(!active);
             }

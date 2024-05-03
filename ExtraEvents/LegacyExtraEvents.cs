@@ -4,69 +4,72 @@ using ExtraObjectiveSetup.ExtendedWardenEvents;
 
 namespace LEGACY.ExtraEvents
 {
-    enum EventType
-    {
-        // ==== misc ====
-        CloseSecurityDoor_Custom = 100,
-        SetTimerTitle = 102,
-
-        // ==== alert enemies ====
-        AlertEnemiesInZone = 107,
-        AlertEnemiesInArea = 108,
-
-        // ==== terminal ====
-        Terminal_ShowTerminalInfoInZone = 130,
-        Terminal_ToggleState = 131, 
-
-        // ==== kill enemies ====
-        KillEnemiesInArea = 140,
-        KillEnemiesInZone = 141,
-        KillEnemiesInDimension = 142,
-
-        // ==== generator cluster =====
-        PlayGCEndSequence = 180,
-
-        // ==== chained puzzle =====
-        ChainedPuzzle_AddReqItem = 200,
-        ChainedPuzzle_RemoveReqItem,
-
-        // ==== spawn hibernate =====
-        SpawnHibernate = 170,
-        Info_ZoneHibernate = 250,
-        Info_LevelHibernate = 251,
-        Output_LevelHibernateSpawnEvent = 252,
-
-        // ==== warp ====
-        TP_WarpTeams = 160,
-        TP_WarpPlayersInRange = 161,
-        TP_WarpItemsInZone = 162,
-
-        // ==== force level failed ====
-        FF_ToggleFFCheck = 210,  // do not use
-        FF_AddPlayersInRangeToCheck = 211,
-        FF_AddPlayersOutOfRangeToCheck = 212,
-        FF_ToggleCheckOnGroup = 213,
-        FF_Reset = 214,
-        FF_ResetGroup = 215,
-        FF_SetExpeditionFailedText = 216,
-        FF_ResetExpeditionFailedText = 217,
-
-        // ==== misc ====
-        SetNavMarker = 220,
-        ToggleDummyVisual = 221,
-        ToggleLSFBState = 222,
-
-        // ==== custom play sound ====
-        PlayMusic = 260,
-        StopMusic = 261,
-
-        // event scan
-        ToggleEventScanState = 270,
-    }
 
     internal static partial class LegacyExtraEvents
     {
         private static bool initialized = false;
+
+        internal enum EventType
+        {
+            // ==== misc ====
+            CloseSecurityDoor_Custom = 100,
+            SetTimerTitle = 102,
+
+            // ==== alert enemies ====
+            AlertEnemiesInZone = 107,
+            AlertEnemiesInArea = 108,
+
+            // ==== terminal ====
+            Terminal_ShowTerminalInfoInZone = 130,
+            Terminal_ToggleState = 131,
+
+            // ==== kill enemies ====
+            KillEnemiesInArea = 140,
+            KillEnemiesInZone = 141,
+            KillEnemiesInDimension = 142,
+
+            // ==== generator cluster =====
+            PlayGCEndSequence = 180,
+
+            // ==== chained puzzle =====
+            ChainedPuzzle_AddReqItem = 200,
+            ChainedPuzzle_RemoveReqItem,
+
+            // ==== spawn hibernate =====
+            SpawnHibernate = 170,
+            Info_ZoneHibernate = 250,
+            Info_LevelHibernate = 251,
+            Output_LevelHibernateSpawnEvent = 252,
+
+            // ==== warp ====
+            TP_WarpTeams = 160,
+            TP_WarpPlayersInRange = 161,
+            TP_WarpItemsInZone = 162,
+
+            // ==== force level failed ====
+            FF_ToggleFFCheck = 210,  // do not use
+            FF_AddPlayersInRangeToCheck = 211,
+            FF_AddPlayersOutOfRangeToCheck = 212,
+            FF_ToggleCheckOnGroup = 213,
+            FF_Reset = 214,
+            FF_ResetGroup = 215,
+            FF_SetExpeditionFailedText = 216,
+            FF_ResetExpeditionFailedText = 217,
+
+            // ==== misc ====
+            SetNavMarker = 220,
+            ToggleDummyVisual = 221,
+            ToggleLSFBState = 222,
+            SaveCheckpoint = 223,
+            SetSuccessPageCustomization = 224,
+
+            // ==== custom play sound ====
+            PlayMusic = 260,
+            StopMusic = 261,
+
+            // event scan
+            ToggleEventScanState = 270,
+        }
 
         internal static void Init()
         {
@@ -119,6 +122,8 @@ namespace LEGACY.ExtraEvents
             EOSWardenEventManager.Current.AddEventDefinition(EventType.SetNavMarker.ToString(), (uint)EventType.SetNavMarker, SetNavMarker);
             EOSWardenEventManager.Current.AddEventDefinition(EventType.ToggleDummyVisual.ToString(), (uint)EventType.ToggleDummyVisual, ToggleDummyVisual);
             EOSWardenEventManager.Current.AddEventDefinition(EventType.ToggleLSFBState.ToString(), (uint)EventType.ToggleLSFBState, ToggleLevelSpawnedFogBeaconState);
+            EOSWardenEventManager.Current.AddEventDefinition(EventType.SaveCheckpoint.ToString(), (uint)EventType.SaveCheckpoint, SaveCheckpoint);
+            EOSWardenEventManager.Current.AddEventDefinition(EventType.SetSuccessPageCustomization.ToString(), (uint)EventType.SetSuccessPageCustomization, SetSuccessPageCustomization);
 
             // ==== custom play sound ====
             EOSWardenEventManager.Current.AddEventDefinition(EventType.PlayMusic.ToString(), (uint)EventType.PlayMusic, PlayMusic);

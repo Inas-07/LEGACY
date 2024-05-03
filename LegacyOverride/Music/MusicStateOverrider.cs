@@ -120,7 +120,6 @@ namespace LEGACY.LegacyOverride.Music
             musicPlaying.Remove(worldEventObjectFilter);
             var musicSetting = Musics[worldEventObjectFilter];
             Sound.Post(musicSetting.StopID, true);
-
             if (SNet.IsMaster)
             {
                 var newState = new MusicSyncStruct(StateReplicator.State);
@@ -199,7 +198,7 @@ namespace LEGACY.LegacyOverride.Music
             UpdateOverrideSetting();
         }
 
-        private void Clear_Leveled()
+        private void Reset()
         {
             MCSStateLocked = false;
             musicPlaying.Clear();
@@ -208,6 +207,8 @@ namespace LEGACY.LegacyOverride.Music
         private void OnStateChanged(MusicSyncStruct oldState, MusicSyncStruct newState, bool isRecall) 
         {
             if (!isRecall) return;
+
+            Reset();
 
             void TryPlay(uint StartID)
             {
@@ -246,8 +247,8 @@ namespace LEGACY.LegacyOverride.Music
         {
             UpdateOverrideSetting();
 
-            LevelAPI.OnBuildStart += Clear_Leveled;
-            LevelAPI.OnLevelCleanup += Clear_Leveled;
+            LevelAPI.OnBuildStart += Reset;
+            LevelAPI.OnLevelCleanup += Reset;
         }
     }
 }

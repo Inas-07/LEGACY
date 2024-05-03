@@ -17,7 +17,7 @@ namespace LEGACY.VanillaFix
                 case eDoorStatus.Closed_LockedWithChainedPuzzle:
                 case eDoorStatus.Unlocked:
                 case eDoorStatus.Closed_LockedWithChainedPuzzle_Alarm:
-                    if (__instance.m_lastState.status == eDoorStatus.Closed_LockedWithPowerGenerator)
+                    if (__instance.m_lastState.status == eDoorStatus.Closed_LockedWithPowerGenerator && !isRecall)
                         WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(__instance.LinkedToZoneData.EventsOnUnlockDoor, eWardenObjectiveEventTrigger.None, true, 0.0f);
                     //Utils.CheckAndExecuteEventsOnTrigger(__instance.LinkedToZoneData.EventsOnUnlockDoor, eWardenObjectiveEventTrigger.None, true, 0.0f);
                     return;

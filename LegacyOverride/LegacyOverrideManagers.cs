@@ -9,6 +9,11 @@ using LEGACY.LegacyOverride.ExpeditionIntelNotification;
 using LEGACY.LegacyOverride.EventScan;
 using LEGACY.LegacyOverride.DummyVisual;
 using LEGACY.LegacyOverride.Music;
+using LEGACY.LegacyOverride.ExpeditionSuccessPage;
+using GTFO.API;
+using AssetShards;
+using LEGACY.LegacyOverride.Patches;
+using LEGACY.LegacyOverride.ThermalSightAdjustment;
 
 namespace LEGACY.LegacyOverride
 {
@@ -28,7 +33,15 @@ namespace LEGACY.LegacyOverride
             EventScanManager.Current.Init();
             VisualManager.Current.Init();
             MusicStateOverrider.Current.Init();
-            LevelSpawnedFogBeaconManager.Current.Init(); 
+            LevelSpawnedFogBeaconManager.Current.Init();
+            SuccessPageCustomizationManager.Current.Init();
+
+            // init after pdata 
+            AssetShardManager.add_OnStartupAssetsLoaded(new System.Action(() => {
+                TSAManager.Current.Init();
+                //DynamicVisualAdjustment.Init();
+            })); 
+
         }
     }
 }

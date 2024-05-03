@@ -1,5 +1,6 @@
 ﻿using GameData;
 using LEGACY.LegacyOverride.DummyVisual;
+using LEGACY.LegacyOverride.DummyVisual.VisualGOAnimation;
 
 namespace LEGACY.ExtraEvents
 {
@@ -8,9 +9,9 @@ namespace LEGACY.ExtraEvents
         private static void ToggleDummyVisual(WardenObjectiveEventData e)
         {
             string visualName = e.WorldEventObjectFilter;
-            VisualType visualType = (VisualType)e.SustainedEventSlotIndex;
+            VisualAnimationType visualType = (VisualAnimationType)e.SustainedEventSlotIndex;
 
-            VisualManager.Current.ToggleVisualType(visualName, visualType);
+            VisualManager.Current.ToggleVisualAnimationType(visualName, visualType);
         }
     }
 }

@@ -1,8 +1,10 @@
-﻿namespace LEGACY.LegacyOverride.DummyVisual
+﻿using LEGACY.LegacyOverride.DummyVisual.VisualGOAnimation;
+
+namespace LEGACY.LegacyOverride.DummyVisual
 {
     public struct VisualGroupState
     {
-        public VisualType visualType = VisualType.OFF;
+        public VisualAnimationType VisualAnimationType = VisualAnimationType.OFF;
 
         public VisualGroupState() { }
     }

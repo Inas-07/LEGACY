@@ -1,16 +1,16 @@
 ﻿using Agents;
 using Enemies;
-using Il2CppInterop.Runtime.Injection;
-using LEGACY.Utils;
 using Player;
 using SNetwork;
 using UnityEngine;
+using Il2CppInterop.Runtime.Injection;
+using LEGACY.Utils;
 
 namespace LEGACY.LegacyOverride.EnemyTargeting
 {
     internal class EnemyTargetingPrioritizer: MonoBehaviour
     {
-        public const float UPDATE_INTERVAL = 1.5f;
+        public const float UPDATE_INTERVAL = 3f;
 
         private float nextUpdateTime = float.NaN;
 
@@ -40,33 +40,38 @@ namespace LEGACY.LegacyOverride.EnemyTargeting
             }
 
             nextUpdateTime = Clock.Time + UPDATE_INTERVAL;
+
             if (enemy.AI.Mode != AgentMode.Agressive 
                 || target == null // wait for vanilla to assign a target
                 || target.m_agent.CourseNode.Pointer == enemy.CourseNode.Pointer
-                || target.m_agent.CourseNode.m_zone.Pointer == enemy.CourseNode.m_zone.Pointer
-                || PlayerManager.PlayerAgentsInLevel.Count < 1 
+                //|| target.m_agent.CourseNode.m_zone.Pointer == enemy.CourseNode.m_zone.Pointer
+                || PlayerManager.PlayerAgentsInLevel.Count <= 1 
                 || PlayerManager.PlayerAgentsInLevel[0].CourseNode.m_dimension.DimensionIndex != enemy.CourseNode.m_dimension.DimensionIndex) return;
+
+            //LegacyLogger.Warning($"Current Target: {target.name}");
 
             TryPrioritizeCloserTarget();
         }
 
         internal void TryPrioritizeCloserTarget()
         {
+            var originalTarget = target;
+            Agent newTarget = null;
+
             // find a target in the same node
-            PlayerAgent target_player = null;
             foreach (var player in PlayerManager.PlayerAgentsInLevel)
             {
                 if (!player.Alive) continue;
 
                 if (player.CourseNode.Pointer == enemy.CourseNode.Pointer)
                 {
-                    target_player = player;
+                    newTarget = player;
                     break;
                 }
             }
 
             // evaluate if target and enemy are in the same zone
-            if (target_player == null)
+            if (newTarget == null)
             {
                 foreach (var player in PlayerManager.PlayerAgentsInLevel)
                 {
@@ -74,20 +79,34 @@ namespace LEGACY.LegacyOverride.EnemyTargeting
 
                     if (player.CourseNode.m_zone.Pointer == enemy.CourseNode.m_zone.Pointer)
                     {
-                        target_player = player;
+                        newTarget = player;
                         break;
                     }
                 }
             }
 
-            if (target_player != null)
+
+            if (newTarget != null)
             {
-                damage.BulletDamage(
-                    0.0f,
-                    target_player.Cast<Agent>(), target_player.Position,
-                    target_player.Position - enemy.Position,
-                    Vector3.up,
-                    staggerMulti: 0f, precisionMulti: 0f);
+                //LegacyLogger.Error($"new Target: {newTarget.name}");
+
+                //damage.BulletDamage(
+                //    0.0f,
+                //    target_player, target_player.Position,
+                //    target_player.Position - enemy.Position,
+                //    Vector3.up,
+                //    staggerMulti: 0f, precisionMulti: 0f);
+                //damage.MeleeDamage(
+                //    0.0f,
+                //    target_player, target_player.Position,
+                //    target_player.Position - enemy.Position,
+                //    staggerMulti: 0f, precisionMulti: 0f, backstabberMulti:0f, 
+                //    environmentMulti:0f, sleeperMulti:0f, 
+                //    damageNoiseLevel: DamageNoiseLevel.Low, 
+                //    skipLimbDestruction:true);
+
+                enemy.AI.SetTarget(newTarget);
+
                 //LegacyLogger.Debug($"EnemyTargetingPrioritizer: enemy in {(enemy.CourseNode.m_zone.LocalIndex, enemy.CourseNode.LayerType, enemy.CourseNode.m_dimension.DimensionIndex)}, original target in {(otn.m_zone.LocalIndex, otn.LayerType, otn.m_dimension.DimensionIndex)}; Retargeting closer player...");
             }
         }

@@ -1,4 +1,4 @@
-﻿namespace LEGACY.LegacyOverride.DummyVisual
+﻿namespace LEGACY.LegacyOverride.DummyVisual.VisualGOAnimation.AnimationConfig
 {
     public class BlinkConfig
     {

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using LEGACY.LegacyOverride.DummyVisual.VisualGOAnimation;
 using Localization;
 
 namespace LEGACY.LegacyOverride.DummyVisual
@@ -7,19 +8,19 @@ namespace LEGACY.LegacyOverride.DummyVisual
     {
         public string WorldEventObjectFilter { get; set; } = string.Empty;
 
-        public MaterialType VisualType { get; set; } = MaterialType.Sensor;
+        public VisualTemplateType VisualType { get; set; } = VisualTemplateType.SENSOR;
 
-        public VisualType InitialVisual { get; set; } = DummyVisual.VisualType.OFF;
+        public VisualAnimationType InitialAnimation { get; set; } = VisualAnimationType.OFF;
 
-        public List<VisualSequence> VisualSequences { get; set; } = new() { new() };
+        public float InitialPlayDelay { get; set; } = 0.0f;
 
         public LocalizedText Text { get; set; } = null;
 
         public bool DisplayCylinder { get; set; } = false;
 
-        public DirectionalConfig DirectionalConfig { get; set; } = new();
+        public List<VisualSequence> VisualSequences { get; set; } = new() { new() };
 
-        public BlinkConfig BlinkConfig { get; set; } = new();
+        public VisualAnimationConfig AnimationConfig { get; set; } = new();
 
     }
 }

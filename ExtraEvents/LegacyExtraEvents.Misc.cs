@@ -7,6 +7,10 @@ using ExtraObjectiveSetup.Instances;
 using EOSExt.Reactor.Managers;
 using LEGACY.LegacyOverride.EventScan;
 using LEGACY.LegacyOverride.FogBeacon;
+using FloLib.Infos;
+using SNetwork;
+using Player;
+using LEGACY.LegacyOverride.ExpeditionSuccessPage;
 
 namespace LEGACY.ExtraEvents
 {
@@ -135,6 +139,17 @@ namespace LEGACY.ExtraEvents
         private static void ToggleLevelSpawnedFogBeaconState(WardenObjectiveEventData e)
         {
             LevelSpawnedFogBeaconManager.Current.ToggleLSFBState(e.WorldEventObjectFilter, e.Enabled);
+        }
+        
+        private static void SaveCheckpoint(WardenObjectiveEventData e)
+        {
+            CheckpointManager.StoreCheckpoint(LocalPlayer.GetEyePosition());
+            SNet.Capture.CaptureGameState(eBufferType.Checkpoint);
+        }
+
+        private static void SetSuccessPageCustomization(WardenObjectiveEventData e)
+        {
+            SuccessPageCustomizationManager.Current.ApplyCustomization(e.WorldEventObjectFilter);
         }
     }
 }

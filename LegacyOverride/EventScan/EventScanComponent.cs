@@ -1,5 +1,6 @@
 ﻿using ExtraObjectiveSetup;
 using FloLib.Networks.Replications;
+using GTFO.API;
 using Il2CppInterop.Runtime.Injection;
 using LEGACY.Utils;
 using Player;
@@ -11,13 +12,20 @@ using UnityEngine;
 
 namespace LEGACY.LegacyOverride.EventScan
 {
+    // TODO: replicate checkpoint bug
     internal class EventScanComponent : MonoBehaviour
     {
         public const float UPDATE_INTERVAL = 0.3f;
 
+        public const string VANILLA_CP_PREFAB_PATH = "Assets/AssetPrefabs/Complex/Generic/ChainedPuzzles/CP_Bioscan_sustained_RequireAll.prefab";
+
         public GameObject Cylinder => gameObject.transform.GetChild(0).GetChild(0).gameObject;
 
         public GameObject Visual => gameObject.transform.GetChild(0).GetChild(1).gameObject;
+        
+        public GameObject Information => gameObject.transform.GetChild(0).GetChild(2).gameObject;
+
+        public GameObject TextMeshProGO => Information.transform.GetChild(0).gameObject;
 
         public Renderer VisualRenderer { get; private set; }
 
@@ -37,6 +45,7 @@ namespace LEGACY.LegacyOverride.EventScan
 
         private float m_colorLerpDelta = 0.0f;
 
+
         private const float LERP_DURATION = 0.5f;
 
         public void Setup()
@@ -50,15 +59,29 @@ namespace LEGACY.LegacyOverride.EventScan
             gameObject.transform.SetPositionAndRotation(def.Position.ToVector3(), Quaternion.identity);
 
             gameObject.SetActiveRecursively(true);
-            DisplayText = gameObject.GetComponentInChildren<TextMeshPro>();
-            if(DisplayText != null)
+
+            var vanillaCP = AssetAPI.GetLoadedAsset<GameObject>(VANILLA_CP_PREFAB_PATH);
+            if (vanillaCP != null)
             {
-                DisplayText.SetText(def.DisplayText);
-                DisplayText.ForceMeshUpdate();
+                var templateGO = vanillaCP.transform.GetChild(0).GetChild(1).gameObject;
+                var newGO = Instantiate(templateGO.gameObject);
+
+                newGO.transform.SetParent(gameObject.transform, false);
+                newGO.transform.localScale = new Vector3(1 / def.Radius, 1 / def.Radius, 1 / def.Radius);
+                DisplayText = newGO.GetComponentInChildren<TextMeshPro>();
+                if(DisplayText != null)
+                {
+                    DisplayText.SetText(def.DisplayText);
+                    DisplayText.ForceMeshUpdate();
+                }
+                else
+                {
+                    LegacyLogger.Error("EventScan: instantiation error - cannot find TMPPro from vanilla CP!");
+                }
             }
             else
             {
-                LegacyLogger.Error("EventScan: instantiation error - cannot find TMP in the game object!");
+                LegacyLogger.Error("EventScan: instantiation error - cannot instantiate vanilla CP!");
             }
 
             var _cWaiting = def.ColorSetting.Waiting;
@@ -86,45 +109,33 @@ namespace LEGACY.LegacyOverride.EventScan
 
         private void OnStateChange(EventScanStatus oldState, EventScanStatus newState, bool isRecall)
         {
-            if (!isRecall) return;
+            LegacyLogger.Warning($"EventScan: {oldState.Status} => {newState.Status}");
 
-            OnStateChangedUnsynced(newState.Status);
-        }
+            //if (oldState == newState) return; // TODO: comment out this line
 
-        public void ChangeState(EventScanState newState)
-        {
-            OnStateChangedUnsynced(newState);
-            if(SNet.IsMaster)
-            {
-                StateReplicator.SetState(new() { Status = newState });
-            }
-        }
-
-        private void OnStateChangedUnsynced(EventScanState newState)
-        {
-            var oldState = StateReplicator.State.Status;
-            if (oldState == newState) return;
-
-            switch (newState) 
+            switch (newState.Status)
             {
                 case EventScanState.Disabled:
                     m_colorLerpDelta = 0.0f;
 
-                    DisplayText.gameObject.SetActive(false);
+                    DisplayText?.gameObject.SetActive(false);
                     Cylinder.SetActive(false);
                     CoroutineManager.BlinkOut(Visual);
                     break;
                 case EventScanState.Waiting:
-                    if(!Visual.active)
+                    if (!Visual.active)
                     {
                         CoroutineManager.BlinkIn(Visual);
                         Cylinder.SetActive(true);
-                        DisplayText.gameObject.SetActive(true);
+                        DisplayText?.gameObject.SetActive(true);
                     }
 
-                    if (oldState == EventScanState.Active)
+                    if(!isRecall) 
                     {
-                        def.EventsOnDeactivate.ForEach(e => WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(e, GameData.eWardenObjectiveEventTrigger.None, true));
+                        if (oldState.Status == EventScanState.Active)
+                        {
+                            def.EventsOnDeactivate.ForEach(e => WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(e, GameData.eWardenObjectiveEventTrigger.None, true));
+                        }
                     }
                     break;
                 case EventScanState.Active:
@@ -132,15 +143,32 @@ namespace LEGACY.LegacyOverride.EventScan
                     {
                         CoroutineManager.BlinkIn(Visual);
                         Cylinder.SetActive(true);
-                        DisplayText.gameObject.SetActive(true);
+                        DisplayText?.gameObject.SetActive(true);
                     }
 
-                    if (oldState == EventScanState.Waiting)
+                    if(!isRecall)
                     {
-                        def.EventsOnActivate.ForEach(e => WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(e, GameData.eWardenObjectiveEventTrigger.None, true));
+                        if (oldState.Status == EventScanState.Waiting)
+                        {
+                            def.EventsOnActivate.ForEach(e => WardenObjectiveManager.CheckAndExecuteEventsOnTrigger(e, GameData.eWardenObjectiveEventTrigger.None, true));
+                        }
                     }
                     break;
             }
+        }
+
+        public void ChangeToState(EventScanState newState)
+        {
+            ChangedToStateUnsynced(newState);
+            if(SNet.IsMaster)
+            {
+                StateReplicator.SetState(new() { Status = newState });
+            }
+        }
+
+        private void ChangedToStateUnsynced(EventScanState newState)
+        {
+
         }
 
         private void Update()
@@ -239,21 +267,13 @@ namespace LEGACY.LegacyOverride.EventScan
                 case EventScanState.Waiting:
                     if(playerSatisfied && reqItemSatisfied)
                     {
-                        OnStateChangedUnsynced(EventScanState.Active);
-                        if(SNet.IsMaster)
-                        {
-                            StateReplicator.SetState(new() { Status = EventScanState.Active });
-                        }
+                        ChangeToState(EventScanState.Active);
                     }
                     break;
                 case EventScanState.Active:
                     if (!playerSatisfied || !reqItemSatisfied)
                     {
-                        OnStateChangedUnsynced(EventScanState.Waiting);
-                        if (SNet.IsMaster)
-                        {
-                            StateReplicator.SetState(new() { Status = EventScanState.Waiting });
-                        }
+                        ChangeToState(EventScanState.Waiting);
                     }
                     break;
             }

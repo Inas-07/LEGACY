@@ -176,7 +176,6 @@ namespace LEGACY.LegacyOverride.EnemyTagger
         {
             LevelAPI.OnBuildStart += Clear;
             LevelAPI.OnLevelCleanup += Clear;
-            AssetShardManager.add_OnStartupAssetsLoaded(new System.Action(DynamicVisualAdjustment.Init)); // init after pdata 
         }
 
         static EnemyTaggerSettingManager()

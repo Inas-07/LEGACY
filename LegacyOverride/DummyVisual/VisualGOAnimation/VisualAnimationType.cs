@@ -1,6 +1,6 @@
-﻿namespace LEGACY.LegacyOverride.DummyVisual
+﻿namespace LEGACY.LegacyOverride.DummyVisual.VisualGOAnimation
 {
-    public enum VisualType
+    public enum VisualAnimationType
     {
         OFF,
         ON,

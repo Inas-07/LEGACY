@@ -63,6 +63,13 @@ namespace LEGACY.LegacyOverride.Patches
 
             repellerGlobalState.CallbackOnStateChange += new System.Action<pCarryItemWithGlobalState_State, pCarryItemWithGlobalState_State, bool>((oldState, newState, isRecall) =>
             {
+                if (isRecall)
+                {
+                    fogRepHold?.KillRepellerInstantly();
+                    fogRepPlaced?.KillRepellerInstantly();
+                    return;
+                }
+
                 switch ((eHeavyFogRepellerStatus)newState.status)
                 {
                     case eHeavyFogRepellerStatus.Activated:
@@ -79,11 +86,6 @@ namespace LEGACY.LegacyOverride.Patches
                         interact.InteractDuration = setting.TimeToPickup;
                         break;
                 }
-
-                if (!isRecall)
-                    return;
-                fogRepHold?.KillRepellerInstantly();
-                fogRepPlaced?.KillRepellerInstantly();
             });
         }
 

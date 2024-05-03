@@ -3,6 +3,7 @@ using ExtraObjectiveSetup.BaseClasses;
 using System.Collections.Generic;
 using LEGACY.Utils;
 using GTFO.API.Utilities;
+using LEGACY.LegacyOverride.DummyVisual.VisualGOAnimation;
 
 namespace LEGACY.LegacyOverride.DummyVisual
 {
@@ -29,15 +30,15 @@ namespace LEGACY.LegacyOverride.DummyVisual
             }
         }
 
-        public void ToggleVisualType(string worldEventObjectFilter, VisualType visualType)
+        public void ToggleVisualAnimationType(string worldEventObjectFilter, VisualAnimationType visualType)
         {
             if(!Visuals.TryGetValue(worldEventObjectFilter, out var vsg))
             {
-                LegacyLogger.Error($"ToggleVisualType: Visual '{worldEventObjectFilter}' is not found");
+                LegacyLogger.Error($"ToggleVisualAnimationType: Visual Sequence '{worldEventObjectFilter}' is not found");
                 return;
             }
 
-            vsg.ChangeToState(new() { visualType = visualType });
+            vsg.ChangeToState(new() { VisualAnimationType = visualType });
         }
 
         private void Clear()
