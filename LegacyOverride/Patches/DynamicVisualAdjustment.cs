@@ -22,7 +22,10 @@ namespace LEGACY.LegacyOverride.Patches
         [HarmonyPatch(typeof(FirstPersonItemHolder), nameof(FirstPersonItemHolder.SetWieldedItem))]
         private static void Post_SetWieldedItem(FirstPersonItemHolder __instance, ItemEquippable item)
         {
+            LegacyLogger.Warning("Item wielded");
             TSAManager.Current.OnPlayerItemWielded(__instance, item);
+            TSAManager.Current.SetPuzzleVisualsIntensity(1f);
+            TSAManager.Current.SetCurrentThermalSightSettings(1f);
         }
 
         [HarmonyPostfix]
@@ -35,6 +38,10 @@ namespace LEGACY.LegacyOverride.Patches
             if (!TSAManager.Current.IsGearWithThermal(TSAManager.Current.CurrentGearPID))
             {
                 t = Math.Max(0.05f, t);
+            }
+            else
+            {
+                TSAManager.Current.SetCurrentThermalSightSettings(t);
             }
 
             TSAManager.Current.SetPuzzleVisualsIntensity(t);

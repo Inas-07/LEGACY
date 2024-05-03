@@ -107,6 +107,7 @@
     <Compile Include="LegacyOverride\ThermalSightAdjustment\TSADefinition.cs" />
     <Compile Include="LegacyOverride\ThermalSightAdjustment\TSAManager.PuzzleVisuals.cs" />
     <Compile Include="LegacyOverride\ThermalSightAdjustment\TSAManager.cs" />
+    <Compile Include="LegacyOverride\ThermalSightAdjustment\TSShader.cs" />
     <Compile Include="LegacyOverride\Warp\DimensionWarpPosition.cs" />
     <Compile Include="LegacyOverride\Warp\DimensionWarpPositionManager.cs" />
     <Compile Include="Utils\CoroutineEase.cs" />

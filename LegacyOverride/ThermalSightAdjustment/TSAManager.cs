@@ -16,13 +16,14 @@ using UnityEngine;
 
 namespace LEGACY.LegacyOverride.ThermalSightAdjustment
 {
-    internal partial class TSAManager : GenericExpeditionDefinitionManager<TSADefinition>
+
+    internal partial class TSAManager : GenericDefinitionManager<TSADefinition>
     {
         public static TSAManager Current { get; } = new();
 
         protected override string DEFINITION_NAME => "ThermalSight";
 
-        private Dictionary<uint, TSADefinition> ThermalGearDefs { get; } = new();
+        //private Dictionary<uint, TSADefinition> ThermalGearDefs { get; } = new();
 
         private Dictionary<uint, Renderer[]> InLevelGearThermals { get; } = new();
 
@@ -33,16 +34,6 @@ namespace LEGACY.LegacyOverride.ThermalSightAdjustment
         public uint CurrentGearPID { get; private set; } = 0u;
 
         private const bool OUTPUT_THERMAL_SHADER_SETTINGS_ON_WIELD = true;
-
-        protected override void AddDefinitions(GenericExpeditionDefinition<TSADefinition> definitions)
-        {
-            base.AddDefinitions(definitions);
-
-            foreach (var def in definitions.Definitions)
-            {
-                ThermalGearDefs[def.GearPID] = def;
-            }
-        }
 
         protected override void FileChanged(LiveEditEventArgs e)
         {
@@ -68,16 +59,17 @@ namespace LEGACY.LegacyOverride.ThermalSightAdjustment
                 if (b.name.ToLowerInvariant().EndsWith("_t"))
                 {
                     ThermalOfflineGears.Add(b.persistentID);
-                    LegacyLogger.Debug($"Found OfflineGear with thermal sight - {b.name}");
                 }
             }
+            LegacyLogger.Debug($"Found OfflineGear with thermal sight, count: {ThermalOfflineGears.Count}");
         }
 
-        private void TryAddInLevelGearThermals(ItemEquippable item, uint gearPID = 0)
+        private bool TryGetInLevelGearThermalRenderersFromItem(ItemEquippable item, uint gearPID, out Renderer[] renderers)
         {
+            renderers = null;
             if (item.GearIDRange == null)
             {
-                return;
+                return false;
             }
 
             if(gearPID == 0)
@@ -85,7 +77,7 @@ namespace LEGACY.LegacyOverride.ThermalSightAdjustment
                 gearPID = ExpeditionGearManager.GetOfflineGearPID(item.GearIDRange);
             }
 
-            if (gearPID == 0 || !IsGearWithThermal(gearPID)) return;
+            if (gearPID == 0 || !IsGearWithThermal(gearPID)) return false;
 
             bool shouldAdd = false;
             if(!InLevelGearThermals.ContainsKey(gearPID))
@@ -101,39 +93,44 @@ namespace LEGACY.LegacyOverride.ThermalSightAdjustment
                 }
                 catch
                 {
+                    ModifiedInLevelGearThermals.Remove(gearPID);
                     shouldAdd = true;
                 }
             }
 
             if (shouldAdd)
             {
-                var renderers = item.GetComponentsInChildren<Renderer>(true);
+                renderers = item.GetComponentsInChildren<Renderer>(true)
+                    ?.Where(x => x.sharedMaterial != null && x.sharedMaterial.shader != null)
+                    .Where(x => x.sharedMaterial.shader.name.ToLower().Contains("Thermal".ToLower()))
+                    .ToArray() ?? null;
+
                 if (renderers != null)
                 {
-                    var tRender = renderers
-                        .Where(x => x.sharedMaterial != null && x.sharedMaterial.shader != null)
-                        .Where(x => x.sharedMaterial.shader.name.ToLower().Contains("Thermal".ToLower()))
-                        .ToArray();
-
-                    if (tRender != null)
+                    if (renderers.Length != 1)
                     {
-                        if (tRender.Length != 1)
-                        {
-                            LegacyLogger.Warning($"{item.PublicName} contains more than 1 thermal renderer!");
-                        }
-
-                        InLevelGearThermals[gearPID] = tRender;
+                        LegacyLogger.Warning($"{item.PublicName} contains more than 1 thermal renderers!");
                     }
+
+                    InLevelGearThermals[gearPID] = renderers;
                 }
                 else
                 {
                     LegacyLogger.Debug($"{item.PublicName}: thermal renderer not found");
+                    return false;
                 }
+
+                return true;
+            }
+            else
+            {
+                renderers = InLevelGearThermals[gearPID];
+                return true;
             }
         }
 
         /// <summary>
-        /// 
+        /// Apply the entire TSShader to this thermal sight.
         /// </summary>
         /// <param name="gearPID"></param>
         /// <returns> `true` if the gear has thermal sight and its def is found, otherwise false. </returns>
@@ -148,36 +145,38 @@ namespace LEGACY.LegacyOverride.ThermalSightAdjustment
 
             if (ModifiedInLevelGearThermals.Contains(gearPID)) return true;
 
-            if(ThermalGearDefs.TryGetValue(gearPID, out var def)
+            if(definitions.TryGetValue(gearPID, out var definition)
                 && InLevelGearThermals.TryGetValue(gearPID, out var renderers))
             {
-                LegacyLogger.Debug($"TrySetThermalSightRenderer: {gearPID}, renderer count: {renderers.Length}, setting...");
+                var def = definition.Definition;
+                TSShader shader = def.Shader;
+
                 foreach (var r in renderers)
                 {
-                    foreach(var prop in def.GetType().GetProperties())
+                    foreach(var prop in shader.GetType().GetProperties())
                     {
                         var type = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
                         var shaderProp = $"_{prop.Name}";
                         if (type == typeof(float))
                         {
-                            r.material.SetFloat(shaderProp, (float)prop.GetValue(def));
+                            r.material.SetFloat(shaderProp, (float)prop.GetValue(shader));
                         }
                         else if(type == typeof(EOSColor))
                         {
-                            var value = (EOSColor)prop.GetValue(def);
+                            var value = (EOSColor)prop.GetValue(shader);
                             r.material.SetVector(shaderProp, value.ToUnityColor());
                         }
                         else if(type == typeof(bool))
                         {
-                            var value = (bool)prop.GetValue(def);
+                            var value = (bool)prop.GetValue(shader);
                             r.material.SetFloat(shaderProp, value ? 1.0f : 0.0f);
                         }
                         else if(type == typeof(Vec4))
                         {
-                            var value = (Vec4)prop.GetValue(def);
+                            var value = (Vec4)prop.GetValue(shader);
                             r.material.SetVector(shaderProp, value.ToVector4());
                         }
-                        LegacyLogger.Debug($"prop: {shaderProp}");
+                        LegacyLogger.Debug($"{shaderProp}");
                     }
                 }
 
@@ -193,41 +192,39 @@ namespace LEGACY.LegacyOverride.ThermalSightAdjustment
         internal void OnPlayerItemWielded(FirstPersonItemHolder fpsItemHolder, ItemEquippable item)
         {
             CurrentGearPID = ExpeditionGearManager.GetOfflineGearPID(item.GearIDRange);
-            TryAddInLevelGearThermals(item, CurrentGearPID);
-            SetPuzzleVisualsIntensity(1f);
+            TryGetInLevelGearThermalRenderersFromItem(item, CurrentGearPID, out var _);
             if (!TrySetThermalSightRenderer(CurrentGearPID) && OUTPUT_THERMAL_SHADER_SETTINGS_ON_WIELD)
             {
                 if (InLevelGearThermals.TryGetValue(CurrentGearPID, out var renderers))
                 {
-                    LegacyLogger.Debug($"OnPlayerItemWielded: {CurrentGearPID}, renderer count: {renderers.Length}, setting...");
                     foreach (var r in renderers)
                     {
-                        TSADefinition rDef = new() { GearPID = CurrentGearPID };
-                        foreach (var prop in rDef.GetType().GetProperties())
+                        TSShader tsshader = new();
+                        foreach (var prop in tsshader.GetType().GetProperties())
                         {
                             var type = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
                             var shaderProp = $"_{prop.Name}";
                             if (type == typeof(float))
                             {
-                                prop.SetValue(rDef, r.material.GetFloat(shaderProp));
+                                prop.SetValue(tsshader, r.material.GetFloat(shaderProp));
                             }
                             else if (type == typeof(EOSColor))
                             {
                                 var value = r.material.GetVector(shaderProp);
-                                prop.SetValue(rDef, new EOSColor() { r = value.x, g = value.y, b = value.z, a = value.w});
+                                prop.SetValue(tsshader, new EOSColor() { r = value.x, g = value.y, b = value.z, a = value.w});
                             }
                             else if (type == typeof(bool))
                             {
-                                prop.SetValue(rDef, r.material.GetFloat(shaderProp) == 1.0f);
+                                prop.SetValue(tsshader, r.material.GetFloat(shaderProp) == 1.0f);
                             }
                             else if (type == typeof(Vec4))
                             {
                                 var value = r.material.GetVector(shaderProp);
-                                prop.SetValue(rDef, new Vec4() { x = value.x, y = value.y, z = value.z, w = value.w });
+                                prop.SetValue(tsshader, new Vec4() { x = value.x, y = value.y, z = value.z, w = value.w });
                             }
                         }
 
-                        LegacyLogger.Log(EOSJson.Serialize(rDef));
+                        LegacyLogger.Log($"GearPID: {CurrentGearPID}, shader setting:\n{EOSJson.Serialize(tsshader)}");
                     }
                 }
             }
@@ -249,6 +246,21 @@ namespace LEGACY.LegacyOverride.ThermalSightAdjustment
             }
 
             ModifiedInLevelGearThermals.Clear();
+        }
+
+        internal void SetCurrentThermalSightSettings(float t)
+        {
+            if (!InLevelGearThermals.TryGetValue(CurrentGearPID, out var renderers) 
+                || !definitions.TryGetValue(CurrentGearPID, out var def)) return;
+
+            foreach (var r in renderers)
+            {
+                float OnAimZoom = def.Definition.Shader.Zoom;
+                float OffAimZoom = def.Definition.OffAimPixelZoom;
+                float zoom = Mathf.Lerp(OnAimZoom, OffAimZoom, t);
+                
+                r.material.SetFloat("_Zoom", zoom);
+            }
         }
 
         private void Clear()

@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace LEGACY.LegacyOverride.ThermalSightAdjustment
 {
-    internal partial class TSAManager : GenericExpeditionDefinitionManager<TSADefinition>
+    internal partial class TSAManager : GenericDefinitionManager<TSADefinition>
     {
         private class PuzzleVisualWrapper
         {
