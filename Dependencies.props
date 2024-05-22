@@ -39,6 +39,7 @@
     <Reference Include="$(PluginsFolder)/net6/Inas07.ExtraObjectiveSetup.dll" Private="false" />
     <Reference Include="$(PluginsFolder)/FloLib.dll" Private="false" />
     <Reference Include="$(PluginsFolder)/net6/Inas07.EOSExt.Reactor.dll" Private="false" />
+    <Reference Include="$(PluginsFolder)/net6/Inas07.EOSExt.EMP.dll" Private="false" />
   </ItemGroup>
 
   <!-- soft dependency -->

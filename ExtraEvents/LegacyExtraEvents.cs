@@ -21,7 +21,7 @@ namespace LEGACY.ExtraEvents
 
             // ==== terminal ====
             Terminal_ShowTerminalInfoInZone = 130,
-            Terminal_ToggleState = 131,
+            Terminal_ToggleState = 131, // MOVED TO EOS
 
             // ==== kill enemies ====
             KillEnemiesInArea = 140,
@@ -62,6 +62,7 @@ namespace LEGACY.ExtraEvents
             ToggleLSFBState = 222,
             SaveCheckpoint = 223,
             SetSuccessPageCustomization = 224,
+            ToggleCamaraShake = 225,
 
             // ==== custom play sound ====
             PlayMusic = 260,
@@ -100,13 +101,13 @@ namespace LEGACY.ExtraEvents
             EOSWardenEventManager.Current.AddEventDefinition(EventType.PlayGCEndSequence.ToString(), (uint)EventType.PlayGCEndSequence, PlayGCEndSequence);
 
             // ==== terminal ====
-            EOSWardenEventManager.Current.AddEventDefinition(EventType.Terminal_ToggleState.ToString(), (uint)EventType.Terminal_ToggleState, ToggleTerminalState);
+            //EOSWardenEventManager.Current.AddEventDefinition(EventType.Terminal_ToggleState.ToString(), (uint)EventType.Terminal_ToggleState, ToggleTerminalState);
             EOSWardenEventManager.Current.AddEventDefinition(EventType.Terminal_ShowTerminalInfoInZone.ToString(), (uint)EventType.Terminal_ShowTerminalInfoInZone, ShowTerminalInfoInZone);
 
             // ==== warpping ====
-            EOSWardenEventManager.Current.AddEventDefinition(EventType.TP_WarpTeams.ToString(), (uint)EventType.TP_WarpTeams, WarpTeam);
-            EOSWardenEventManager.Current.AddEventDefinition(EventType.TP_WarpPlayersInRange.ToString(), (uint)EventType.TP_WarpPlayersInRange, WarpAlivePlayersAndItemsInRange);
-            EOSWardenEventManager.Current.AddEventDefinition(EventType.TP_WarpItemsInZone.ToString(), (uint)EventType.TP_WarpItemsInZone, WarpItemsInZone);
+            //EOSWardenEventManager.Current.AddEventDefinition(EventType.TP_WarpTeams.ToString(), (uint)EventType.TP_WarpTeams, WarpTeam);
+            //EOSWardenEventManager.Current.AddEventDefinition(EventType.TP_WarpPlayersInRange.ToString(), (uint)EventType.TP_WarpPlayersInRange, WarpAlivePlayersAndItemsInRange);
+            //EOSWardenEventManager.Current.AddEventDefinition(EventType.TP_WarpItemsInZone.ToString(), (uint)EventType.TP_WarpItemsInZone, WarpItemsInZone);
 
             // ==== force fail check ====
             EOSWardenEventManager.Current.AddEventDefinition(EventType.FF_ToggleFFCheck.ToString(), (uint)EventType.FF_ToggleFFCheck, ToggleFFCheckGroup);
@@ -124,6 +125,7 @@ namespace LEGACY.ExtraEvents
             EOSWardenEventManager.Current.AddEventDefinition(EventType.ToggleLSFBState.ToString(), (uint)EventType.ToggleLSFBState, ToggleLevelSpawnedFogBeaconState);
             EOSWardenEventManager.Current.AddEventDefinition(EventType.SaveCheckpoint.ToString(), (uint)EventType.SaveCheckpoint, SaveCheckpoint);
             EOSWardenEventManager.Current.AddEventDefinition(EventType.SetSuccessPageCustomization.ToString(), (uint)EventType.SetSuccessPageCustomization, SetSuccessPageCustomization);
+            EOSWardenEventManager.Current.AddEventDefinition(EventType.ToggleCamaraShake.ToString(), (uint)EventType.ToggleCamaraShake, ToggleCamaraShake);
 
             // ==== custom play sound ====
             EOSWardenEventManager.Current.AddEventDefinition(EventType.PlayMusic.ToString(), (uint)EventType.PlayMusic, PlayMusic);

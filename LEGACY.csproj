@@ -35,7 +35,6 @@
     <Compile Include="ExtraEvents\LegacyExtraEvents.NavMarker.cs" />
     <Compile Include="ExtraEvents\LegacyExtraEvents.ForceFail.cs" />
     <Compile Include="ExtraEvents\LegacyExtraEvents.Warp.cs" />
-    <Compile Include="ExtraEvents\LegacyExtraEvents.Terminal.cs" />
     <Compile Include="ExtraEvents\LegacyExtraEvents.ChainedPuzzle.cs" />
     <Compile Include="ExtraEvents\LegacyExtraEvents.GC.cs" />
     <Compile Include="ExtraEvents\LegacyExtraEvents.TimerTitle.cs" />
@@ -62,6 +61,7 @@
     <Compile Include="LegacyOverride\DummyVisual\VisualGroupState.cs" />
     <Compile Include="LegacyOverride\EnemyTagger\EnemyTaggerComponent.cs" />
     <Compile Include="LegacyOverride\EnemyTargeting\Patch.cs" />
+    <Compile Include="LegacyOverride\EOSWorldEventTrigger\EOSCollisionTrigger.cs" />
     <Compile Include="LegacyOverride\EventScan\EventScanComponent.cs" />
     <Compile Include="LegacyOverride\EventScan\EventScanDefinition.cs" />
     <Compile Include="LegacyOverride\EventScan\EventScanManager.cs" />
@@ -100,10 +100,16 @@
     <Compile Include="LegacyOverride\LegacyOverrideManagers.cs" />
     <Compile Include="LegacyOverride\ElevatorCargo\LevelElevatorCargo.cs" />
     <Compile Include="LegacyOverride\EnemyTargeting\EnemyTargetingPrioritizer.cs" />
+    <Compile Include="LegacyOverride\ResourceStations\ToolStation.cs" />
+    <Compile Include="LegacyOverride\ResourceStations\MediStation.cs" />
+    <Compile Include="LegacyOverride\ResourceStations\ResourceStation.cs" />
+    <Compile Include="LegacyOverride\ResourceStations\AmmoStation.cs" />
+    <Compile Include="LegacyOverride\ResourceStations\ResourceStationDefinition.cs" />
+    <Compile Include="LegacyOverride\ResourceStations\ResourceStationManager.cs" />
+    <Compile Include="LegacyOverride\ResourceStations\RSStateStruct.cs" />
+    <Compile Include="LegacyOverride\ResourceStations\RSTimer.cs" />
     <Compile Include="LegacyOverride\SecDoorIntText\InteractGlitchManager.cs" />
-    <Compile Include="LegacyOverride\Terminal\TerminalState.cs" />
-    <Compile Include="LegacyOverride\Terminal\TerminalStateManager.cs" />
-    <Compile Include="LegacyOverride\Terminal\TerminalWrapper.cs" />
+    <Compile Include="LegacyOverride\ThermalSightAdjustment\ThermalGearWrapper.cs" />
     <Compile Include="LegacyOverride\ThermalSightAdjustment\TSADefinition.cs" />
     <Compile Include="LegacyOverride\ThermalSightAdjustment\TSAManager.PuzzleVisuals.cs" />
     <Compile Include="LegacyOverride\ThermalSightAdjustment\TSAManager.cs" />
@@ -121,7 +127,6 @@
     <Compile Include="Utils\VersionWatermark.cs" />
     <Compile Include="Utils\WeightedAreaSelector.cs" />
     <Compile Include="Utils\WeightedRandomBag.cs" />
-    <Compile Include="VanillaFix\Patch_FixHiddenCommandExecution.cs" />
     <Compile Include="VanillaFix\Patch_FixScoutFreeze.cs" />
     <Compile Include="ExtraEvents\LegacyExtraEvents.cs" />
     <Compile Include="LegacyOverride\Patches\ElevatorCargoOverride.cs" />
@@ -132,7 +137,6 @@
     <Compile Include="Reactor\Patch_ReactorStartup_ExtraEventsExecution.cs" />
     <Compile Include="Reactor\Patch_ReactorStartup_OverwriteGUIBehaviour.cs" />
     <Compile Include="VanillaFix\Debugger.cs" />
-    <Compile Include="VanillaFix\Patch_RepeatableCommandEventFix.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Dependencies.props" />

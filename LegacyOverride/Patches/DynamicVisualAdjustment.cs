@@ -22,7 +22,7 @@ namespace LEGACY.LegacyOverride.Patches
         [HarmonyPatch(typeof(FirstPersonItemHolder), nameof(FirstPersonItemHolder.SetWieldedItem))]
         private static void Post_SetWieldedItem(FirstPersonItemHolder __instance, ItemEquippable item)
         {
-            LegacyLogger.Warning("Item wielded");
+            //LegacyLogger.Warning("Item wielded");
             TSAManager.Current.OnPlayerItemWielded(__instance, item);
             TSAManager.Current.SetPuzzleVisualsIntensity(1f);
             TSAManager.Current.SetCurrentThermalSightSettings(1f);

@@ -2,7 +2,7 @@
 using LEGACY.Utils;
 using LevelGeneration;
 using LEGACY.LegacyOverride.ForceFail;
-using LEGACY.LegacyOverride.Terminal;
+//using LEGACY.LegacyOverride.Terminal;
 
 namespace LEGACY.ExtraEvents
 {
@@ -26,13 +26,6 @@ namespace LEGACY.ExtraEvents
             {
                 return true; // turn to vanilla check
             }
-        }
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(LG_ComputerTerminal), nameof(LG_ComputerTerminal.Setup))]
-        private static void Post_ComputerTerminal_Setup(LG_ComputerTerminal __instance)
-        {
-            TerminalStateManager.Current.SetupTerminal(__instance);
         }
     }
 }

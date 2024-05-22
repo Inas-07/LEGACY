@@ -64,11 +64,11 @@ namespace LEGACY.LegacyOverride.EventScan
             if (vanillaCP != null)
             {
                 var templateGO = vanillaCP.transform.GetChild(0).GetChild(1).gameObject;
-                var newGO = Instantiate(templateGO.gameObject);
+                var DisplayTextGO = Instantiate(templateGO.gameObject);
 
-                newGO.transform.SetParent(gameObject.transform, false);
-                newGO.transform.localScale = new Vector3(1 / def.Radius, 1 / def.Radius, 1 / def.Radius);
-                DisplayText = newGO.GetComponentInChildren<TextMeshPro>();
+                DisplayTextGO.transform.SetParent(gameObject.transform, false);
+                DisplayTextGO.transform.localScale = new Vector3(1 / def.Radius, 1 / def.Radius, 1 / def.Radius);
+                DisplayText = DisplayTextGO.GetComponentInChildren<TextMeshPro>();
                 if(DisplayText != null)
                 {
                     DisplayText.SetText(def.DisplayText);

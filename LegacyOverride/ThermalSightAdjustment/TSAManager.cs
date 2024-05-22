@@ -1,13 +1,10 @@
-﻿using ChainedPuzzles;
-using Enemies;
-using ExtraObjectiveSetup.BaseClasses;
+﻿using ExtraObjectiveSetup.BaseClasses;
 using ExtraObjectiveSetup.Expedition.Gears;
 using ExtraObjectiveSetup.JSON;
 using ExtraObjectiveSetup.Utils;
 using GameData;
 using GTFO.API;
 using GTFO.API.Utilities;
-using Il2CppSystem.Security.Cryptography;
 using LEGACY.Utils;
 using System;
 using System.Collections.Generic;
@@ -33,7 +30,7 @@ namespace LEGACY.LegacyOverride.ThermalSightAdjustment
 
         public uint CurrentGearPID { get; private set; } = 0u;
 
-        private const bool OUTPUT_THERMAL_SHADER_SETTINGS_ON_WIELD = true;
+        private const bool OUTPUT_THERMAL_SHADER_SETTINGS_ON_WIELD = false;
 
         protected override void FileChanged(LiveEditEventArgs e)
         {
@@ -88,7 +85,7 @@ namespace LEGACY.LegacyOverride.ThermalSightAdjustment
             {
                 try
                 {
-                    InLevelGearThermals[gearPID][0].gameObject.SetActive(true); // see if it's destroyed
+                    var _ = InLevelGearThermals[gearPID][0].gameObject.transform.position;
                     shouldAdd = false;
                 }
                 catch
@@ -176,7 +173,7 @@ namespace LEGACY.LegacyOverride.ThermalSightAdjustment
                             var value = (Vec4)prop.GetValue(shader);
                             r.material.SetVector(shaderProp, value.ToVector4());
                         }
-                        LegacyLogger.Debug($"{shaderProp}");
+                        //LegacyLogger.Debug($"{shaderProp}");
                     }
                 }
 
@@ -191,6 +188,12 @@ namespace LEGACY.LegacyOverride.ThermalSightAdjustment
 
         internal void OnPlayerItemWielded(FirstPersonItemHolder fpsItemHolder, ItemEquippable item)
         {
+            if(item.GearIDRange == null)
+            {
+                CurrentGearPID = 0;
+                return;
+            }
+
             CurrentGearPID = ExpeditionGearManager.GetOfflineGearPID(item.GearIDRange);
             TryGetInLevelGearThermalRenderersFromItem(item, CurrentGearPID, out var _);
             if (!TrySetThermalSightRenderer(CurrentGearPID) && OUTPUT_THERMAL_SHADER_SETTINGS_ON_WIELD)

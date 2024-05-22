@@ -151,5 +151,10 @@ namespace LEGACY.ExtraEvents
         {
             SuccessPageCustomizationManager.Current.ApplyCustomization(e.WorldEventObjectFilter);
         }
+
+        private static void ToggleCamaraShake(WardenObjectiveEventData e)
+        {
+
+        }
     }
 }

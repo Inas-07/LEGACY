@@ -19,6 +19,12 @@ namespace LEGACY
 
         internal static GameObject DummySensor { get; private set; }
 
+        internal static GameObject AmmoStation { get; private set; }
+
+        internal static GameObject MediStation { get; private set; }
+
+        internal static GameObject ToolStation { get; private set; }
+
         public static void Init()
         {
             CircleSensor = AssetAPI.GetLoadedAsset<GameObject>("Assets/SecuritySensor/CircleSensor.prefab");
@@ -28,6 +34,9 @@ namespace LEGACY
             EventScan = AssetAPI.GetLoadedAsset<GameObject>("Assets/EventObjects/EventScan.prefab");
             DummyScan = AssetAPI.GetLoadedAsset<GameObject>("Assets/DummyVisual/DummyScan.prefab");
             DummySensor = AssetAPI.GetLoadedAsset<GameObject>("Assets/DummyVisual/DummySensor.prefab");
+            AmmoStation = AssetAPI.GetLoadedAsset<GameObject>("Assets/Misc/AmmoStation.prefab");
+            MediStation = AssetAPI.GetLoadedAsset<GameObject>("Assets/Misc/MediStation.prefab");
+            ToolStation = AssetAPI.GetLoadedAsset<GameObject>("Assets/Misc/ToolStation.prefab");
         }
     }
 }
