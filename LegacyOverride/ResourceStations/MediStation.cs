@@ -24,14 +24,14 @@ namespace LEGACY.LegacyOverride.ResourceStations
             Interact.InteractionMessage = interactTextDB == null ? "HEALTH STATION" : Text.Get(interactTextDB.persistentID);
         }
 
-        protected override void OnTriggerInteractionAction(PlayerAgent player)
+        protected override void Replenish(PlayerAgent player)
         {
             float curHealth = player.Damage.Health;
             float maxHealth = def.SupplyUplimit.Medi * VANILLA_MAX_HEALTH;
 
             if (curHealth >= maxHealth) return;
 
-            player.GiveHealth(player, Math.Min(def.SupplyEfficiency.Medi, (maxHealth - curHealth) / VANILLA_MAX_HEALTH));
+            player.GiveHealth(null, Math.Min(def.SupplyEfficiency.Medi, (maxHealth - curHealth) / VANILLA_MAX_HEALTH));
             player.Sound.Post(EVENTS.MEDPACK_APPLY, true);
         }
 

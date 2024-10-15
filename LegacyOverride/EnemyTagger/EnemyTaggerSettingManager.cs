@@ -9,6 +9,7 @@ using Player;
 using UnityEngine;
 using LEGACY.LegacyOverride.Patches;
 using AssetShards;
+using ThermalSights;
 
 namespace LEGACY.LegacyOverride.EnemyTagger
 {
@@ -166,6 +167,22 @@ namespace LEGACY.LegacyOverride.EnemyTagger
             });
         }
 
+        private void AddOBSVisualRenderers()
+        {
+            foreach (var go in OBSVisuals)
+            {
+                var renderer = go.GetComponentInChildren<Renderer>();
+                float intensity = renderer.material.GetFloat("_Intensity");
+                float behindWallIntensity = -1.0f;
+                TSAManager.Current.RegisterPuzzleVisual(new TSAManager.PuzzleVisualWrapper()
+                {
+                    GO = go,
+                    Renderer = renderer,
+                    Intensity = intensity,
+                    BehindWallIntensity = behindWallIntensity
+                });
+            }
+        }
 
         private void Clear()
         {
@@ -176,6 +193,7 @@ namespace LEGACY.LegacyOverride.EnemyTagger
         {
             LevelAPI.OnBuildStart += Clear;
             LevelAPI.OnLevelCleanup += Clear;
+            LevelAPI.OnEnterLevel += AddOBSVisualRenderers;
         }
 
         static EnemyTaggerSettingManager()

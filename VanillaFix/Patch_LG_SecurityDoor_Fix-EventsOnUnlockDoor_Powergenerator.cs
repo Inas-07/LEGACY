@@ -1,7 +1,10 @@
 ﻿using HarmonyLib;
 using LevelGeneration;
 using GameData;
+using ChainedPuzzles;
 using LEGACY.Utils;
+using GTFO.API;
+using FloLib.Utils.Extensions;
 
 namespace LEGACY.VanillaFix
 {
@@ -23,5 +26,13 @@ namespace LEGACY.VanillaFix
                     return;
             }
         }
+
+        //[HarmonyPostfix]
+        //[HarmonyPatch(typeof(CP_Holopath_Spline), nameof(CP_Holopath_Spline.Setup))]
+        //private static void Post_test(CP_Holopath_Spline __instance)
+        //{
+
+        //    LegacyLogger.Warning($"{__instance.m_splineGeneratorPrefab.}");
+        //}
     }
 }

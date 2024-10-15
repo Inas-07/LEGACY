@@ -13,7 +13,7 @@ using LEGACY.LegacyOverride.ExpeditionSuccessPage;
 using GTFO.API;
 using AssetShards;
 using LEGACY.LegacyOverride.Patches;
-using LEGACY.LegacyOverride.ThermalSightAdjustment;
+//using LEGACY.LegacyOverride.ThermalSightAdjustment;
 using LEGACY.LegacyOverride.ResourceStations;
 
 namespace LEGACY.LegacyOverride
@@ -27,8 +27,6 @@ namespace LEGACY.LegacyOverride
             ElevatorCargoOverrideManager.Current.Init();
             BigPickupFogBeaconSettingManager.Current.Init();
             EnemyTaggerSettingManager.Current.Init();
-            //SecDoorIntTextOverrideManager.Current.Init();
-            //DimensionWarpPositionManager.Current.Init();
             ForceFailManager.Current.Init();
             ExpeditionIntelNotifier.Current.Init();
             EventScanManager.Current.Init();
@@ -37,13 +35,6 @@ namespace LEGACY.LegacyOverride
             LevelSpawnedFogBeaconManager.Current.Init();
             SuccessPageCustomizationManager.Current.Init();
             ResourceStationManager.Current.Init();
-
-            // init after pdata 
-            AssetShardManager.add_OnStartupAssetsLoaded(new System.Action(() => {
-                TSAManager.Current.Init();
-                //DynamicVisualAdjustment.Init();
-            })); 
-
         }
     }
 }

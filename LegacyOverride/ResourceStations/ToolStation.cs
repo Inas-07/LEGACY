@@ -22,14 +22,14 @@ namespace LEGACY.LegacyOverride.ResourceStations
             Interact.InteractionMessage = interactTextDB == null ? "TOOL STATION" : Text.Get(interactTextDB.persistentID);
         }
 
-        protected override void OnTriggerInteractionAction(PlayerAgent player)
+        protected override void Replenish(PlayerAgent player)
         {
             PlayerBackpack backpack = PlayerBackpackManager.GetBackpack(player.Owner);
             PlayerAmmoStorage ammoStorage = backpack.AmmoStorage;
             //float _class = Math.Max(0f, Math.Min(def.SupplyUplimit.AmmoSpecial - 1.0f * ammoStorage.SpecialAmmo.BulletClipSize / ammoStorage.SpecialAmmo.BulletsMaxCap - ammoStorage.SpecialAmmo.RelInPack, def.SupplyEfficiency.AmmoSpecial));
             float _class = Math.Max(0f, Math.Min(def.SupplyUplimit.Tool - ammoStorage.ClassAmmo.RelInPack, def.SupplyEfficiency.Tool));
 
-            player.GiveAmmoRel(player, 0f, 0f, _class);
+            player.GiveAmmoRel(null, 0f, 0f, _class);
             player.Sound.Post(EVENTS.AMMOPACK_APPLY, true);
         }
 

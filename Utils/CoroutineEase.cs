@@ -1,10 +1,6 @@
 ﻿using BepInEx.Unity.IL2CPP.Utils.Collections;
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace LEGACY.Utils
@@ -87,5 +83,7 @@ namespace LEGACY.Utils
             var ease2 = ease ?? new EasingFunction(Easing.EaseOutExpo);
             return CoroutineManager.StartCoroutine(DoEaseLocalRot(trans, sourceEuler, targetEuler, Clock.Time, duration, ease2, onDone, checkAbort).WrapToIl2Cpp(), null);
         }
+
+
     }
 }

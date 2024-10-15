@@ -26,5 +26,22 @@ namespace LEGACY.VanillaFix
             if (!DEBUGGING) return;
 
         }
+
+        void f1(int k, out string v)
+        {
+            if(k < 2)
+            {
+                v = "2";
+            }
+            v = null;
+        }
+
+        void f2(int k, ref string v)
+        {
+            if(k < 2)
+            {
+                v = "2";
+            }
+        }
     }
 }

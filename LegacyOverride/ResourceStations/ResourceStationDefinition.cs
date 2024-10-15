@@ -57,8 +57,8 @@ namespace LEGACY.LegacyOverride.ResourceStations
 
         public SupplyUplimit SupplyUplimit { get; set; } = new();
 
-        public int AllowedUseTimePerCooldown { get; set; } = 3;
+        public int AllowedUseTimePerCooldown { get; set; } = ResourceStation.UNLIMITED_USE_TIME;
 
-        public float CooldownTime { get; set; } = 5f;
+        public float CooldownTime { get; set; } = 3f;
     }
 }

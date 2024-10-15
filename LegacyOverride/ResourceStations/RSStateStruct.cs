@@ -8,6 +8,8 @@ namespace LEGACY.LegacyOverride.ResourceStations
 {
     public struct RSStateStruct
     {
+        public int LastInteractedPlayer;
+
         public int RemainingUseTime;
 
         public float CurrentCooldownTime;

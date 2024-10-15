@@ -12,27 +12,36 @@ namespace LEGACY.LegacyOverride.ResourceStations
 {
     public class RSTimer : MonoBehaviour
     {
+        private float startTime = 0f;
+
         private float endTime = 0f;
 
         private bool hasOnGoingTimer = false;
 
         public float RemainingTime => hasOnGoingTimer ? Math.Max(endTime - Clock.Time, 0f): 0f;
 
+        private Action<float> OnProgress;
+
         private Action OnTimerEnd;
 
         private void Update()
         {
-            if (GameStateManager.CurrentStateName != eGameStateName.InLevel) return;
-            if (!hasOnGoingTimer || Clock.Time < endTime) return;
+            if (GameStateManager.CurrentStateName != eGameStateName.InLevel || !hasOnGoingTimer) return;
+
+            float time = Clock.Time;
+            if (OnProgress != null)
+            {
+                OnProgress((time - startTime) / (endTime - startTime));
+            }
+
+            if (time < endTime) return;
 
             endTime = 0f;
             hasOnGoingTimer = false;
-            var action = OnTimerEnd;
-            OnTimerEnd = null;
-            action?.Invoke();
+            OnTimerEnd?.Invoke();
         }
 
-        public void StartTimer(float time, Action onEnd = null)
+        public void StartTimer(float time)
         {
             if (time <= 0f)
             {
@@ -46,8 +55,8 @@ namespace LEGACY.LegacyOverride.ResourceStations
                 return;
             }
 
-            endTime = Clock.Time + time;
-            OnTimerEnd = onEnd;
+            startTime = Clock.Time;
+            endTime = startTime + time;
             hasOnGoingTimer = true;
         }
 
@@ -60,10 +69,12 @@ namespace LEGACY.LegacyOverride.ResourceStations
 
         private static List<GameObject> TimerGOs { get; } = new();
 
-        public static RSTimer Instantiate()
+        public static RSTimer Instantiate(Action<float> onProgress, Action actionOnEnd)
         {
             GameObject timerGO = new();
             var timer = timerGO.AddComponent<RSTimer>();
+            timer.OnProgress = onProgress;
+            timer.OnTimerEnd = actionOnEnd;
             TimerGOs.Add(timerGO);
             return timer;
         }

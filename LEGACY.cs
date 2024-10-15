@@ -25,6 +25,7 @@ namespace LEGACY
     [BepInDependency("Inas.EOSExt.EMP", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("Inas.EOSExt.SecDoor", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("Inas.EOSExt.DimensionWarp", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("Inas.ThermalSights", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("GTFO.FloLib", BepInDependency.DependencyFlags.HardDependency)]
     [BepInIncompatibility("GTFO.AWO")]
     [BepInPlugin(AUTHOR + "." + RUNDOWN_NAME, RUNDOWN_NAME, VERSION)]
@@ -33,7 +34,7 @@ namespace LEGACY
     {
         public const string AUTHOR = "Inas";
         public const string RUNDOWN_NAME = "LEGACY";
-        public const string VERSION = "4.2.4";
+        public const string VERSION = "4.3.3";
         public const bool TESTING = false;
         public const string TEST_STRING = "TESTING";
 

@@ -7,23 +7,31 @@ using AIGraph;
 using GameData;
 using ExtraObjectiveSetup;
 using FloLib.Networks.Replications;
+using SNetwork;
+using System;
+using BepInEx.Unity.IL2CPP.Utils.Collections;
+
 namespace LEGACY.LegacyOverride.ResourceStations
 {
     public abstract class ResourceStation
     {
+        public const int UNLIMITED_USE_TIME = int.MaxValue;
+
         public virtual GameObject GameObject { get; protected set; }
 
-        public virtual GameObject InteractGO => GameObject?.transform.GetChild(3).gameObject ?? null;
+        public GameObject InteractGO => GameObject?.transform.GetChild(3).gameObject ?? null;
 
-        public virtual GameObject StationMarkerGO => GameObject?.transform.GetChild(2).gameObject ?? null;
+        public GameObject StationMarkerGO => GameObject?.transform.GetChild(2).gameObject ?? null;
 
         public virtual Interact_Timed Interact { get; protected set; }
 
         public virtual ResourceStationDefinition def { get; protected set; }
 
-        //public RSTimer Timer { get; protected set; } = RSTimer.Instantiate();
+        public RSTimer Timer { get; protected set; } 
 
         public StateReplicator<RSStateStruct> StateReplicator { get; protected set; }
+
+        public RSStateStruct State => StateReplicator?.State ?? new();
 
         public LG_GenericTerminalItem TerminalItem { get; protected set; }
 
@@ -33,33 +41,77 @@ namespace LEGACY.LegacyOverride.ResourceStations
 
         public virtual string ItemKey => $"Resource_Station_{SerialNumber}";
 
+        private Coroutine m_blinkMarkerCoroutine = null;
+
         public virtual void Destroy()
         {
+            if (m_blinkMarkerCoroutine != null)
+            {
+                CoroutineManager.StopCoroutine(m_blinkMarkerCoroutine);
+                m_blinkMarkerCoroutine = null;
+            }
+
             GameObject.Destroy(GameObject);
+
+            StateReplicator?.Unload();
             Interact = null;
             def = null;
+            StateReplicator = null;
         }
 
-        protected virtual void OnTriggerInteractionAction(PlayerAgent player) { }
+        public bool Enabled => State.Enabled;
+
+        protected virtual bool CanInteract() => Enabled && !InCooldown;
+        
+        protected virtual bool InCooldown => State.RemainingUseTime <= 0 && State.CurrentCooldownTime > 0;
+
+        protected abstract void Replenish(PlayerAgent player);
+
+        public virtual bool HasUnlimitedUseTime => def.AllowedUseTimePerCooldown == UNLIMITED_USE_TIME;
+
+        protected virtual void SetInteractionText()
+        {
+            string button = Text.Format(827U, InputMapper.GetBindingName(Interact.InputAction));
+            var additionalInfoTextDB = GameDataBlockBase<TextDataBlock>.GetBlock("InGame.OnAdditionalInteractionText.ResourceStation");
+            string additionalInfo = additionalInfoTextDB == null ? "TO REPLENISH" : Text.Get(additionalInfoTextDB.persistentID);
+            string remainingUseTimeText = HasUnlimitedUseTime ? string.Empty : $"({State.RemainingUseTime}/{def.AllowedUseTimePerCooldown})";
+            GuiManager.InteractionLayer.SetInteractPrompt(Interact.InteractionMessage, $"{button}{additionalInfo}{remainingUseTimeText}", ePUIMessageStyle.Default);
+        }
+
+        protected virtual void OnTriggerInteraction(PlayerAgent player) 
+        {
+            var oldState = State;
+
+            int remainingUseTime = HasUnlimitedUseTime ? UNLIMITED_USE_TIME : Math.Max(oldState.RemainingUseTime - 1, 0);
+            int slotIdx = player.Owner.PlayerSlotIndex();
+            if (slotIdx < 0 || slotIdx >= SNet.Slots.PlayerSlots.Count)
+            {
+                LegacyLogger.Error($"ResourceStation_OnTriggerInteraction: player {player.PlayerName} has invalid slot index: {slotIdx}");
+                return;
+            }
+
+            StateReplicator?.SetState(new() {
+                LastInteractedPlayer = slotIdx,
+                RemainingUseTime = remainingUseTime,
+                CurrentCooldownTime = remainingUseTime == 0 ? def.CooldownTime : 0f,
+                Enabled = true,
+            });
+        }
 
         protected virtual void OnInteractionSelected(PlayerAgent agent, bool selected)
         {
-            if (selected)
+            if(selected)
             {
-                string button = Text.Format(827U, InputMapper.GetBindingName(Interact.InputAction));
-                var additionalInfoTextDB = GameDataBlockBase<TextDataBlock>.GetBlock("InGame.OnAdditionalInteractionText.ResourceStation");
-                string additionalInfo = additionalInfoTextDB == null ? "TO REPLENISH" : Text.Get(additionalInfoTextDB.persistentID);
-
-                GuiManager.InteractionLayer.SetInteractPrompt(Interact.InteractionMessage,
-                   $"{button}{additionalInfo}", ePUIMessageStyle.Default);
+                SetInteractionText();
             }
         }
 
         protected virtual void SetupInteraction()
         {
             Interact.InteractDuration = def.InteractDuration;
+            Interact.ExternalPlayerCanInteract += new System.Func<PlayerAgent, bool>((_) => CanInteract());
             Interact.OnInteractionSelected += new System.Action<PlayerAgent, bool>(OnInteractionSelected);
-            Interact.OnInteractionTriggered += new System.Action<PlayerAgent>(OnTriggerInteractionAction);
+            Interact.OnInteractionTriggered += new System.Action<PlayerAgent>(OnTriggerInteraction);
         }
 
         protected virtual void SetupTerminalItem()
@@ -99,24 +151,112 @@ namespace LEGACY.LegacyOverride.ResourceStations
 
         protected virtual void OnStateChanged(RSStateStruct oldState, RSStateStruct newState, bool isRecall)
         {
-            //if (!isRecall) return;
+            if (isRecall) return;
+            int playerSlot = newState.LastInteractedPlayer;
 
+            if (playerSlot < 0 || playerSlot >= SNet.Slots.PlayerSlots.Count)
+            {
+                return;
+            }
 
+            if(Interact.IsSelected)
+            {
+                SetInteractionText();
+            }
+
+            if (SNet.IsMaster) 
+            {
+                LegacyLogger.Warning($"ResourceStation OnStateChanged: replenish for player {playerSlot}, remaining use time: {newState.RemainingUseTime}");
+
+                if(oldState.RemainingUseTime > 0) 
+                {
+                    var player = SNet.Slots.GetPlayerInSlot(playerSlot);
+                    if(player != null)
+                    {
+                        Replenish(player.m_playerAgent.Cast<PlayerAgent>());
+                    }
+                    else
+                    {
+                        LegacyLogger.Error($"playerSlot_{playerSlot} has no player agent!");
+                    }
+                }
+
+                if (newState.RemainingUseTime == 0)
+                {
+                    LegacyLogger.Warning($"ResourceStation OnStateChanged: cooldown timer starts!");
+                    OnCoolDownStart();
+                }
+            }
+        }
+
+        protected virtual void OnCoolDownStart()
+        {
+            Timer.StartTimer(def.CooldownTime);
+            if (m_blinkMarkerCoroutine == null)
+            {
+                m_blinkMarkerCoroutine = CoroutineManager.StartCoroutine(BlinkMarker().WrapToIl2Cpp());
+            }
+        }
+
+        protected virtual void OnCoolDownTimerProgress(float progress)
+        {
+
+        }
+
+        protected virtual void OnCoolDownEnd()
+        {
+            LegacyLogger.Warning($"ResourceStation OnCoolDownEnd");
+            if(m_blinkMarkerCoroutine != null)
+            {
+                CoroutineManager.StopCoroutine(m_blinkMarkerCoroutine);
+                m_blinkMarkerCoroutine = null;
+                StationMarkerGO.SetActive(true);
+            }
+
+            if (SNet.IsMaster)
+            {
+                LegacyLogger.Warning($"ResourceStation OnCoolDownEnd: master reset state!");
+                StateReplicator.SetState(new RSStateStruct() { 
+                    LastInteractedPlayer = -1,
+                    RemainingUseTime = def.AllowedUseTimePerCooldown,
+                    CurrentCooldownTime = 0,
+                    Enabled = true,
+                });
+            }
         }
 
         protected virtual void SetupReplicator()
         {
-            //uint id = EOSNetworking.AllotReplicatorID();
-            //if (id == EOSNetworking.INVALID_ID)
-            //{
-            //    LegacyLogger.Error("ResourceStation: replicatorID depleted, cannot setup replicator!");
-            //    return;
-            //}
+            if (StateReplicator != null) return;
 
-            //StateReplicator = StateReplicator<RSStateStruct>.Create(id, new() { RemainingUseTime = def.AllowedUseTimePerCooldown, CurrentCooldownTime = -1f, Enabled = true }, LifeTimeType.Level);
-            //StateReplicator.OnStateChanged += OnStateChanged;
+            uint id = EOSNetworking.AllotReplicatorID();
+            if (id == EOSNetworking.INVALID_ID)
+            {
+                LegacyLogger.Error("ResourceStation: replicatorID depleted, cannot setup replicator!");
+                return;
+            }
+
+            StateReplicator = StateReplicator<RSStateStruct>.Create(id, new() { RemainingUseTime = def.AllowedUseTimePerCooldown, CurrentCooldownTime = -1f, Enabled = true }, LifeTimeType.Level);
+            StateReplicator.OnStateChanged += OnStateChanged;
         }
 
+        protected virtual void SetupRSTimer()
+        {
+            if(Timer == null)
+            {
+                Timer = RSTimer.Instantiate(OnCoolDownTimerProgress, OnCoolDownEnd);
+            }
+        }
+
+        private System.Collections.IEnumerator BlinkMarker()
+        {
+            const float BLINK_INTERVAL = 0.5f;
+            while(true)
+            {
+                StationMarkerGO.SetActive(!StationMarkerGO.active);
+                yield return new WaitForSeconds(BLINK_INTERVAL);
+            }
+        }
 
         protected ResourceStation(ResourceStationDefinition def, GameObject GO) 
         { 
@@ -146,8 +286,8 @@ namespace LEGACY.LegacyOverride.ResourceStations
             }
 
             SetupReplicator();
+            SetupRSTimer();
         }
-
 
         static ResourceStation () 
         {
