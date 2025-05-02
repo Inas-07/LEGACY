@@ -24,6 +24,8 @@ namespace LEGACY
         internal static GameObject MediStation { get; private set; }
 
         internal static GameObject ToolStation { get; private set; }
+        
+        internal static GameObject RestartPage { get; private set; }
 
         public static void Init()
         {
@@ -37,6 +39,7 @@ namespace LEGACY
             AmmoStation = AssetAPI.GetLoadedAsset<GameObject>("Assets/Misc/AmmoStation.prefab");
             MediStation = AssetAPI.GetLoadedAsset<GameObject>("Assets/Misc/MediStation.prefab");
             ToolStation = AssetAPI.GetLoadedAsset<GameObject>("Assets/Misc/ToolStation.prefab");
+            RestartPage = AssetAPI.GetLoadedAsset<GameObject>("Assets/Misc/CM_PageRestart_CellUI.prefab");
         }
     }
 }

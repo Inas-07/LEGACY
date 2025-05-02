@@ -166,6 +166,12 @@ namespace LEGACY.LegacyOverride.ResourceStations
 
             if (SNet.IsMaster) 
             {
+                if(oldState.RemainingUseTime == newState.RemainingUseTime)
+                {
+                    LegacyLogger.Warning($"ResourceStation OnStateChanged: RemainingUseTime does not change, won't replenish");
+                    return;
+                }
+
                 LegacyLogger.Warning($"ResourceStation OnStateChanged: replenish for player {playerSlot}, remaining use time: {newState.RemainingUseTime}");
 
                 if(oldState.RemainingUseTime > 0) 

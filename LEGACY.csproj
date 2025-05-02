@@ -29,6 +29,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Assets.cs" />
+    <Compile Include="ExtraEvents\LegacyExtraEvents.SeamlessRestart.cs" />
     <Compile Include="ExtraEvents\LegacyExtraEvents.LocalizedTextDBGeneration.cs" />
     <Compile Include="ExtraEvents\LegacyExtraEvents.DummyVisual.cs" />
     <Compile Include="ExtraEvents\LegacyExtraEvents.Music.cs" />
@@ -42,7 +43,8 @@
     <Compile Include="ExtraEvents\LegacyExtraEvents.KillEnemies.cs" />
     <Compile Include="ExtraEvents\LegacyExtraEvents.AlertEnemies.cs" />
     <Compile Include="ExtraEvents\LegacyExtraEvents.SpawnHibernate.cs" />
-    <Compile Include="ExtraEvents\LegacyExtraEventsPatches.cs" />
+    <Compile Include="ExtraEvents\Patches\CheckForceFail.cs" />
+    <Compile Include="ExtraEvents\Patches\SeamlessRestart.cs" />
     <Compile Include="LegacyOverride\DummyVisual\VisualGOAnimation\AnimationConfig\BlinkConfig.cs" />
     <Compile Include="LegacyOverride\DummyVisual\VisualGOAnimation\AnimationConfig\DirectionalConfig.cs" />
     <Compile Include="LegacyOverride\DummyVisual\VisualTemplateType.cs" />
@@ -85,6 +87,7 @@
     <Compile Include="LegacyOverride\Music\Patches.cs" />
     <Compile Include="LegacyOverride\NavMarkerManager.cs" />
     <Compile Include="LegacyOverride\Patches\ExpeditionSuccessPage.cs" />
+    <Compile Include="LegacyOverride\Patches\GUIManager_RestartPage.cs" />
     <Compile Include="LegacyOverride\Patches\LevelSpawnFogBeacon_BugFix.cs" />
     <Compile Include="LegacyOverride\Patches\PrioritizeEnemyTargeting.cs" />
     <Compile Include="LegacyOverride\Patches\RundownSelectionCustomization.cs" />
@@ -107,7 +110,9 @@
     <Compile Include="LegacyOverride\ResourceStations\ResourceStationManager.cs" />
     <Compile Include="LegacyOverride\ResourceStations\RSStateStruct.cs" />
     <Compile Include="LegacyOverride\ResourceStations\RSTimer.cs" />
+    <Compile Include="LegacyOverride\Restart\CM_PageRestart.cs" />
     <Compile Include="Utils\CoroutineEase.cs" />
+    <Compile Include="Utils\GOExtensions.cs" />
     <Compile Include="Utils\Helper.ChainedPuzzle.cs" />
     <Compile Include="Utils\Json.cs" />
     <Compile Include="Utils\Helper.cs" />

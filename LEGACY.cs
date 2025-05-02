@@ -27,14 +27,14 @@ namespace LEGACY
     [BepInDependency("Inas.EOSExt.DimensionWarp", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("Inas.ThermalSights", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("GTFO.FloLib", BepInDependency.DependencyFlags.HardDependency)]
-    [BepInIncompatibility("GTFO.AWO")]
+    //[BepInIncompatibility("GTFO.AWO")]
     [BepInPlugin(AUTHOR + "." + RUNDOWN_NAME, RUNDOWN_NAME, VERSION)]
     
     public class EntryPoint: BasePlugin
     {
         public const string AUTHOR = "Inas";
         public const string RUNDOWN_NAME = "LEGACY";
-        public const string VERSION = "4.3.3";
+        public const string VERSION = "4.4.4";
         public const bool TESTING = false;
         public const string TEST_STRING = "TESTING";
 

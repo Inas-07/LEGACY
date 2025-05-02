@@ -70,6 +70,9 @@ namespace LEGACY.ExtraEvents
 
             // event scan
             ToggleEventScanState = 270,
+
+            // Seamless reload 
+            ToggleSeamlessReload = 280,
         }
 
         internal static void Init()
@@ -133,10 +136,13 @@ namespace LEGACY.ExtraEvents
 
             // ==== event scan state toggle ====
             EOSWardenEventManager.Current.AddEventDefinition(EventType.ToggleEventScanState.ToString(), (uint)EventType.ToggleEventScanState, ToggleEventScanState);
+            
+            EOSWardenEventManager.Current.AddEventDefinition(EventType.ToggleSeamlessReload.ToString(), (uint)EventType.ToggleSeamlessReload, ToggleSeamlessReload);
 
             // ==== vanilla event override ====
             EOSWardenEventManager.Current.AddEventDefinition(eWardenObjectiveEventType.ActivateChainedPuzzle.ToString(), (uint)eWardenObjectiveEventType.ActivateChainedPuzzle, ActivateChainedPuzzle);
             EOSWardenEventManager.Current.AddEventDefinition(eWardenObjectiveEventType.SetTerminalCommand.ToString(), (uint)eWardenObjectiveEventType.SetTerminalCommand, SetTerminalCommand_Custom);
+
 
             //if (!Debugger.Current.DEBUGGING)
             //{

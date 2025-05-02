@@ -1,5 +1,6 @@
 ﻿using GameData;
 using GTFO.API;
+using GTFO.API.Extensions;
 using HarmonyLib;
 using LEGACY.Utils;
 using LevelGeneration;
@@ -18,7 +19,7 @@ namespace LEGACY.VanillaFix
 
         private Debugger()
         {
-
+            //new List<Debugger>().ToIl2Cpp
         }
 
         internal void Init()
