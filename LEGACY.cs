@@ -34,7 +34,7 @@ namespace LEGACY
     {
         public const string AUTHOR = "Inas";
         public const string RUNDOWN_NAME = "LEGACY";
-        public const string VERSION = "4.4.4";
+        public const string VERSION = "4.4.5";
         public const bool TESTING = false;
         public const string TEST_STRING = "TESTING";
 

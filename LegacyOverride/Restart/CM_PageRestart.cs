@@ -37,7 +37,7 @@ namespace LEGACY.LegacyOverride.Restart
 
         internal static void Setup()
         {
-
+            if (Assets.RestartPage == null) return;
             if (Page != null)
             {
                 LegacyLogger.Warning("Duplicate setup for CM_PageRestart!");
