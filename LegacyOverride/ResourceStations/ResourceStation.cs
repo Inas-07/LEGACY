@@ -27,6 +27,7 @@ namespace LEGACY.LegacyOverride.ResourceStations
 
         public virtual ResourceStationDefinition def { get; protected set; }
 
+
         public RSTimer Timer { get; protected set; } 
 
         public StateReplicator<RSStateStruct> StateReplicator { get; protected set; }
@@ -149,15 +150,15 @@ namespace LEGACY.LegacyOverride.ResourceStations
             TerminalItem.FloorItemStatus = eFloorInventoryObjectStatus.Normal;
         }
 
+        protected virtual void SetEnabled(bool enabled)
+        {
+            Interact.SetActive(enabled);
+            StationMarkerGO.SetActive(enabled);
+        }
+
         protected virtual void OnStateChanged(RSStateStruct oldState, RSStateStruct newState, bool isRecall)
         {
             if (isRecall) return;
-            int playerSlot = newState.LastInteractedPlayer;
-
-            if (playerSlot < 0 || playerSlot >= SNet.Slots.PlayerSlots.Count)
-            {
-                return;
-            }
 
             if(Interact.IsSelected)
             {
@@ -166,25 +167,48 @@ namespace LEGACY.LegacyOverride.ResourceStations
 
             if (SNet.IsMaster) 
             {
-                LegacyLogger.Warning($"ResourceStation OnStateChanged: replenish for player {playerSlot}, remaining use time: {newState.RemainingUseTime}");
 
-                if(oldState.RemainingUseTime > 0) 
+                if(newState.Enabled)
                 {
-                    var player = SNet.Slots.GetPlayerInSlot(playerSlot);
-                    if(player != null)
+                    SetEnabled(true);
+
+                    if(!oldState.Enabled && Timer.HasOnGoingTimer)
                     {
-                        Replenish(player.m_playerAgent.Cast<PlayerAgent>());
+                        if (m_blinkMarkerCoroutine == null)
+                        {
+                            m_blinkMarkerCoroutine = CoroutineManager.StartCoroutine(BlinkMarker().WrapToIl2Cpp());
+                        }
                     }
-                    else
-                    {
-                        LegacyLogger.Error($"playerSlot_{playerSlot} has no player agent!");
+
+                    int playerSlot = newState.LastInteractedPlayer;
+                    if (oldState.RemainingUseTime > 0 && 0 <= playerSlot && playerSlot < SNet.Slots.PlayerSlots.Count)
+                    {                        
+                        var player = SNet.Slots.GetPlayerInSlot(playerSlot);
+                        if (player != null)
+                        {
+                            Replenish(player.m_playerAgent.Cast<PlayerAgent>());
+                            if (newState.RemainingUseTime == 0)
+                            {
+                                LegacyLogger.Warning($"ResourceStation OnStateChanged: cooldown timer starts!");
+                                OnCoolDownStart();
+                            }
+
+                            LegacyLogger.Warning($"ResourceStation OnStateChanged: replenish for player {playerSlot}, remaining use time: {newState.RemainingUseTime}");
+                        }
+                        else
+                        {
+                            LegacyLogger.Error($"playerSlot_{playerSlot} has no player agent!");
+                        }
                     }
                 }
-
-                if (newState.RemainingUseTime == 0)
+                else
                 {
-                    LegacyLogger.Warning($"ResourceStation OnStateChanged: cooldown timer starts!");
-                    OnCoolDownStart();
+                    SetEnabled(false);
+                    if(m_blinkMarkerCoroutine != null)
+                    {
+                        CoroutineManager.StopCoroutine(m_blinkMarkerCoroutine);
+                        m_blinkMarkerCoroutine = null;
+                    }
                 }
             }
         }
@@ -210,7 +234,6 @@ namespace LEGACY.LegacyOverride.ResourceStations
             {
                 CoroutineManager.StopCoroutine(m_blinkMarkerCoroutine);
                 m_blinkMarkerCoroutine = null;
-                StationMarkerGO.SetActive(true);
             }
 
             if (SNet.IsMaster)
@@ -220,7 +243,7 @@ namespace LEGACY.LegacyOverride.ResourceStations
                     LastInteractedPlayer = -1,
                     RemainingUseTime = def.AllowedUseTimePerCooldown,
                     CurrentCooldownTime = 0,
-                    Enabled = true,
+                    Enabled = State.Enabled,
                 });
             }
         }

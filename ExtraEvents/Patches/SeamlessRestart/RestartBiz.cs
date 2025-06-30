@@ -7,10 +7,10 @@ using LEGACY.Utils;
 using LEGACY.LegacyOverride.Restart;
 
 
-namespace LEGACY.ExtraEvents.Patches
+namespace LEGACY.ExtraEvents.Patches.SeamlessRestart
 {
     [HarmonyPatch]
-    internal static class SeamlessRestart
+    internal static class RestartBiz
     {
         public static bool SeamlessRestartEnabled { get; internal set; } = false;
 
@@ -64,7 +64,7 @@ namespace LEGACY.ExtraEvents.Patches
             s_expeditionFail_Entered = false;
         }
 
-        static SeamlessRestart()
+        static RestartBiz()
         {
             LevelAPI.OnBuildStart += Clear;
             LevelAPI.OnLevelCleanup += Clear;

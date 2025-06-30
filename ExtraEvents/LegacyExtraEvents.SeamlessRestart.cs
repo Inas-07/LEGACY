@@ -5,7 +5,7 @@ using LEGACY.LegacyOverride;
 using LevelGeneration;
 using ScanPosOverride.Managers;
 using Player;
-using LEGACY.ExtraEvents.Patches;
+using LEGACY.ExtraEvents.Patches.SeamlessRestart;
 
 namespace LEGACY.ExtraEvents
 {
@@ -13,7 +13,7 @@ namespace LEGACY.ExtraEvents
     {
         private static void ToggleSeamlessReload(WardenObjectiveEventData e)
         {
-            SeamlessRestart.SeamlessRestartEnabled = e.Enabled;
+            RestartBiz.SeamlessRestartEnabled = e.Enabled;
         }
     }
 }

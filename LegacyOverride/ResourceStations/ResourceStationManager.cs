@@ -1,4 +1,6 @@
 ﻿using ExtraObjectiveSetup.BaseClasses;
+using ExtraObjectiveSetup.ExtendedWardenEvents;
+using GameData;
 using GTFO.API;
 using LEGACY.Utils;
 using System;
@@ -72,10 +74,34 @@ namespace LEGACY.LegacyOverride.ResourceStations
         {
             LevelAPI.OnBuildStart += () => { Clear(); };
             LevelAPI.OnLevelCleanup += Clear;
-
             LevelAPI.OnBuildDone += BuildStations;
         }
 
-        static ResourceStationManager() { }
+        private static void SetEnabled(WardenObjectiveEventData e)
+        {
+            if (Current.Stations.TryGetValue(e.WorldEventObjectFilter, out var station))
+            {
+                station.StateReplicator.SetState(new() { 
+                    LastInteractedPlayer = -1,
+                    CurrentCooldownTime = station.State.CurrentCooldownTime,
+                    RemainingUseTime = station.State.RemainingUseTime,
+                    Enabled = e.Enabled,
+                });
+            }
+            else 
+            {
+                LegacyLogger.Error($"ResourceStationManager: WorldEventObjectFilter '{e.WorldEventObjectFilter}' not found");
+            }
+        }
+
+        public enum RSEvents
+        {
+            ResourceStation_SetEnabled = 156,
+        }
+
+        static ResourceStationManager() 
+        {
+            EOSWardenEventManager.Current.AddEventDefinition(RSEvents.ResourceStation_SetEnabled.ToString(), (uint)RSEvents.ResourceStation_SetEnabled, SetEnabled);
+        }
     }
 }

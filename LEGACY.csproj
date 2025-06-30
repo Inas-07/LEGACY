@@ -44,7 +44,9 @@
     <Compile Include="ExtraEvents\LegacyExtraEvents.AlertEnemies.cs" />
     <Compile Include="ExtraEvents\LegacyExtraEvents.SpawnHibernate.cs" />
     <Compile Include="ExtraEvents\Patches\CheckForceFail.cs" />
-    <Compile Include="ExtraEvents\Patches\SeamlessRestart.cs" />
+    <Compile Include="ExtraEvents\Patches\SeamlessRestart\RestartPage.cs" />
+    <Compile Include="ExtraEvents\Patches\SeamlessRestart\RestartBiz.cs" />
+    <Compile Include="ExtraEvents\Patches\SeamlessRestart\RestartSetup.cs" />
     <Compile Include="LegacyOverride\DummyVisual\VisualGOAnimation\AnimationConfig\BlinkConfig.cs" />
     <Compile Include="LegacyOverride\DummyVisual\VisualGOAnimation\AnimationConfig\DirectionalConfig.cs" />
     <Compile Include="LegacyOverride\DummyVisual\VisualTemplateType.cs" />

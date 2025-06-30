@@ -103,7 +103,7 @@ namespace LEGACY.LegacyOverride.Patches
             if (r1TitleID != 0) return;
 
             var db = GameDataBlockBase<TextDataBlock>.GetBlock("LEGACY_Title");
-            if(db != null)
+            if (db != null)
             {
                 r1TitleID = db.persistentID;
             }

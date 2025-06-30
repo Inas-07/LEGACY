@@ -12,13 +12,13 @@ namespace LEGACY.LegacyOverride.ResourceStations
 {
     public class RSTimer : MonoBehaviour
     {
-        private float startTime = 0f;
+        public float StartTime { get; private set; } = 0f;
 
-        private float endTime = 0f;
+        public float EndTime { get; private set; } = 0f;
 
-        private bool hasOnGoingTimer = false;
+        public bool HasOnGoingTimer { get; private set; } = false;
 
-        public float RemainingTime => hasOnGoingTimer ? Math.Max(endTime - Clock.Time, 0f): 0f;
+        public float RemainingTime => HasOnGoingTimer ? Math.Max(EndTime - Clock.Time, 0f): 0f;
 
         private Action<float> OnProgress;
 
@@ -26,18 +26,18 @@ namespace LEGACY.LegacyOverride.ResourceStations
 
         private void Update()
         {
-            if (GameStateManager.CurrentStateName != eGameStateName.InLevel || !hasOnGoingTimer) return;
+            if (GameStateManager.CurrentStateName != eGameStateName.InLevel || !HasOnGoingTimer) return;
 
             float time = Clock.Time;
             if (OnProgress != null)
             {
-                OnProgress((time - startTime) / (endTime - startTime));
+                OnProgress((time - StartTime) / (EndTime - StartTime));
             }
 
-            if (time < endTime) return;
+            if (time < EndTime) return;
 
-            endTime = 0f;
-            hasOnGoingTimer = false;
+            EndTime = 0f;
+            HasOnGoingTimer = false;
             OnTimerEnd?.Invoke();
         }
 
@@ -49,21 +49,21 @@ namespace LEGACY.LegacyOverride.ResourceStations
                 return;
             }
 
-            if(hasOnGoingTimer)
+            if(HasOnGoingTimer)
             {
                 LegacyLogger.Error("StartTimer: this timer is yet ended!");
                 return;
             }
 
-            startTime = Clock.Time;
-            endTime = startTime + time;
-            hasOnGoingTimer = true;
+            StartTime = Clock.Time;
+            EndTime = StartTime + time;
+            HasOnGoingTimer = true;
         }
 
         private void OnDestroy() 
         {
-            endTime = 0f;
-            hasOnGoingTimer = false;
+            EndTime = 0f;
+            HasOnGoingTimer = false;
             OnTimerEnd = null;
         }
 
