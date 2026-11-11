@@ -1,6 +1,6 @@
 ﻿using ExtraObjectiveSetup;
 using ExtraObjectiveSetup.BaseClasses;
-using FloLib.Networks.Replications;
+using AmorLib.Networking.StateReplicators;
 using GTFO.API;
 using LEGACY.Utils;
 using SNetwork;
@@ -108,7 +108,7 @@ namespace LEGACY.LegacyOverride.ExpeditionSuccessPage
                     return;
                 }
 
-                StateReplicator = StateReplicator<StateSync>.Create(id, new() { index = 0 }, LifeTimeType.Forever);
+                StateReplicator = StateReplicator<StateSync>.Create(id, new() { index = 0 }, LifeTimeType.Permanent);
                 StateReplicator.OnStateChanged += OnStateChanged;
             };
         }

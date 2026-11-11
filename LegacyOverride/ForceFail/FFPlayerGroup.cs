@@ -1,5 +1,5 @@
 ﻿using ExtraObjectiveSetup;
-using FloLib.Networks.Replications;
+using AmorLib.Networking.StateReplicators;
 using GTFO.API;
 using LEGACY.Utils;
 using System.Collections.Generic;
@@ -114,7 +114,7 @@ namespace LEGACY.LegacyOverride.ForceFail
             }
 
             var g = new FFPlayerGroup();
-            g.stateReplicator = StateReplicator<FFReplicationStruct>.Create(allotedID, new FFReplicationStruct(), LifeTimeType.Forever);
+            g.stateReplicator = StateReplicator<FFReplicationStruct>.Create(allotedID, new FFReplicationStruct(), LifeTimeType.Permanent);
             g.stateReplicator.OnStateChanged += g.OnStateChanged;
 
             g.Setup();

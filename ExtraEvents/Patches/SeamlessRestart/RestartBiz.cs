@@ -2,7 +2,6 @@
 using SNetwork;
 using GTFO.API;
 using GameEvent;
-using FloLib.Infos;
 using LEGACY.Utils;
 using LEGACY.LegacyOverride.Restart;
 

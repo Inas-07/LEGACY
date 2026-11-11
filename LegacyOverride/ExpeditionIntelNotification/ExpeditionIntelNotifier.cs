@@ -20,14 +20,16 @@ namespace LEGACY.LegacyOverride.ExpeditionIntelNotification
 
         private void ShowIntelForExpedition(ExpeditionIntel intel)
         {
+            LegacyLogger.Warning($"{intel.Header.Id}, {intel.Header.UntranslatedText}, {intel.Header.ShouldLocalize}");
             var pop = GlobalPopupMessageManager.ShowPopup(new PopupMessage()
             {
                 BlinkInContent = intel.BlinkInContent,
                 BlinkTimeInterval = intel.BlinkTimeInterval,
                 Header = intel.Header,
                 UpperText = intel.Text,
+                LowerText = string.Empty,
                 PopupType = PopupType.BoosterImplantMissed,
-                OnCloseCallback = new Action(() => { })
+                OnCloseCallback = (Il2CppSystem.Action)(() => { })
             });
         }
 

@@ -1,5 +1,5 @@
 ﻿using ExtraObjectiveSetup;
-using FloLib.Networks.Replications;
+using AmorLib.Networking.StateReplicators;
 using GTFO.API;
 using Il2CppInterop.Runtime.Injection;
 using LEGACY.Utils;
@@ -103,7 +103,7 @@ namespace LEGACY.LegacyOverride.EventScan
                 return;
             }
 
-            StateReplicator = StateReplicator<EventScanStatus>.Create(id, new() { Status = EventScanState.Waiting }, LifeTimeType.Level);
+            StateReplicator = StateReplicator<EventScanStatus>.Create(id, new() { Status = EventScanState.Waiting }, LifeTimeType.Session);
             StateReplicator.OnStateChanged += OnStateChange;
         }
 

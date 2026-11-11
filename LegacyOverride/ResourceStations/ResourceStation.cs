@@ -6,7 +6,7 @@ using LevelGeneration;
 using AIGraph;
 using GameData;
 using ExtraObjectiveSetup;
-using FloLib.Networks.Replications;
+using AmorLib.Networking.StateReplicators;
 using SNetwork;
 using System;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
@@ -259,7 +259,7 @@ namespace LEGACY.LegacyOverride.ResourceStations
                 return;
             }
 
-            StateReplicator = StateReplicator<RSStateStruct>.Create(id, new() { RemainingUseTime = def.AllowedUseTimePerCooldown, CurrentCooldownTime = -1f, Enabled = true }, LifeTimeType.Level);
+            StateReplicator = StateReplicator<RSStateStruct>.Create(id, new() { RemainingUseTime = def.AllowedUseTimePerCooldown, CurrentCooldownTime = -1f, Enabled = true }, LifeTimeType.Session);
             StateReplicator.OnStateChanged += OnStateChanged;
         }
 

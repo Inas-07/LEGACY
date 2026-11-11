@@ -1,6 +1,6 @@
 ﻿using BepInEx.Unity.IL2CPP.Utils.Collections;
 using ExtraObjectiveSetup;
-using FloLib.Networks.Replications;
+using AmorLib.Networking.StateReplicators;
 using GTFO.API;
 using LEGACY.LegacyOverride.DummyVisual.VisualGOAnimation;
 using LEGACY.LegacyOverride.DummyVisual.VisualGOAnimation.AnimationConfig;
@@ -160,7 +160,7 @@ namespace LEGACY.LegacyOverride.DummyVisual
                 return false;
             }
 
-            StateReplicator = StateReplicator<VisualGroupState>.Create(id, new() { VisualAnimationType = VisualAnimationType.OFF }, LifeTimeType.Level);
+            StateReplicator = StateReplicator<VisualGroupState>.Create(id, new() { VisualAnimationType = VisualAnimationType.OFF }, LifeTimeType.Session);
             StateReplicator.OnStateChanged += OnStateChanged;
 
             LevelAPI.OnEnterLevel += OnEnterLevel;

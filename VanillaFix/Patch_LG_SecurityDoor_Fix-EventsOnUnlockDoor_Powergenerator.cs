@@ -4,7 +4,6 @@ using GameData;
 using ChainedPuzzles;
 using LEGACY.Utils;
 using GTFO.API;
-using FloLib.Utils.Extensions;
 
 namespace LEGACY.VanillaFix
 {

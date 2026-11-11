@@ -25,8 +25,8 @@ namespace LEGACY
     [BepInDependency("Inas.EOSExt.EMP", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("Inas.EOSExt.SecDoor", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("Inas.EOSExt.DimensionWarp", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("Amor.AmorLib", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("Inas.ThermalSights", BepInDependency.DependencyFlags.HardDependency)]
-    [BepInDependency("GTFO.FloLib", BepInDependency.DependencyFlags.HardDependency)]
     //[BepInIncompatibility("GTFO.AWO")]
     [BepInPlugin(AUTHOR + "." + RUNDOWN_NAME, RUNDOWN_NAME, VERSION)]
     

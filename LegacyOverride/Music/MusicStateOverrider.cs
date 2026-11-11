@@ -5,7 +5,7 @@ using ExtraObjectiveSetup.BaseClasses;
 using GTFO.API.Utilities;
 using UnityEngine;
 using Il2CppSystem.Runtime.Remoting.Messaging;
-using FloLib.Networks.Replications;
+using AmorLib.Networking.StateReplicators;
 using ExtraObjectiveSetup;
 using SNetwork;
 
@@ -238,7 +238,7 @@ namespace LEGACY.LegacyOverride.Music
                     LegacyLogger.Error("PlayMusic: failed to setup state replicator!");
                 }
 
-                StateReplicator = StateReplicator<MusicSyncStruct>.Create(id, new(), LifeTimeType.Forever);
+                StateReplicator = StateReplicator<MusicSyncStruct>.Create(id, new(), LifeTimeType.Permanent);
                 StateReplicator.OnStateChanged += OnStateChanged;
             };
         }
